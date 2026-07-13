@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aurin H-1 — 프리미엄 헤드폰 컨피규레이터</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  /* 컬러 스와치가 이 변수들을 통째로 교체한다 */
+  --hp-main: #2e3444; --hp-dark: #1b202e; --hp-light: #4a5470;
+  --bg: #f4f5f8; --card: #ffffff; --cta: #262c3c; --cta-hover: #171b28;
+  --ink: #17181c; --sub: #6d7078; --line: #e6e7ec; --tintsoft: #e4e7ef;
+}
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: var(--bg); color: var(--ink);
+       -webkit-font-smoothing: antialiased; overflow-x: hidden;
+       transition: background .7s cubic-bezier(.4,0,.2,1); }
+
+/* ── 미니 내비 ── */
+nav { position: sticky; top: 0; z-index: 50; display: flex; align-items: center; gap: 28px;
+      max-width: 1180px; margin: 0 auto; padding: 18px 28px; }
+nav::before { content: ""; position: absolute; inset: 0; background: color-mix(in srgb, var(--bg) 75%, transparent);
+              backdrop-filter: blur(14px); z-index: -1; }
+.logo { font-size: 20px; font-weight: 800; letter-spacing: -.04em; }
+.logo i { font-style: normal; color: var(--cta); transition: color .7s; }
+nav .links { display: flex; gap: 22px; }
+nav .links a { color: var(--sub); text-decoration: none; font-size: 14px; font-weight: 600; transition: color .2s; }
+nav .links a:hover { color: var(--ink); }
+.search { margin-left: auto; display: flex; align-items: center; gap: 8px; background: var(--card);
+          border: 1px solid var(--line); border-radius: 99px; padding: 8px 16px; color: var(--sub);
+          font-size: 13px; width: 200px; }
+.cart-btn { position: relative; width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line);
+            background: var(--card); cursor: pointer; display: flex; align-items: center; justify-content: center;
+            transition: transform .2s; }
+.cart-btn:hover { transform: translateY(-2px); }
+.cart-btn svg { width: 19px; height: 19px; fill: none; stroke: var(--ink); stroke-width: 1.8; }
+.badge { position: absolute; top: -4px; right: -4px; min-width: 19px; height: 19px; border-radius: 99px;
+         background: var(--cta); color: #fff; font-size: 11px; font-weight: 700;
+         display: flex; align-items: center; justify-content: center; padding: 0 5px;
+         transition: background .7s, transform .3s cubic-bezier(.3,1.6,.5,1); }
+.badge.pop { transform: scale(1.45); }
+
+/* ── 제품 레이아웃 ── */
+.wrap { max-width: 1180px; margin: 0 auto; padding: 26px 28px 80px; }
+.product { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: start; }
+
+/* 좌: 제품 스테이지 */
+.stage-col { position: sticky; top: 90px; }
+.stage { position: relative; background: linear-gradient(170deg, var(--card), var(--tintsoft));
+         border: 1px solid var(--line); border-radius: 28px; height: 520px; overflow: hidden;
+         display: flex; align-items: center; justify-content: center;
+         perspective: 1000px; transition: background .7s; }
+.stage .halo { position: absolute; width: 380px; height: 380px; border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--hp-main) 22%, transparent), transparent 68%);
+  transition: background .7s; }
+.stage .flag { position: absolute; top: 20px; left: 20px; font-size: 11.5px; font-weight: 700;
+               letter-spacing: .14em; color: var(--sub); font-family: "JetBrains Mono", monospace; }
+.stage .view-cap { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%);
+                   font-size: 12px; color: var(--sub); font-weight: 600; letter-spacing: .06em; }
+
+/* ── CSS 로만 그린 무선 헤드폰 ── */
+.hp-wrap { transform-style: preserve-3d; transition: transform .8s cubic-bezier(.2,.75,.2,1); }
+.hp-wrap.v-side   { transform: rotateY(46deg) scale(1.04); }
+.hp-wrap.v-detail { transform: scale(1.55) rotate(-7deg) translateY(6%); }
+.hp { position: relative; width: 264px; height: 296px; animation: float 5.2s ease-in-out infinite; }
+@keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-14px); } }
+
+.band { position: absolute; top: 0; left: 32px; width: 200px; height: 122px;
+        border: 19px solid var(--hp-main); border-bottom: none;
+        border-radius: 120px 120px 0 0; transition: border-color .7s; }
+.band::before { /* 헤드밴드 상단 하이라이트 */
+  content: ""; position: absolute; top: -14px; left: 18px; right: 18px; height: 7px;
+  border-radius: 99px; background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent); }
+.band::after { /* 안쪽 쿠션 스트립 */
+  content: ""; position: absolute; top: -2px; left: 26px; right: 26px; height: 12px;
+  border-radius: 0 0 12px 12px; background: var(--hp-dark); transition: background .7s; }
+.yoke { position: absolute; top: 116px; width: 15px; height: 38px; background: var(--hp-dark);
+        border-radius: 4px; transition: background .7s; }
+.yoke.l { left: 36px; } .yoke.r { right: 36px; }
+.cup { position: absolute; top: 146px; width: 92px; height: 116px; border-radius: 44px;
+       background: linear-gradient(148deg, var(--hp-light) 4%, var(--hp-main) 46%, var(--hp-dark));
+       box-shadow: inset 0 2px 6px rgba(255,255,255,.28), 0 22px 36px -14px color-mix(in srgb, var(--hp-dark) 60%, transparent);
+       transition: background .7s, box-shadow .7s; }
+.cup.l { left: 4px; } .cup.r { right: 4px; }
+.cup::before { /* 이어 쿠션 */
+  content: ""; position: absolute; inset: 9px; border-radius: 38px;
+  background: linear-gradient(160deg, var(--hp-dark), color-mix(in srgb, var(--hp-dark) 75%, #000));
+  box-shadow: inset 0 4px 10px rgba(0,0,0,.35); transition: background .7s; }
+.cup::after { /* 브랜드 도트 */
+  content: ""; position: absolute; top: 50%; left: 50%; width: 15px; height: 15px; border-radius: 50%;
+  transform: translate(-50%,-50%);
+  background: radial-gradient(circle at 34% 30%, rgba(255,255,255,.85), var(--hp-light) 60%);
+  transition: background .7s; }
+.hp .shadow { position: absolute; left: 50%; bottom: -46px; width: 200px; height: 26px; border-radius: 50%;
+  transform: translateX(-50%); background: radial-gradient(ellipse, rgba(20,22,30,.22), transparent 70%);
+  animation: shsync 5.2s ease-in-out infinite; }
+@keyframes shsync { 0%,100% { transform: translateX(-50%) scale(1); opacity: 1; }
+                    50% { transform: translateX(-50%) scale(.86); opacity: .6; } }
+
+/* 갤러리 썸네일: 정면 / 측면 / 디테일 */
+.thumbs { display: flex; gap: 12px; margin-top: 16px; }
+.thumb { flex: none; width: 76px; height: 76px; border-radius: 16px; border: 1px solid var(--line);
+         background: var(--card); cursor: pointer; display: flex; flex-direction: column; gap: 5px;
+         align-items: center; justify-content: center; transition: border-color .3s, box-shadow .3s, transform .2s; }
+.thumb:hover { transform: translateY(-3px); }
+.thumb.on { border-color: var(--cta); box-shadow: 0 0 0 1.5px var(--cta); }
+.thumb span { font-size: 10.5px; color: var(--sub); font-weight: 600; }
+.thumb .g { position: relative; width: 34px; height: 26px; }
+/* 미니 글리프도 CSS 도형으로 */
+.g-front::before { content: ""; position: absolute; top: 0; left: 5px; right: 5px; height: 15px;
+  border: 3.5px solid var(--hp-main); border-bottom: none; border-radius: 20px 20px 0 0; transition: border-color .7s; }
+.g-front::after { content: ""; position: absolute; bottom: 0; width: 9px; height: 12px; border-radius: 4px;
+  background: var(--hp-main); box-shadow: 25px 0 0 var(--hp-main); transition: background .7s, box-shadow .7s; }
+.g-side::before { content: ""; position: absolute; top: 1px; left: 7px; width: 17px; height: 13px;
+  border: 3.5px solid var(--hp-main); border-bottom: none; border-radius: 16px 16px 0 0; transition: border-color .7s; }
+.g-side::after { content: ""; position: absolute; bottom: 0; left: 9px; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--hp-main); transition: background .7s; }
+.g-detail::before { content: ""; position: absolute; top: 2px; left: 8px; width: 16px; height: 16px;
+  border-radius: 50%; border: 3px solid var(--hp-main); transition: border-color .7s; }
+.g-detail::after { content: ""; position: absolute; bottom: 0; right: 4px; width: 9px; height: 3.5px;
+  border-radius: 2px; background: var(--hp-main); transform: rotate(45deg); transition: background .7s; }
+
+/* 우: 제품 정보 */
+.info .brand { font-size: 12.5px; font-weight: 700; letter-spacing: .22em; color: var(--sub); }
+.info h1 { font-size: clamp(28px, 3.2vw, 38px); font-weight: 800; letter-spacing: -.03em;
+           margin-top: 10px; line-height: 1.2; word-break: keep-all; }
+.rating { display: flex; align-items: center; gap: 9px; margin-top: 12px; font-size: 13.5px; }
+.stars { color: #e8a33d; letter-spacing: 2px; font-size: 15px; }
+.rating b { font-weight: 700; }
+.rating a { color: var(--sub); text-decoration: underline; text-underline-offset: 3px; }
+
+.price-row { display: flex; align-items: baseline; gap: 12px; margin-top: 18px; }
+.price { font-size: 30px; font-weight: 800; letter-spacing: -.02em; }
+.was { font-size: 16px; color: var(--sub); text-decoration: line-through; }
+.off { font-size: 12px; font-weight: 800; color: #fff; background: #d64545;
+       padding: 3px 9px; border-radius: 99px; }
+.desc { margin-top: 16px; color: var(--sub); font-size: 15px; line-height: 1.75; word-break: keep-all; }
+
+/* 색상 스와치 */
+.opt-label { margin-top: 28px; font-size: 13.5px; font-weight: 700; }
+.opt-label em { font-style: normal; color: var(--sub); font-weight: 600; }
+.swatches { display: flex; gap: 14px; margin-top: 12px; }
+.sw { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: none; position: relative;
+      transition: transform .2s; box-shadow: inset 0 2px 5px rgba(255,255,255,.35), inset 0 -3px 6px rgba(0,0,0,.22); }
+.sw:hover { transform: scale(1.12); }
+.sw.on { box-shadow: 0 0 0 2.5px var(--bg), 0 0 0 4.5px var(--cta),
+         inset 0 2px 5px rgba(255,255,255,.35); transition: transform .2s, box-shadow .5s; }
+
+/* 수량 + CTA */
+.buy-row { display: flex; gap: 12px; margin-top: 28px; }
+.stepper { display: flex; align-items: center; border: 1.5px solid var(--line); border-radius: 14px;
+           background: var(--card); overflow: hidden; }
+.stepper button { width: 44px; height: 54px; border: none; background: none; font-size: 19px;
+                  cursor: pointer; color: var(--sub); transition: background .2s, color .2s; }
+.stepper button:hover { background: var(--tintsoft); color: var(--ink); }
+.stepper b { width: 38px; text-align: center; font-size: 16px; font-variant-numeric: tabular-nums; }
+.cta { flex: 1; height: 54px; border: none; border-radius: 14px; background: var(--cta); color: #fff;
+       font-family: inherit; font-size: 15.5px; font-weight: 700; cursor: pointer; letter-spacing: -.01em;
+       transition: background .4s, transform .15s, box-shadow .3s;
+       box-shadow: 0 14px 30px -12px color-mix(in srgb, var(--cta) 65%, transparent); }
+.cta:hover { background: var(--cta-hover); transform: translateY(-2px); }
+.cta.done { background: #2f9e63; }
+.micro { display: flex; gap: 18px; margin-top: 14px; font-size: 12.5px; color: var(--sub); }
+.micro span::before { content: "✓ "; color: #2f9e63; font-weight: 700; }
+
+/* 장바구니로 날아가는 클론 */
+.flyer { position: fixed; z-index: 99; width: 70px; height: 70px; border-radius: 50%; pointer-events: none;
+  background: radial-gradient(circle at 35% 30%, var(--hp-light), var(--hp-main) 55%, var(--hp-dark));
+  box-shadow: 0 14px 30px rgba(0,0,0,.3);
+  transition: transform .75s cubic-bezier(.45,.05,.6,1), opacity .75s; }
+.hp-wrap.squash { transform: scale(.9); transition: transform .18s; }
+
+/* 아코디언 */
+.accs { margin-top: 34px; border-top: 1px solid var(--line); }
+.acc { border-bottom: 1px solid var(--line); }
+.acc-head { width: 100%; display: flex; align-items: center; justify-content: space-between;
+            padding: 18px 2px; background: none; border: none; cursor: pointer;
+            font-family: inherit; font-size: 15px; font-weight: 700; color: var(--ink); }
+.acc-head .chev { width: 22px; height: 22px; border-radius: 50%; background: var(--tintsoft);
+  display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--sub);
+  transition: transform .4s, background .4s; }
+.acc.open .chev { transform: rotate(45deg); background: var(--cta); color: #fff; }
+.acc-body { max-height: 0; overflow: hidden; transition: max-height .45s cubic-bezier(.3,.7,.3,1); }
+.acc-body > div { padding: 0 2px 20px; color: var(--sub); font-size: 14px; line-height: 1.8; word-break: keep-all; }
+.spec { display: grid; grid-template-columns: 110px 1fr; row-gap: 8px; font-size: 13.5px; }
+.spec dt { color: var(--sub); } .spec dd { color: var(--ink); font-weight: 600; }
+
+/* ── 리뷰 ── */
+.reviews { max-width: 1180px; margin: 30px auto 0; padding: 0 28px 90px; }
+.reviews h2 { font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.reviews .sub-t { margin-top: 8px; color: var(--sub); font-size: 14.5px; }
+.rev-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; margin-top: 26px; }
+.rev { background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 24px;
+       transition: transform .3s, box-shadow .3s; }
+.rev:hover { transform: translateY(-4px); box-shadow: 0 22px 44px -20px rgba(30,34,48,.25); }
+.rev .rhead { display: flex; align-items: center; gap: 11px; }
+.rev .avatar { width: 40px; height: 40px; border-radius: 50%; flex: none; }
+.rev .rhead b { display: block; font-size: 14px; }
+.rev .rhead span { font-size: 12px; color: var(--sub); }
+.rev .stars { font-size: 13px; margin-top: 12px; }
+.rev p { margin-top: 10px; font-size: 13.5px; line-height: 1.75; color: var(--sub); word-break: keep-all; }
+.rev .tag { display: inline-block; margin-top: 12px; font-size: 11.5px; font-weight: 700; color: var(--cta);
+            background: var(--tintsoft); padding: 4px 11px; border-radius: 99px; transition: color .7s, background .7s; }
+
+footer { text-align: center; padding: 26px; color: var(--sub); font-size: 12.5px;
+         border-top: 1px solid var(--line); }
+
+/* 진입 리빌 */
+.reveal { opacity: 0; transform: translateY(28px); transition: opacity .8s cubic-bezier(.2,.6,.2,1), transform .8s cubic-bezier(.2,.6,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 800px) {
+  .product { grid-template-columns: 1fr; gap: 30px; }
+  .stage-col { position: static; }
+  .stage { height: 400px; }
+  .hp { transform: scale(.82); }
+  .search, nav .links { display: none; }
+  .rev-grid { grid-template-columns: 1fr; }
+  .buy-row { flex-direction: column; }
+  .stepper { justify-content: center; }
+  .stepper button { flex: 1; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="logo">aurin<i>.</i></span>
+  <div class="links"><a href="#">헤드폰</a><a href="#">이어버드</a><a href="#">스피커</a><a href="#">액세서리</a></div>
+  <div class="search">⌕ &nbsp;제품 검색…</div>
+  <button class="cart-btn" id="cartBtn" aria-label="장바구니">
+    <svg viewBox="0 0 24 24"><path d="M5 8h14l-1.3 11H6.3L5 8zm3.5 0V6.5a3.5 3.5 0 017 0V8"/></svg>
+    <span class="badge" id="badge">0</span>
+  </button>
+</nav>
+
+<div class="wrap">
+  <div class="product">
+
+    <!-- 제품 스테이지: CSS로만 그린 헤드폰 -->
+    <div class="stage-col reveal">
+      <div class="stage">
+        <div class="halo"></div>
+        <span class="flag">H-1 / STUDIO WIRELESS</span>
+        <div class="hp-wrap" id="hpWrap">
+          <div class="hp">
+            <div class="band"></div>
+            <div class="yoke l"></div><div class="yoke r"></div>
+            <div class="cup l"></div><div class="cup r"></div>
+            <div class="shadow"></div>
+          </div>
+        </div>
+        <span class="view-cap" id="viewCap">정면 뷰</span>
+      </div>
+      <div class="thumbs">
+        <button class="thumb on" data-view="" data-cap="정면 뷰"><span class="g g-front"></span><span>정면</span></button>
+        <button class="thumb" data-view="v-side" data-cap="측면 뷰 — 45°"><span class="g g-side"></span><span>측면</span></button>
+        <button class="thumb" data-view="v-detail" data-cap="디테일 — 이어컵 클로즈업"><span class="g g-detail"></span><span>디테일</span></button>
+      </div>
+    </div>
+
+    <!-- 제품 정보 -->
+    <div class="info reveal">
+      <div class="brand">AURIN ACOUSTICS</div>
+      <h1>Aurin H-1 스튜디오 와이어리스</h1>
+      <div class="rating">
+        <span class="stars">★★★★★</span><b>4.8</b>
+        <a href="#">리뷰 1,284개</a>
+      </div>
+      <div class="price-row">
+        <span class="price" id="price">₩389,000</span>
+        <span class="was">₩459,000</span>
+        <span class="off">15% OFF</span>
+      </div>
+      <p class="desc">40mm 베릴륨 드라이버와 적응형 노이즈 캔슬링. 한 번의 충전으로 42시간,
+      스튜디오의 정밀함을 일상의 모든 순간으로. 메모리폼 이어쿠션이 하루 종일 편안하게 감쌉니다.</p>
+
+      <div class="opt-label">색상 · <em id="swName">미드나잇</em></div>
+      <div class="swatches" id="swatches">
+        <button class="sw on" data-c="midnight" style="background:linear-gradient(148deg,#4a5470,#2e3444 55%,#1b202e)" aria-label="미드나잇"></button>
+        <button class="sw" data-c="sand" style="background:linear-gradient(148deg,#ecdcbf,#d9c6a7 55%,#b39b74)" aria-label="샌드"></button>
+        <button class="sw" data-c="sage" style="background:linear-gradient(148deg,#c3d4be,#a9bca4 55%,#7e957a)" aria-label="세이지"></button>
+        <button class="sw" data-c="burgundy" style="background:linear-gradient(148deg,#a05262,#7c3644 55%,#57212c)" aria-label="버건디"></button>
+      </div>
+
+      <div class="buy-row">
+        <div class="stepper">
+          <button id="minus" aria-label="수량 감소">−</button><b id="qty">1</b><button id="plus" aria-label="수량 증가">+</button>
+        </div>
+        <button class="cta" id="cta">장바구니 담기 · ₩389,000</button>
+      </div>
+      <div class="micro"><span>오늘 출발 (15시 이전 주문)</span><span>무료 배송</span><span>30일 무료 반품</span></div>
+
+      <div class="accs">
+        <div class="acc open">
+          <button class="acc-head">제품 상세 <span class="chev">＋</span></button>
+          <div class="acc-body"><div>
+            독자 개발한 40mm 베릴륨 코팅 드라이버가 10Hz–40kHz의 초광대역을 왜곡 없이 재생합니다.
+            8개의 마이크가 주변 소음을 초당 4만 번 분석하는 적응형 ANC, 착용을 감지해 자동으로
+            재생을 멈추는 웨어 센서까지 — 디테일이 곧 프리미엄입니다.
+          </div></div>
+        </div>
+        <div class="acc">
+          <button class="acc-head">배송 · 반품 <span class="chev">＋</span></button>
+          <div class="acc-body"><div>
+            평일 15시 이전 주문 시 당일 출고, 전 지역 무료 배송입니다. 수령 후 30일 이내라면
+            사용 흔적이 있어도 무료로 반품·교환할 수 있습니다. 개봉 여부는 묻지 않습니다.
+          </div></div>
+        </div>
+        <div class="acc">
+          <button class="acc-head">스펙 <span class="chev">＋</span></button>
+          <div class="acc-body"><div>
+            <dl class="spec">
+              <dt>드라이버</dt><dd>40mm 베릴륨 코팅</dd>
+              <dt>재생 시간</dt><dd>42시간 (ANC 켬 32시간)</dd>
+              <dt>무게</dt><dd>248g</dd>
+              <dt>연결</dt><dd>Bluetooth 5.4 · LDAC · 멀티포인트</dd>
+              <dt>충전</dt><dd>USB-C · 10분 충전 5시간 재생</dd>
+            </dl>
+          </div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 리뷰 -->
+<section class="reviews">
+  <div class="reveal">
+    <h2>먼저 경험한 분들의 이야기</h2>
+    <p class="sub-t">구매 확정 리뷰 1,284개 중 평점 높은 순</p>
+  </div>
+  <div class="rev-grid">
+    <div class="rev reveal">
+      <div class="rhead"><span class="avatar" style="background:linear-gradient(135deg,#f59e0b,#ef4444)"></span>
+        <div><b>김서연</b><span>세이지 · 2주 사용</span></div></div>
+      <div class="stars">★★★★★</div>
+      <p>카페에서 작업할 때 ANC를 켜면 정말 다른 세상이에요. 세이지 색은 사진보다 실물이
+      훨씬 고급스럽습니다. 6시간 연속 착용해도 귀가 아프지 않아요.</p>
+      <span class="tag">노이즈 캔슬링 최고</span>
+    </div>
+    <div class="rev reveal">
+      <div class="rhead"><span class="avatar" style="background:linear-gradient(135deg,#8b5cf6,#ec4899)"></span>
+        <div><b>박준호</b><span>미드나잇 · 1개월 사용</span></div></div>
+      <div class="stars">★★★★★</div>
+      <p>스튜디오 모니터링용으로 쓰던 유선을 완전히 대체했습니다. LDAC로 들으면
+      해상도 차이가 거의 느껴지지 않아요. 멀티포인트 전환도 즉각적입니다.</p>
+      <span class="tag">음질에 진심</span>
+    </div>
+    <div class="rev reveal">
+      <div class="rhead"><span class="avatar" style="background:linear-gradient(135deg,#10b981,#3b82f6)"></span>
+        <div><b>이하늘</b><span>버건디 · 3주 사용</span></div></div>
+      <div class="stars">★★★★☆</div>
+      <p>배터리는 광고 그대로예요. 일주일에 한 번 충전하면 충분합니다. 케이스가 조금 큰 게
+      유일한 아쉬움인데, 그만큼 튼튼해서 가방에 그냥 던져 넣습니다.</p>
+      <span class="tag">배터리 괴물</span>
+    </div>
+  </div>
+</section>
+
+<footer>AURIN ACOUSTICS — CSS로만 그린 제품 컨피규레이터 데모 · 이미지 0장</footer>
+
+<script>
+const $ = id => document.getElementById(id);
+
+/* ── 1. 색상 컨피규레이터: CSS 변수 통째로 교체 ── */
+const PALETTES = {
+  midnight: { name: '미드나잇', main: '#2e3444', dark: '#1b202e', light: '#4a5470',
+              bg: '#f4f5f8', cta: '#262c3c', ctaH: '#171b28', tint: '#e4e7ef' },
+  sand:     { name: '샌드', main: '#d9c6a7', dark: '#b39b74', light: '#ecdcbf',
+              bg: '#faf6ee', cta: '#8a744e', ctaH: '#6f5c3c', tint: '#f0e8d8' },
+  sage:     { name: '세이지', main: '#a9bca4', dark: '#7e957a', light: '#c3d4be',
+              bg: '#f2f6f1', cta: '#5f7a5c', ctaH: '#4a6147', tint: '#e2ebe0' },
+  burgundy: { name: '버건디', main: '#7c3644', dark: '#57212c', light: '#a05262',
+              bg: '#f9f2f3', cta: '#6d2836', ctaH: '#521c27', tint: '#efdfe2' },
+};
+$('swatches').addEventListener('click', e => {
+  const btn = e.target.closest('.sw'); if (!btn) return;
+  document.querySelectorAll('.sw').forEach(s => s.classList.remove('on'));
+  btn.classList.add('on');
+  const p = PALETTES[btn.dataset.c], r = document.documentElement.style;
+  r.setProperty('--hp-main', p.main); r.setProperty('--hp-dark', p.dark);
+  r.setProperty('--hp-light', p.light); r.setProperty('--bg', p.bg);
+  r.setProperty('--cta', p.cta); r.setProperty('--cta-hover', p.ctaH);
+  r.setProperty('--tintsoft', p.tint);
+  $('swName').textContent = p.name;
+});
+
+/* ── 2. 갤러리 뷰 전환: transform 클래스 교체 ── */
+document.querySelectorAll('.thumb').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.thumb').forEach(x => x.classList.remove('on'));
+  t.classList.add('on');
+  $('hpWrap').className = 'hp-wrap ' + t.dataset.view;
+  $('viewCap').textContent = t.dataset.cap;
+}));
+
+/* ── 3. 수량 스테퍼 + 가격 갱신 ── */
+const UNIT = 389000;
+let qty = 1;
+const won = n => '₩' + n.toLocaleString('ko-KR');
+function syncQty() {
+  $('qty').textContent = qty;
+  $('cta').textContent = `장바구니 담기 · ${won(UNIT * qty)}`;
+  $('price').textContent = won(UNIT * qty);
+}
+$('plus').addEventListener('click', () => { if (qty < 9) { qty++; syncQty(); } });
+$('minus').addEventListener('click', () => { if (qty > 1) { qty--; syncQty(); } });
+
+/* ── 4. 장바구니 담기: 제품이 카트로 날아가는 애니메이션 ── */
+let cart = 0, ctaLock = false;
+$('cta').addEventListener('click', () => {
+  if (ctaLock) return; ctaLock = true;
+  const wrap = $('hpWrap'), cartR = $('cartBtn').getBoundingClientRect();
+  const from = wrap.getBoundingClientRect();
+
+  // 제품이 살짝 움츠러들었다가
+  wrap.classList.add('squash');
+  setTimeout(() => wrap.classList.remove('squash'), 220);
+
+  // 클론이 카트로 날아간다
+  const fly = document.createElement('div');
+  fly.className = 'flyer';
+  fly.style.left = (from.left + from.width / 2 - 35) + 'px';
+  fly.style.top = (from.top + from.height / 2 - 35) + 'px';
+  document.body.appendChild(fly);
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const dx = cartR.left + cartR.width / 2 - (from.left + from.width / 2);
+    const dy = cartR.top + cartR.height / 2 - (from.top + from.height / 2);
+    fly.style.transform = `translate(${dx}px, ${dy}px) scale(.12)`;
+    fly.style.opacity = '.25';
+  }));
+  setTimeout(() => {
+    fly.remove();
+    cart += qty;
+    $('badge').textContent = cart;
+    $('badge').classList.add('pop');
+    setTimeout(() => $('badge').classList.remove('pop'), 350);
+  }, 760);
+
+  // 버튼 상태 전환
+  const cta = $('cta');
+  cta.classList.add('done'); cta.textContent = '✓ 담김';
+  setTimeout(() => { cta.classList.remove('done'); syncQty(); ctaLock = false; }, 1500);
+});
+
+/* ── 5. 아코디언: scrollHeight 기반 max-height 트랜지션 ── */
+document.querySelectorAll('.acc').forEach(acc => {
+  const body = acc.querySelector('.acc-body');
+  const set = () => { body.style.maxHeight = acc.classList.contains('open') ? body.scrollHeight + 'px' : '0px'; };
+  set();
+  acc.querySelector('.acc-head').addEventListener('click', () => { acc.classList.toggle('open'); set(); });
+});
+
+/* ── 진입 리빌: IntersectionObserver + transition ── */
+const io = new IntersectionObserver(es => es.forEach(en => en.isIntersecting && en.target.classList.add('in')),
+  { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+
+syncQty();
+</script>
+
+<script>
+/* ── English mode (?lang=en): translate all visible Korean text, no logic changes ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "Aurin H-1 — 프리미엄 헤드폰 컨피규레이터": "Aurin H-1 — Premium Headphone Configurator",
+    "헤드폰": "Headphones",
+    "이어버드": "Earbuds",
+    "스피커": "Speakers",
+    "액세서리": "Accessories",
+    "장바구니": "Cart",
+    "Aurin H-1 스튜디오 와이어리스": "Aurin H-1 Studio Wireless",
+    "리뷰 1,284개": "1,284 reviews",
+    "색상 ·": "Color ·",
+    "미드나잇": "Midnight",
+    "샌드": "Sand",
+    "세이지": "Sage",
+    "버건디": "Burgundy",
+    "정면 뷰": "Front view",
+    "측면 뷰 — 45°": "Side view — 45°",
+    "디테일 — 이어컵 클로즈업": "Detail — earcup close-up",
+    "정면": "Front",
+    "측면": "Side",
+    "디테일": "Detail",
+    "수량 감소": "Decrease quantity",
+    "수량 증가": "Increase quantity",
+    "✓ 담김": "✓ Added",
+    "오늘 출발 (15시 이전 주문)": "Ships today (order before 3 PM)",
+    "무료 배송": "Free shipping",
+    "30일 무료 반품": "30-day free returns",
+    "제품 상세": "Product Details",
+    "배송 · 반품": "Shipping · Returns",
+    "스펙": "Specs",
+    "드라이버": "Driver",
+    "40mm 베릴륨 코팅": "40mm beryllium-coated",
+    "재생 시간": "Playtime",
+    "42시간 (ANC 켬 32시간)": "42 hours (32 hours with ANC on)",
+    "무게": "Weight",
+    "연결": "Connectivity",
+    "Bluetooth 5.4 · LDAC · 멀티포인트": "Bluetooth 5.4 · LDAC · Multipoint",
+    "충전": "Charging",
+    "USB-C · 10분 충전 5시간 재생": "USB-C · 10-min charge, 5-hour playback",
+    "먼저 경험한 분들의 이야기": "Stories From Those Who Tried It First",
+    "구매 확정 리뷰 1,284개 중 평점 높은 순": "1,284 verified-purchase reviews, sorted by highest rating",
+    "김서연": "Kim Seoyeon",
+    "박준호": "Park Junho",
+    "이하늘": "Lee Haneul",
+    "세이지 · 2주 사용": "Sage · 2 weeks of use",
+    "미드나잇 · 1개월 사용": "Midnight · 1 month of use",
+    "버건디 · 3주 사용": "Burgundy · 3 weeks of use",
+    "노이즈 캔슬링 최고": "Best-in-class ANC",
+    "음질에 진심": "Serious about sound",
+    "배터리 괴물": "Battery beast",
+    "AURIN ACOUSTICS — CSS로만 그린 제품 컨피규레이터 데모 · 이미지 0장": "AURIN ACOUSTICS — A product configurator demo drawn purely in CSS · 0 images"
+  };
+  const PATTERNS = [
+    [/^⌕\s+제품 검색…$/, () => "⌕  Search products…"],
+    [/^장바구니 담기 · (₩[\d,]+)$/, m => `Add to cart · ${m[1]}`],
+    [/^40mm 베릴륨 드라이버[\s\S]*감쌉니다\.$/, () => "40mm beryllium drivers with adaptive noise cancelling. 42 hours on a single charge — studio precision for every moment of your day. Memory-foam ear cushions keep you comfortable all day long."],
+    [/^독자 개발한 40mm[\s\S]*프리미엄입니다\.$/, () => "Our in-house 40mm beryllium-coated drivers reproduce an ultra-wide 10Hz–40kHz range without distortion. Adaptive ANC with 8 mics analyzing ambient noise 40,000 times per second, plus a wear sensor that auto-pauses playback when you take them off — the details are what make it premium."],
+    [/^평일 15시 이전 주문[\s\S]*묻지 않습니다\.$/, () => "Order before 3 PM on weekdays for same-day dispatch, with free shipping nationwide. Within 30 days of delivery you can return or exchange for free, even with signs of use. We won't ask whether you opened it."],
+    [/^카페에서 작업할 때[\s\S]*않아요\.$/, () => "Switching on ANC while working at a cafe is truly another world. Sage looks far more premium in person than in photos. Even after 6 hours straight, my ears don't hurt."],
+    [/^스튜디오 모니터링용으로[\s\S]*즉각적입니다\.$/, () => "They completely replaced the wired pair I used for studio monitoring. Over LDAC I can barely tell the resolution difference. Multipoint switching is instant, too."],
+    [/^배터리는 광고 그대로예요[\s\S]*던져 넣습니다\.$/, () => "The battery is exactly as advertised. Charging once a week is plenty. My only gripe is the case being a bit bulky, but it's so sturdy I just toss it in my bag."]
+  ];
+  const tr = t => { if (TR[t] != null) return TR[t]; for (const [re,fn] of PATTERNS){ const m = t.match(re); if (m) return fn(m); } return null; };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swap = s => { const t = s.trim(); const r = tr(t); return r != null ? s.replace(t, r) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (tr(n.nodeValue.trim()) != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && tr(n.getAttribute(a).trim()) != null) n.setAttribute(a, tr(n.getAttribute(a).trim())); });
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim()); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

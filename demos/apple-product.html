@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Apple 스타일 — 프로덕트 쇼케이스</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: #000; color: #f5f5f7;
+       -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+nav { position: sticky; top: 0; z-index: 30; display: flex; justify-content: center; gap: 38px;
+      padding: 13px 24px; background: rgba(22,22,23,.8); backdrop-filter: blur(20px) saturate(1.8);
+      font-size: 12.5px; }
+nav a { color: #d6d6d6; text-decoration: none; opacity: .85; transition: opacity .2s; }
+nav a:hover { opacity: 1; color: #fff; }
+
+/* ── 히어로 ── */
+.hero { text-align: center; padding: 100px 24px 0; position: relative; }
+.hero .kicker { font-size: 19px; font-weight: 600; color: #86868b; letter-spacing: .3px; }
+.hero h1 { font-size: clamp(52px, 8.5vw, 88px); font-weight: 800; letter-spacing: -.045em;
+           line-height: 1.03; margin-top: 10px;
+           background: linear-gradient(180deg, #fff 55%, #6e6e73);
+           -webkit-background-clip: text; background-clip: text; color: transparent; }
+.hero .tagline { font-size: clamp(21px, 3vw, 28px); margin-top: 18px; font-weight: 700;
+  background: linear-gradient(90deg, #0090f7, #ba62fc 30%, #f2416b 60%, #f55600 90%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: flow 7s ease-in-out infinite; }
+@keyframes flow { 0%,100% { background-position: 0% 0; } 50% { background-position: 100% 0; } }
+.links { margin-top: 26px; display: flex; gap: 30px; justify-content: center; font-size: 19px; }
+.links a { color: #2997ff; text-decoration: none; }
+.links a:hover { text-decoration: underline; }
+.links a::after { content: " ›"; }
+
+/* ── 디바이스: 티타늄 프레임 + 다이내믹 아일랜드 + 반사광 ── */
+.device-stage { display: flex; justify-content: center; padding: 64px 24px 110px; perspective: 1200px; }
+.device { width: 320px; height: 650px; border-radius: 54px; position: relative;
+          background: linear-gradient(155deg, #4d4d52, #232326 40%, #3c3c41 70%, #1c1c1f);
+          box-shadow: 0 60px 120px -30px rgba(0,0,0,.9), inset 0 0 0 2px #57575c,
+                      inset 0 0 0 7px #0c0c0d;
+          animation: floaty 7s ease-in-out infinite; }
+@keyframes floaty { 0%,100% { transform: translateY(0) rotateX(0); } 50% { transform: translateY(-16px) rotateX(2deg); } }
+.screen { position: absolute; inset: 12px; border-radius: 44px; overflow: hidden;
+          background: radial-gradient(130% 100% at 15% 0%, #0090f7, #ba62fc 40%, #f2416b 72%, #f55600 100%); }
+.screen::before { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(115deg, transparent 30%, rgba(255,255,255,.22) 46%, rgba(255,255,255,.05) 54%, transparent 66%);
+  background-size: 300% 100%; animation: sweep 6s ease-in-out infinite; }
+@keyframes sweep { 0%,100% { background-position: 120% 0; } 50% { background-position: -30% 0; } }
+.island { position: absolute; top: 26px; left: 50%; transform: translateX(-50%); width: 96px; height: 28px;
+          background: #000; border-radius: 99px; z-index: 2; }
+.dev-time { position: absolute; top: 120px; left: 0; right: 0; text-align: center; color: #fff;
+            font-size: 72px; font-weight: 200; letter-spacing: -1px; z-index: 1;
+            text-shadow: 0 4px 30px rgba(0,0,0,.3); }
+.dev-date { position: absolute; top: 210px; left: 0; right: 0; text-align: center;
+            color: rgba(255,255,255,.85); font-size: 15px; font-weight: 600; z-index: 1; }
+.widget { position: absolute; left: 28px; right: 28px; bottom: 42px; z-index: 1;
+          background: rgba(0,0,0,.28); backdrop-filter: blur(20px); border-radius: 22px;
+          padding: 16px 18px; color: #fff; }
+.widget small { font-size: 11px; opacity: .75; font-weight: 600; }
+.widget b { display: block; font-size: 17px; margin-top: 3px; }
+.widget .wbar { margin-top: 10px; height: 5px; border-radius: 99px; background: rgba(255,255,255,.25); overflow: hidden; }
+.widget .wbar i { display: block; height: 100%; width: 68%; border-radius: 99px; background: #fff; }
+
+/* ── 섹션 공통 ── */
+.section { text-align: center; padding: 130px 24px; position: relative; }
+.section .s-kicker { font-size: 15px; font-weight: 700; color: #86868b; letter-spacing: 1.5px;
+                     text-transform: uppercase; }
+.section h2 { font-size: clamp(36px, 5.5vw, 62px); font-weight: 800; letter-spacing: -.04em;
+              margin-top: 16px; line-height: 1.08; word-break: keep-all; }
+.section .body-text { max-width: 620px; margin: 26px auto 0; font-size: 19px; line-height: 1.6;
+                      color: #86868b; word-break: keep-all; }
+.section .body-text strong { color: #f5f5f7; font-weight: 600; }
+
+.titanium h2 { background: linear-gradient(100deg, #8e8e93 10%, #f5f5f7 38%, #d1d1d6 52%, #6e6e73 78%);
+               background-size: 200% 100%;
+               -webkit-background-clip: text; background-clip: text; color: transparent;
+               animation: metal 6s ease-in-out infinite; }
+@keyframes metal { 0%,100% { background-position: 0% 0; } 50% { background-position: 100% 0; } }
+
+/* ── 벤토 타일 ── */
+.grid2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; max-width: 980px;
+         margin: 70px auto 0; text-align: left; }
+.tile { border-radius: 28px; padding: 44px 38px; min-height: 340px; background: #111;
+        display: flex; flex-direction: column; justify-content: flex-end; overflow: hidden;
+        position: relative; transition: transform .4s cubic-bezier(.2,.7,.2,1); }
+.tile:hover { transform: scale(1.015); }
+.tile.blue { background: radial-gradient(120% 130% at 85% -10%, #0a3d68, #05101c 70%); }
+.tile.purple { background: radial-gradient(120% 130% at 15% -10%, #3b1d5e, #12081f 70%); }
+.tile .big { font-size: 68px; position: absolute; top: 36px; left: 38px; }
+.tile h3 { font-size: clamp(22px, 2.4vw, 30px); font-weight: 800; letter-spacing: -.03em; line-height: 1.15;
+           word-break: keep-all; }
+.tile p { margin-top: 12px; font-size: 15.5px; color: #86868b; line-height: 1.6; max-width: 340px;
+          word-break: keep-all; }
+.tile .num { position: absolute; top: 40px; right: 38px; text-align: right; }
+.tile .num b { font-size: 46px; font-weight: 800; letter-spacing: -2px;
+               background: linear-gradient(180deg, #64d2ff, #0a84ff);
+               -webkit-background-clip: text; background-clip: text; color: transparent; }
+.tile.purple .num b { background: linear-gradient(180deg, #da8fff, #bf5af2);
+                      -webkit-background-clip: text; background-clip: text; }
+.tile .num span { display: block; font-size: 12px; color: #86868b; margin-top: 2px; }
+
+/* ── 컬러 라인업 ── */
+.colors { padding-bottom: 40px; }
+.swatches { display: flex; justify-content: center; gap: 26px; margin-top: 56px; flex-wrap: wrap; }
+.swatch { text-align: center; cursor: pointer; }
+.swatch .ball { width: 88px; height: 88px; border-radius: 50%; margin: 0 auto;
+                box-shadow: inset -10px -14px 26px rgba(0,0,0,.5), inset 8px 10px 20px rgba(255,255,255,.28),
+                            0 18px 34px -12px rgba(0,0,0,.7);
+                transition: transform .35s cubic-bezier(.2,.8,.3,1.3); }
+.swatch:hover .ball { transform: scale(1.14) translateY(-6px); }
+.swatch span { display: block; margin-top: 14px; font-size: 13.5px; color: #86868b; font-weight: 600; }
+
+.light { background: #f5f5f7; color: #1d1d1f; }
+.light .body-text strong { color: #1d1d1f; }
+.cta-btn { display: inline-block; margin-top: 34px; background: #0071e3; color: #fff; font-size: 16.5px;
+           font-weight: 600; padding: 14px 30px; border-radius: 99px; text-decoration: none;
+           transition: background .2s, transform .2s; }
+.cta-btn:hover { background: #0a84ff; transform: scale(1.03); }
+
+footer { padding: 44px 24px; text-align: center; font-size: 12px; color: #6e6e73; background: #f5f5f7;
+         border-top: 1px solid #e0e0e2; }
+
+.reveal { opacity: 0; transform: translateY(34px) scale(.985); transition: opacity 1s cubic-bezier(.2,.6,.2,1), transform 1s cubic-bezier(.2,.6,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 780px) {
+  .grid2 { grid-template-columns: 1fr; }
+  nav { gap: 20px; font-size: 11.5px; }
+  .device { width: 270px; height: 550px; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <a href="#">스토어</a><a href="#">폰</a><a href="#">패드</a><a href="#">워치</a><a href="#">에어팟</a><a href="#">액세서리</a><a href="#">지원</a>
+</nav>
+
+<section class="hero">
+  <div class="kicker">Nova Phone Pro</div>
+  <h1>한계를 넘어선 프로.</h1>
+  <div class="tagline">티타늄. 역대 가장 강력한 칩과 함께.</div>
+  <div class="links">
+    <a href="#">더 알아보기</a>
+    <a href="#">구입하기</a>
+  </div>
+</section>
+
+<div class="device-stage">
+  <div class="device">
+    <div class="screen"></div>
+    <div class="island"></div>
+    <div class="dev-time">9:41</div>
+    <div class="dev-date">7월 10일 금요일</div>
+    <div class="widget">
+      <small>지금 재생 중</small>
+      <b>Midnight City — M83</b>
+      <div class="wbar"><i></i></div>
+    </div>
+  </div>
+</div>
+
+<section class="section titanium reveal">
+  <div class="s-kicker">Design</div>
+  <h2>티타늄.<br>강하고, 가볍고, 프로답게.</h2>
+  <p class="body-text">항공우주 등급 <strong>티타늄 소재</strong>를 사용해 역대 프로 모델 중
+  가장 가볍습니다. 브러시드 텍스처의 아름다움과 구조적 강인함이 공존하는 디자인.</p>
+</section>
+
+<section class="section reveal" style="padding-top:0">
+  <div class="s-kicker">Performance</div>
+  <h2>A20 Pro 칩.<br>괴물 같은 성능.</h2>
+  <div class="grid2">
+    <div class="tile blue">
+      <div class="num"><b data-count="2.6" data-suffix="x">0</b><span>GPU 성능 향상</span></div>
+      <div class="big">🎮</div>
+      <h3>콘솔급 게이밍.<br>손바닥 위에서.</h3>
+      <p>하드웨어 가속 레이 트레이싱으로 반사와 그림자가 실시간으로 살아납니다.</p>
+    </div>
+    <div class="tile purple">
+      <div class="num"><b data-count="35" data-suffix="">0</b><span>초당 조 단위 연산</span></div>
+      <div class="big">🧠</div>
+      <h3>온디바이스 AI를 위한<br>뉴럴 엔진.</h3>
+      <p>사진 편집부터 실시간 통역까지, 모든 지능이 기기 안에서 처리됩니다.</p>
+    </div>
+    <div class="tile blue">
+      <div class="num"><b data-count="29" data-suffix="시간">0</b><span>비디오 재생</span></div>
+      <div class="big">🔋</div>
+      <h3>하루를 넘어서는<br>배터리.</h3>
+      <p>아침부터 다음 날 아침까지. 충전 걱정은 이제 과거의 일입니다.</p>
+    </div>
+    <div class="tile purple">
+      <div class="num"><b data-count="48" data-suffix="MP">0</b><span>메인 카메라</span></div>
+      <div class="big">📷</div>
+      <h3>프로급 카메라<br>시스템.</h3>
+      <p>나노 스케일 픽셀 기술로 어둠 속에서도 놀랍도록 선명하게.</p>
+    </div>
+  </div>
+</section>
+
+<section class="section colors reveal">
+  <div class="s-kicker">Colors</div>
+  <h2>네 가지 티타늄 마감.</h2>
+  <div class="swatches">
+    <div class="swatch"><div class="ball" style="background:#3c3c41"></div><span>블랙 티타늄</span></div>
+    <div class="swatch"><div class="ball" style="background:#c2bcb2"></div><span>내추럴 티타늄</span></div>
+    <div class="swatch"><div class="ball" style="background:#f0f0f2"></div><span>화이트 티타늄</span></div>
+    <div class="swatch"><div class="ball" style="background:#3f4a5a"></div><span>블루 티타늄</span></div>
+  </div>
+</section>
+
+<section class="section light reveal">
+  <div class="s-kicker" style="color:#6e6e73">Trade In</div>
+  <h2 style="color:#1d1d1f">쓰던 폰을 새 폰으로.</h2>
+  <p class="body-text" style="color:#6e6e73">보상 판매 프로그램으로 <strong>최대 ₩800,000</strong>을
+  할인받으세요. 기기 상태 확인부터 데이터 이전까지 전부 도와드립니다.</p>
+  <a class="cta-btn" href="#">내 보상 판매 금액 확인하기</a>
+</section>
+
+<footer>Apple 스타일 재현 데모 — 실제 제품과 무관한 학습용 페이지입니다.</footer>
+
+<script>
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('in');
+  e.target.querySelectorAll('[data-count]').forEach(el => {
+    if (el.dataset.done) return; el.dataset.done = 1;
+    const target = parseFloat(el.dataset.count), sfx = el.dataset.suffix || '';
+    const dec = el.dataset.count.includes('.') ? 1 : 0;
+    const t0 = performance.now();
+    (function tick(t) {
+      const p = Math.min((t - t0) / 1500, 1), ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = (target * ease).toFixed(dec) + sfx;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+}), { threshold: .18 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+<script>
+/* ── English mode (?lang=en) — translation layer only, no logic changes ── */
+(function(){
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "Apple 스타일 — 프로덕트 쇼케이스": "Apple Style — Product Showcase",
+    "스토어": "Store",
+    "폰": "Phone",
+    "패드": "Pad",
+    "워치": "Watch",
+    "에어팟": "AirPods",
+    "액세서리": "Accessories",
+    "지원": "Support",
+    "한계를 넘어선 프로.": "Pro beyond limits.",
+    "티타늄. 역대 가장 강력한 칩과 함께.": "Titanium. With the most powerful chip ever.",
+    "더 알아보기": "Learn more",
+    "구입하기": "Buy",
+    "7월 10일 금요일": "Friday, July 10",
+    "지금 재생 중": "Now Playing",
+    "티타늄.": "Titanium.",
+    "강하고, 가볍고, 프로답게.": "Strong, light, and pro.",
+    "항공우주 등급": "Aerospace-grade",
+    "티타늄 소재": "titanium",
+    "를 사용해 역대 프로 모델 중 가장 가볍습니다. 브러시드 텍스처의 아름다움과 구조적 강인함이 공존하는 디자인.": " makes it the lightest Pro model ever — a design where brushed-texture beauty and structural strength coexist.",
+    "A20 Pro 칩.": "A20 Pro chip.",
+    "괴물 같은 성능.": "Monster performance.",
+    "GPU 성능 향상": "GPU performance boost",
+    "콘솔급 게이밍.": "Console-class gaming.",
+    "손바닥 위에서.": "In the palm of your hand.",
+    "하드웨어 가속 레이 트레이싱으로 반사와 그림자가 실시간으로 살아납니다.": "Hardware-accelerated ray tracing brings reflections and shadows to life in real time.",
+    "초당 조 단위 연산": "Trillion operations per second",
+    "온디바이스 AI를 위한": "A neural engine for",
+    "뉴럴 엔진.": "on-device AI.",
+    "사진 편집부터 실시간 통역까지, 모든 지능이 기기 안에서 처리됩니다.": "From photo editing to live translation, all intelligence runs on device.",
+    "비디오 재생": "Video playback",
+    "하루를 넘어서는": "Battery that lasts",
+    "배터리.": "beyond a day.",
+    "아침부터 다음 날 아침까지. 충전 걱정은 이제 과거의 일입니다.": "From morning to the next. Charging worries are a thing of the past.",
+    "메인 카메라": "Main camera",
+    "프로급 카메라": "Pro-grade camera",
+    "시스템.": "system.",
+    "나노 스케일 픽셀 기술로 어둠 속에서도 놀랍도록 선명하게.": "Nano-scale pixel technology stays stunningly sharp even in the dark.",
+    "네 가지 티타늄 마감.": "Four titanium finishes.",
+    "블랙 티타늄": "Black Titanium",
+    "내추럴 티타늄": "Natural Titanium",
+    "화이트 티타늄": "White Titanium",
+    "블루 티타늄": "Blue Titanium",
+    "쓰던 폰을 새 폰으로.": "Trade up to a new phone.",
+    "보상 판매 프로그램으로": "With our trade-in program, save",
+    "최대 ₩800,000": "up to ₩800,000",
+    "을 할인받으세요. 기기 상태 확인부터 데이터 이전까지 전부 도와드립니다.": ". We help with everything from device inspection to data transfer.",
+    "내 보상 판매 금액 확인하기": "Check my trade-in value",
+    "Apple 스타일 재현 데모 — 실제 제품과 무관한 학습용 페이지입니다.": "An Apple-style recreation demo — a learning page unrelated to any real product."
+  };
+  const RE = [
+    [/^(\d+)시간$/, "$1 hrs"]
+  ];
+  const tr = t => {
+    if (TR[t] != null) return TR[t];
+    for (const [re, rep] of RE) { if (re.test(t)) return t.replace(re, rep); }
+    return null;
+  };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const raw = n.nodeValue, t = raw.trim().replace(/\s+/g,' ');
+      if (t) { const out = tr(t); if (out != null) {
+        const lead = (raw.match(/^\s*/)||[''])[0], trail = (raw.match(/\s*$/)||[''])[0];
+        n.nodeValue = lead + out + trail;
+      }}
+      return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) {
+      const out = tr(n.getAttribute(a).trim().replace(/\s+/g,' ')); if (out != null) n.setAttribute(a, out);
+    }});
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim().replace(/\s+/g,' ')); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

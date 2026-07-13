@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>에디토리얼 브루탈리즘 — 디자인 매거진</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,500;0,700;0,900;1,600&family=Noto+Sans+KR:wght@400;500;700;900&family=Noto+Serif+KR:wght@600;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --paper: #f2efe8; --ink: #141311; --acid: #d8ff3e; --red: #ff4b1f; }
+::selection { background: var(--acid); color: var(--ink); }
+body { font-family: Archivo, "Noto Sans KR", sans-serif; background: var(--paper); color: var(--ink);
+       -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+/* ── 상단 티커 ── */
+.ticker { background: var(--ink); color: var(--paper); overflow: hidden; padding: 9px 0;
+          font-family: "JetBrains Mono", monospace; font-size: 11.5px; letter-spacing: 1px; }
+.ticker-track { display: flex; gap: 44px; width: max-content; animation: tick 20s linear infinite; }
+.ticker-track span i { font-style: normal; color: var(--acid); margin-right: 8px; }
+@keyframes tick { to { transform: translateX(-50%); } }
+
+nav { display: flex; align-items: center; justify-content: space-between; padding: 20px 4vw;
+      border-bottom: 2px solid var(--ink); }
+.logo { font-weight: 900; font-size: 21px; letter-spacing: -.05em; text-transform: uppercase; }
+.logo span { color: var(--red); }
+nav .right { display: flex; gap: 26px; font-size: 13px; font-weight: 700; text-transform: uppercase;
+             letter-spacing: 1px; }
+nav .right a { color: var(--ink); text-decoration: none; }
+nav .right a:hover { background: var(--ink); color: var(--acid); padding: 0 4px; margin: 0 -4px; }
+
+/* ── 히어로: 거대 타이포 + 회전 뱃지 + 기울어진 사진 ── */
+.hero { position: relative; padding: 7vh 4vw 8vh; border-bottom: 2px solid var(--ink); }
+.kicker { display: inline-block; font-family: "JetBrains Mono", monospace; font-size: 12px;
+          border: 1.5px solid var(--ink); padding: 6px 14px; letter-spacing: 2px;
+          background: var(--acid); box-shadow: 4px 4px 0 var(--ink); }
+h1 { margin-top: 4vh; font-size: clamp(56px, 11.5vw, 168px); line-height: .92; font-weight: 900;
+     letter-spacing: -.045em; text-transform: uppercase; }
+h1 .row { display: block; overflow: hidden; }
+h1 .row > span { display: inline-block; transform: translateY(105%);
+                 transition: transform .9s cubic-bezier(.76,0,.24,1); }
+body.in h1 .row:nth-child(1) > span { transform: none; transition-delay: .05s; }
+body.in h1 .row:nth-child(2) > span { transform: none; transition-delay: .16s; }
+body.in h1 .row:nth-child(3) > span { transform: none; transition-delay: .27s; }
+h1 .serif { font-family: "Noto Serif KR", serif; font-weight: 900; font-style: italic;
+            text-transform: none; letter-spacing: -.02em; }
+h1 .outline { color: transparent; -webkit-text-stroke: 2.5px var(--ink); }
+h1 .accent { color: var(--red); }
+
+/* 회전 스티커 뱃지 */
+.badge { position: absolute; right: 7vw; top: 9vh; width: 150px; height: 150px; z-index: 5; }
+.badge svg { width: 100%; height: 100%; animation: rot 12s linear infinite; }
+@keyframes rot { to { transform: rotate(360deg); } }
+.badge .disc { fill: var(--red); }
+.badge text { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 2.5px;
+              fill: var(--paper); font-weight: 700; }
+.badge .star { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+               font-size: 40px; color: var(--paper); animation: rot 12s linear infinite reverse; }
+
+.hero-meta { display: flex; gap: 5vw; margin-top: 5vh; align-items: flex-start; flex-wrap: wrap; }
+.hero-meta p { max-width: 380px; font-size: 15px; line-height: 1.8; word-break: keep-all; }
+.hero-meta p b { background: var(--acid); padding: 0 4px; }
+.issue { font-family: "JetBrains Mono", monospace; font-size: 12px; line-height: 2; color: #4c4a44; }
+
+/* 기울어진 폴라로이드 사진들 */
+.photos { position: relative; margin-top: 6vh; height: 380px; }
+.polaroid { position: absolute; background: #fff; padding: 12px 12px 44px; border: 1.5px solid var(--ink);
+            box-shadow: 7px 7px 0 var(--ink); transition: transform .4s cubic-bezier(.2,.8,.3,1.2); }
+.polaroid img { display: block; width: 250px; height: 180px; object-fit: cover;
+                filter: saturate(.9) contrast(1.05); background: #ddd; }
+.polaroid figcaption { position: absolute; bottom: 12px; left: 14px; font-family: "JetBrains Mono", monospace;
+                       font-size: 11px; letter-spacing: 1px; }
+.polaroid:nth-child(1) { left: 3%; top: 12px; transform: rotate(-5deg); }
+.polaroid:nth-child(2) { left: 32%; top: 60px; transform: rotate(3deg); }
+.polaroid:nth-child(3) { left: 61%; top: 6px; transform: rotate(-2deg); }
+.polaroid:hover { transform: rotate(0) scale(1.06) !important; z-index: 6; }
+
+/* ── 아웃라인 마퀴 ── */
+.mq { border-bottom: 2px solid var(--ink); padding: 3.4vh 0; overflow: hidden; background: var(--paper); }
+.mq-track { display: flex; gap: 4vw; width: max-content; animation: tick 16s linear infinite; }
+.mq-track span { font-size: clamp(38px, 6vw, 76px); font-weight: 900; text-transform: uppercase;
+                 letter-spacing: -.03em; white-space: nowrap; }
+.mq-track span:nth-child(even) { color: transparent; -webkit-text-stroke: 2px var(--ink); }
+
+/* ── 아티클 인덱스 ── */
+.index { padding: 8vh 4vw 10vh; }
+.index-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 4vh; }
+.index-head h2 { font-size: 15px; font-weight: 900; letter-spacing: 3px; text-transform: uppercase; }
+.index-head span { font-family: "JetBrains Mono", monospace; font-size: 12px; }
+.art { display: grid; grid-template-columns: 110px 1fr auto; gap: 3vw; align-items: baseline;
+       padding: 3.6vh 10px; border-top: 2px solid var(--ink); text-decoration: none; color: var(--ink);
+       position: relative; overflow: hidden; }
+.art:last-of-type { border-bottom: 2px solid var(--ink); }
+.art::before { content: ""; position: absolute; inset: 0; background: var(--ink);
+               transform: scaleY(0); transform-origin: bottom; transition: transform .35s cubic-bezier(.76,0,.24,1); }
+.art:hover::before { transform: scaleY(1); }
+.art > * { position: relative; transition: color .35s; }
+.art:hover > * { color: var(--paper); }
+.art .no { font-family: "JetBrains Mono", monospace; font-size: 13px; }
+.art .title { font-size: clamp(22px, 3.2vw, 40px); font-weight: 900; letter-spacing: -.03em; }
+.art .title em { font-family: "Noto Serif KR", serif; font-style: italic; font-weight: 600; }
+.art .tag { font-family: "JetBrains Mono", monospace; font-size: 11.5px; border: 1.5px solid currentColor;
+            padding: 5px 12px; letter-spacing: 1px; }
+.art:hover .tag { border-color: var(--acid); color: var(--acid) !important; }
+
+/* ── 풋터: 초대형 아웃라인 ── */
+footer { background: var(--ink); color: var(--paper); padding: 9vh 4vw 5vh; }
+footer .giant { font-size: clamp(64px, 14vw, 210px); font-weight: 900; letter-spacing: -.05em;
+                text-transform: uppercase; line-height: .9; color: transparent;
+                -webkit-text-stroke: 2px var(--paper); transition: color .5s; }
+footer .giant:hover { color: var(--acid); -webkit-text-stroke: 2px var(--acid); }
+footer .foot-row { display: flex; justify-content: space-between; margin-top: 6vh;
+                   font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 1px;
+                   color: #8d8a80; flex-wrap: wrap; gap: 12px; }
+
+@media (max-width: 820px) {
+  .badge { width: 100px; height: 100px; top: 4vh; }
+  .photos { height: auto; display: flex; flex-direction: column; gap: 20px; }
+  .polaroid { position: static; width: fit-content; }
+  .art { grid-template-columns: 60px 1fr; } .art .tag { display: none; }
+  nav .right { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="ticker">
+  <div class="ticker-track">
+    <span><i>●</i>ISSUE Nº42 — 비정형의 시대</span><span><i>●</i>2026 서울 디자인 위크 특집</span>
+    <span><i>●</i>인터뷰: 그리드를 부수는 사람들</span><span><i>●</i>NEW DROP — 아카이브 포스터 발매</span>
+    <span><i>●</i>ISSUE Nº42 — 비정형의 시대</span><span><i>●</i>2026 서울 디자인 위크 특집</span>
+    <span><i>●</i>인터뷰: 그리드를 부수는 사람들</span><span><i>●</i>NEW DROP — 아카이브 포스터 발매</span>
+  </div>
+</div>
+
+<nav>
+  <div class="logo">뚝딱<span>*</span>PRESS</div>
+  <div class="right"><a href="#">아카이브</a><a href="#">스토어</a><a href="#">구독</a></div>
+</nav>
+
+<header class="hero">
+  <span class="kicker">ISSUE Nº42 — JULY 2026</span>
+  <h1>
+    <span class="row"><span>규칙은</span></span>
+    <span class="row"><span class="outline">깨라고&nbsp;</span><span class="serif accent">있는</span></span>
+    <span class="row"><span>것이다<span class="accent">.</span></span></span>
+  </h1>
+
+  <div class="badge">
+    <svg viewBox="0 0 150 150">
+      <circle class="disc" cx="75" cy="75" r="75"/>
+      <defs><path id="bc" d="M75,75 m-56,0 a56,56 0 1,1 112,0 a56,56 0 1,1 -112,0"/></defs>
+      <text><textPath href="#bc">브루탈리즘 · BRUTALISM · 날것의 미학 · RAW ·</textPath></text>
+    </svg>
+    <div class="star">✳</div>
+  </div>
+
+  <div class="hero-meta">
+    <p>정제된 그리드와 안전한 여백의 시대는 끝났다. <b>날것의 타이포그래피</b>,
+    부딪히는 색, 삐뚤어진 사진 — 웹이 다시 재미있어지는 순간을 기록한다.</p>
+    <div class="issue">
+      EDITION — 한정 1,000부<br>
+      PRINT + WEB — ₩18,000<br>
+      EDITOR — 루나 스튜디오
+    </div>
+  </div>
+
+  <div class="photos">
+    <figure class="polaroid">
+      <img src="https://picsum.photos/id/1071/500/360" alt="아카이브 1" loading="lazy">
+      <figcaption>FIG.01 — 서울, 을지로</figcaption>
+    </figure>
+    <figure class="polaroid">
+      <img src="https://picsum.photos/id/1080/500/360" alt="아카이브 2" loading="lazy">
+      <figcaption>FIG.02 — 스튜디오 스틸</figcaption>
+    </figure>
+    <figure class="polaroid">
+      <img src="https://picsum.photos/id/1084/500/360" alt="아카이브 3" loading="lazy">
+      <figcaption>FIG.03 — 오프닝 나이트</figcaption>
+    </figure>
+  </div>
+</header>
+
+<div class="mq">
+  <div class="mq-track">
+    <span>Anti-Design</span><span>비정형</span><span>Raw&nbsp;Type</span><span>브루탈리즘</span>
+    <span>Anti-Design</span><span>비정형</span><span>Raw&nbsp;Type</span><span>브루탈리즘</span>
+  </div>
+</div>
+
+<section class="index">
+  <div class="index-head"><h2>In This Issue</h2><span>04 ARTICLES</span></div>
+  <a class="art" href="#">
+    <span class="no">P.008</span>
+    <span class="title">그리드를 <em>부수는</em> 열두 가지 방법</span>
+    <span class="tag">ESSAY</span>
+  </a>
+  <a class="art" href="#">
+    <span class="no">P.024</span>
+    <span class="title">픽셀 폰트의 귀환</span>
+    <span class="tag">TYPE</span>
+  </a>
+  <a class="art" href="#">
+    <span class="no">P.042</span>
+    <span class="title">인터뷰 — <em>못생긴 게</em> 좋아서요</span>
+    <span class="tag">PEOPLE</span>
+  </a>
+  <a class="art" href="#">
+    <span class="no">P.066</span>
+    <span class="title">아카이브: 90년대 웹의 유산</span>
+    <span class="tag">HISTORY</span>
+  </a>
+</section>
+
+<footer>
+  <div class="giant">뚝딱*Press</div>
+  <div class="foot-row">
+    <span>© 2026 DDUKDDAK PRESS</span>
+    <span>SEOUL — 을지로 3가</span>
+    <span>INSTAGRAM ↗ / RSS ↗</span>
+  </div>
+</footer>
+
+<script>
+requestAnimationFrame(() => requestAnimationFrame(() => document.body.classList.add('in')));
+</script>
+
+<script>
+/* ── English mode (?lang=en): translate all visible Korean text, no logic changes ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "에디토리얼 브루탈리즘 — 디자인 매거진": "Editorial Brutalism — Design Magazine",
+    "ISSUE Nº42 — 비정형의 시대": "ISSUE Nº42 — The Age of the Unconventional",
+    "2026 서울 디자인 위크 특집": "2026 Seoul Design Week Special",
+    "인터뷰: 그리드를 부수는 사람들": "Interview: The People Who Break the Grid",
+    "NEW DROP — 아카이브 포스터 발매": "NEW DROP — Archive Poster Release",
+    "뚝딱": "DDUKDDAK",
+    "아카이브": "ARCHIVE",
+    "스토어": "STORE",
+    "구독": "SUBSCRIBE",
+    "규칙은": "Rules are",
+    "깨라고": "made",
+    "있는": "to be",
+    "것이다": "broken",
+    "브루탈리즘 · BRUTALISM · 날것의 미학 · RAW ·": "Brutalism · BRUTALISM · Raw Aesthetics · RAW ·",
+    "정제된 그리드와 안전한 여백의 시대는 끝났다.": "The era of refined grids and safe whitespace is over.",
+    "날것의 타이포그래피": "Raw typography",
+    "EDITION — 한정 1,000부": "EDITION — Limited 1,000 copies",
+    "EDITOR — 루나 스튜디오": "EDITOR — Luna Studio",
+    "아카이브 1": "Archive 1",
+    "아카이브 2": "Archive 2",
+    "아카이브 3": "Archive 3",
+    "FIG.01 — 서울, 을지로": "FIG.01 — Seoul, Euljiro",
+    "FIG.02 — 스튜디오 스틸": "FIG.02 — Studio Still",
+    "FIG.03 — 오프닝 나이트": "FIG.03 — Opening Night",
+    "비정형": "Unconventional",
+    "브루탈리즘": "Brutalism",
+    "그리드를": "Twelve Ways to",
+    "부수는": "Break",
+    "열두 가지 방법": "the Grid",
+    "픽셀 폰트의 귀환": "The Return of Pixel Fonts",
+    "인터뷰 —": "Interview —",
+    "못생긴 게": "Because I Like",
+    "좋아서요": "It Ugly",
+    "아카이브: 90년대 웹의 유산": "Archive: The Legacy of the '90s Web",
+    "뚝딱*Press": "DDUKDDAK*Press",
+    "SEOUL — 을지로 3가": "SEOUL — Euljiro 3-ga"
+  };
+  const PATTERNS = [
+    [/^,[\s\S]*기록한다\.$/, () => ", clashing colors, crooked photographs — a record of the moment the web gets fun again."]
+  ];
+  const tr = t => { if (TR[t] != null) return TR[t]; for (const [re,fn] of PATTERNS){ const m = t.match(re); if (m) return fn(m); } return null; };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swap = s => { const t = s.trim(); const r = tr(t); return r != null ? s.replace(t, r) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (tr(n.nodeValue.trim()) != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && tr(n.getAttribute(a).trim()) != null) n.setAttribute(a, tr(n.getAttribute(a).trim())); });
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim()); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+{
+  "delivery": {
+    "color": {
+      "primary":        { "value": "#2AC1BC", "type": "color", "description": "브랜드 민트 — 헤더, 활성 탭" },
+      "background":     { "value": "#FFFFFF", "type": "color" },
+      "text-primary":   { "value": "#1C1C1E", "type": "color" },
+      "text-secondary": { "value": "#8E8E93", "type": "color" },
+      "divider":        { "value": "#F2F2F7", "type": "color" },
+      "star":           { "value": "#FFC400", "type": "color" },
+      "order-bar":      { "value": "#1C1C1E", "type": "color", "description": "주문 현황 플로팅 바 배경" },
+      "category-bg":    { "value": "#F7F8FA", "type": "color" }
+    },
+    "radius": {
+      "search":    { "value": "14", "type": "borderRadius" },
+      "banner":    { "value": "16", "type": "borderRadius" },
+      "card":      { "value": "14", "type": "borderRadius" },
+      "category":  { "value": "18", "type": "borderRadius" },
+      "order-bar": { "value": "16", "type": "borderRadius" }
+    },
+    "spacing": {
+      "screen-x":   { "value": "16", "type": "spacing" },
+      "section-gap":{ "value": "26", "type": "spacing" },
+      "card-gap":   { "value": "12", "type": "spacing" }
+    },
+    "typography": {
+      "section-title": { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "900", "fontSize": "17" }, "type": "typography" },
+      "shop-name":     { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "700", "fontSize": "14" }, "type": "typography" },
+      "banner-title":  { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "900", "fontSize": "18" }, "type": "typography" },
+      "address":       { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "900", "fontSize": "16.5" }, "type": "typography" }
+    },
+    "component": {
+      "category-icon":  { "value": "52", "type": "sizing" },
+      "category-grid":  { "value": "5", "type": "other", "description": "카테고리 그리드 열 수" },
+      "shop-card-width":{ "value": "168", "type": "sizing" },
+      "banner-height":  { "value": "96", "type": "sizing" }
+    }
+  }
+}

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>파티클 타이포그래피 — 흩어졌다 모이는 글자</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body { font-family: "Noto Sans KR", sans-serif; background: #06070f; color: #fff;
+       overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+#stage { position: fixed; inset: 0; display: block; cursor: crosshair; }
+
+/* 상단 안내 */
+.topbar { position: fixed; top: 22px; left: 50%; transform: translateX(-50%); z-index: 10;
+          display: flex; align-items: center; gap: 14px; padding: 9px 18px;
+          background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+          border-radius: 99px; backdrop-filter: blur(14px); }
+.topbar .dot { width: 8px; height: 8px; border-radius: 50%; background: #6ee7ff;
+               box-shadow: 0 0 12px #6ee7ff; animation: pulse 1.8s ease-in-out infinite; }
+@keyframes pulse { 0%,100%{opacity:.4} 50%{opacity:1} }
+.topbar span { font-size: 12.5px; letter-spacing: .5px; color: rgba(255,255,255,.82); }
+.topbar b { font-family: "JetBrains Mono", monospace; font-weight: 500; color: #6ee7ff; }
+
+/* 하단 컨트롤 */
+.controls { position: fixed; bottom: 26px; left: 50%; transform: translateX(-50%); z-index: 10;
+            display: flex; gap: 10px; }
+.controls button { font-family: "Noto Sans KR", sans-serif; font-size: 13px; font-weight: 700;
+                   color: rgba(255,255,255,.85); padding: 10px 20px; border-radius: 99px;
+                   border: 1px solid rgba(255,255,255,.16); background: rgba(255,255,255,.06);
+                   backdrop-filter: blur(14px); cursor: pointer; transition: all .2s; }
+.controls button:hover { background: rgba(255,255,255,.14); color: #fff; transform: translateY(-2px); }
+.hint { position: fixed; bottom: 74px; left: 50%; transform: translateX(-50%); z-index: 10;
+        font-family: "JetBrains Mono", monospace; font-size: 10.5px; letter-spacing: 2px;
+        color: rgba(255,255,255,.4); }
+
+/* ── 散談 SANDAM 브랜드 랜딩 오버레이 ── */
+.sd-layer { position: fixed; inset: 0; z-index: 9; pointer-events: none; }
+.sd-top { position: absolute; top: 26px; left: 30px; max-width: 46%; }
+.sd-logo { font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #fff; }
+.sd-logo b { color: #6ee7ff; letter-spacing: 3px; }
+.sd-sub { margin-top: 6px; font-family: "JetBrains Mono", monospace; font-size: 11px;
+  letter-spacing: 2px; color: rgba(255,255,255,.5); }
+.sd-head { margin-top: 22px; font-size: clamp(20px, 2.4vw, 30px); font-weight: 900;
+  line-height: 1.25; letter-spacing: -.01em; color: rgba(255,255,255,.92); word-break: keep-all; }
+.sd-work { position: absolute; bottom: 30px; left: 30px; display: flex; flex-direction: column; gap: 7px; }
+.sd-cap { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 3px;
+  color: rgba(110,231,255,.7); margin-bottom: 4px; }
+.sd-work a { pointer-events: auto; display: flex; align-items: baseline; gap: 10px; text-decoration: none;
+  font-size: 13px; color: rgba(255,255,255,.78); transition: color .18s; }
+.sd-work a span { font-family: "JetBrains Mono", monospace; font-size: 10px; color: rgba(255,255,255,.4); }
+.sd-work a em { font-family: "JetBrains Mono", monospace; font-style: normal; font-size: 10px;
+  color: rgba(255,255,255,.4); }
+.sd-work a:hover { color: #6ee7ff; }
+.sd-cta-wrap { position: absolute; bottom: 30px; right: 30px; text-align: right; }
+.sd-contact { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 1px;
+  color: rgba(255,255,255,.5); margin-bottom: 12px; }
+.sd-cta { pointer-events: auto; display: inline-block; font-size: 13px; font-weight: 700; color: #06070f;
+  background: #6ee7ff; text-decoration: none; padding: 12px 24px; border-radius: 99px; transition: all .2s;
+  box-shadow: 0 0 24px rgba(110,231,255,.4); }
+.sd-cta:hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(110,231,255,.7); }
+@media (max-width: 720px){ .sd-work { display: none; } .sd-top { max-width: 70%; } .sd-head { font-size: 18px; } }
+</style>
+</head>
+<body>
+<canvas id="stage"></canvas>
+
+<div class="topbar">
+  <span class="dot"></span>
+  <span>마우스를 글자 위로 · <b>클릭하면 폭발</b></span>
+</div>
+
+<div class="hint">DRAG YOUR CURSOR THROUGH THE TEXT</div>
+<div class="controls">
+  <button id="next">다음 문구 →</button>
+  <button id="boom">폭발 💥</button>
+</div>
+
+<div class="sd-layer">
+  <div class="sd-top">
+    <div class="sd-logo">散談 <b>SANDAM</b></div>
+    <div class="sd-sub">MOTION · TYPOGRAPHY STUDIO</div>
+    <h2 class="sd-head">흩어지는 것들을<br>붙잡아 형태로.</h2>
+  </div>
+  <div class="sd-work">
+    <div class="sd-cap">SELECTED WORK</div>
+    <a href="#"><span>01</span> 페스티벌 타이틀 시퀀스 <em>2025</em></a>
+    <a href="#"><span>02</span> 브랜드 모션 아이덴티티 <em>2024</em></a>
+    <a href="#"><span>03</span> 인터랙티브 전시 그래픽 <em>2024</em></a>
+  </div>
+  <div class="sd-cta-wrap">
+    <div class="sd-contact">hello@sandam.studio</div>
+    <a class="sd-cta" href="#">프로젝트 시작 →</a>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   파티클 타이포그래피
+   임시 캔버스에 글자를 그려 픽셀 샘플링 → 파티클 목표점
+   ───────────────────────────────────────────── */
+const canvas = document.getElementById('stage');
+const ctx = canvas.getContext('2d');
+
+/* 순환 문구 (한글 + 영문/숫자) */
+const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+const PHRASES = __EN
+  ? ["TOUCH TO SCATTER", "COME BACK TOGETHER", "COLOR", "2026"]
+  : ["만지면 흩어져요", "다시 모여요", "COLOR", "2026"];
+let phraseIdx = 0;
+
+/* devicePixelRatio 대응 */
+let W = 0, H = 0, DPR = 1;
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  buildTargets();
+}
+
+/* 파티클 배열 (루프 前에 선언) */
+let particles = [];
+const mouse = { x: -9999, y: -9999, active: false };
+const RADIUS = 110;          // 마우스 밀어내기 반경
+let exploding = 0;           // 폭발 잔여 프레임
+
+/* 오프스크린 캔버스로 글자 픽셀 샘플링 */
+const off = document.createElement('canvas');
+const octx = off.getContext('2d');
+
+function sampleText(text) {
+  const fontSize = Math.min(W * 0.16, 220);
+  off.width = W; off.height = H;
+  octx.clearRect(0, 0, W, H);
+  octx.fillStyle = '#fff';
+  octx.textAlign = 'center';
+  octx.textBaseline = 'middle';
+  const weight = 900;
+  octx.font = `${weight} ${fontSize}px "Noto Sans KR", sans-serif`;
+  octx.fillText(text, W / 2, H / 2);
+  /* 폭이 넘치면 자동 축소 */
+  let metrics = octx.measureText(text);
+  if (metrics.width > W * 0.9) {
+    const s = (W * 0.9) / metrics.width;
+    octx.clearRect(0, 0, W, H);
+    octx.font = `${weight} ${fontSize * s}px "Noto Sans KR", sans-serif`;
+    octx.fillText(text, W / 2, H / 2);
+  }
+  const img = octx.getImageData(0, 0, W, H).data;
+  const pts = [];
+  /* 샘플 간격을 넓혀 파티클 밀도를 낮춘다 → 가산 블렌딩에도 획이 분리되어 보임 */
+  const gap = Math.max(7, Math.round(W / 160));
+  for (let y = 0; y < H; y += gap) {
+    for (let x = 0; x < W; x += gap) {
+      const a = img[(y * W + x) * 4 + 3];
+      if (a > 128) pts.push({ x, y });
+    }
+  }
+  return pts;
+}
+
+/* 목표점 재구성 → 파티클과 매칭 */
+function buildTargets() {
+  const pts = sampleText(PHRASES[phraseIdx]);
+  const n = pts.length;
+  /* 파티클 수를 목표점 수에 맞춤 (부족하면 생성, 남으면 화면 밖으로) */
+  while (particles.length < n) {
+    particles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      vx: 0, vy: 0, tx: 0, ty: 0, hue: 0, size: 0, on: false
+    });
+  }
+  for (let i = 0; i < particles.length; i++) {
+    const p = particles[i];
+    if (i < n) {
+      p.tx = pts[i].x; p.ty = pts[i].y;
+      p.on = true;
+      /* 위치 기반 은은한 그라디언트 (틸→바이올렛→코랄) */
+      p.hue = 180 + (pts[i].x / W) * 150;
+      p.size = 1.3 + Math.random() * 0.8;
+    } else {
+      p.on = false;
+      /* 남는 파티클은 화면 밖 목표 */
+      p.tx = Math.random() * W; p.ty = H + 80 + Math.random() * 200;
+    }
+  }
+}
+
+/* 문구 전환 (약한 폭발과 함께) */
+function nextPhrase() {
+  phraseIdx = (phraseIdx + 1) % PHRASES.length;
+  buildTargets();
+  explode(0.55);
+}
+function explode(power = 1) {
+  exploding = 22;
+  for (const p of particles) {
+    const ang = Math.random() * Math.PI * 2;
+    const sp = (6 + Math.random() * 12) * power;
+    p.vx += Math.cos(ang) * sp;
+    p.vy += Math.sin(ang) * sp;
+  }
+}
+
+/* 입력 */
+function setMouse(x, y) { mouse.x = x; mouse.y = y; mouse.active = true; }
+addEventListener('mousemove', e => setMouse(e.clientX, e.clientY));
+addEventListener('mouseleave', () => { mouse.active = false; mouse.x = mouse.y = -9999; });
+addEventListener('touchmove', e => {
+  const t = e.touches[0]; setMouse(t.clientX, t.clientY);
+}, { passive: true });
+addEventListener('mousedown', e => {
+  if (e.target.tagName === 'BUTTON') return;
+  explode(1);
+});
+addEventListener('touchstart', e => {
+  if (e.target.tagName === 'BUTTON') return;
+  const t = e.touches[0]; setMouse(t.clientX, t.clientY); explode(1);
+}, { passive: true });
+
+document.getElementById('next').onclick = nextPhrase;
+document.getElementById('boom').onclick = () => explode(1.3);
+
+/* 자동 문구 순환 (입력 없어도 살아있게) */
+let autoTimer = 0;
+
+resize();
+addEventListener('resize', resize);
+
+/* ── 메인 루프 ── */
+let frames = 0;
+(function loop() {
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+
+  /* 잔상 트레일 배경 */
+  ctx.globalCompositeOperation = 'source-over';
+  ctx.fillStyle = 'rgba(6,7,15,0.22)';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.globalCompositeOperation = 'lighter';
+  const spring = exploding > 0 ? 0.012 : 0.055;
+  const friction = exploding > 0 ? 0.94 : 0.86;
+
+  for (const p of particles) {
+    /* 목표로 스프링 복귀 */
+    const dx = p.tx - p.x, dy = p.ty - p.y;
+    p.vx += dx * spring; p.vy += dy * spring;
+
+    /* 마우스 반경 안 밀어내기 (거리 감쇠) */
+    if (mouse.active && p.on) {
+      const mx = p.x - mouse.x, my = p.y - mouse.y;
+      const dist = Math.hypot(mx, my);
+      if (dist < RADIUS && dist > 0.01) {
+        const force = (1 - dist / RADIUS);
+        const f = force * force * 5.5;
+        p.vx += (mx / dist) * f;
+        p.vy += (my / dist) * f;
+      }
+    }
+
+    p.vx *= friction; p.vy *= friction;
+    p.x += p.vx; p.y += p.vy;
+
+    if (!p.on) continue;
+    const speed = Math.min(Math.hypot(p.vx, p.vy), 20);
+    const light = 55 + speed * 2.2;
+    ctx.fillStyle = `hsla(${p.hue}, 85%, ${Math.min(light, 78)}%, 0.9)`;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  /* 마우스 커서 주변 미세 글로우 */
+  if (mouse.active) {
+    const g = ctx.createRadialGradient(mouse.x, mouse.y, 0, mouse.x, mouse.y, RADIUS);
+    g.addColorStop(0, 'rgba(110,231,255,0.10)');
+    g.addColorStop(1, 'rgba(110,231,255,0)');
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.arc(mouse.x, mouse.y, RADIUS, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  if (exploding > 0) exploding--;
+
+  /* 입력 없으면 6초마다 자동 순환 */
+  autoTimer++;
+  if (!mouse.active && autoTimer > 360) { autoTimer = 0; nextPhrase(); }
+  if (mouse.active) autoTimer = 0;
+
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>
+/* ── English mode (?lang=en) — non-destructive DOM text swap.
+   Canvas PHRASES are switched separately in the main script above. ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "파티클 타이포그래피 — 흩어졌다 모이는 글자": "Particle Typography — Letters That Scatter and Regather",
+    "마우스를 글자 위로 ·": "Mouse over the letters ·",
+    "클릭하면 폭발": "click to explode",
+    "다음 문구 →": "Next Phrase →",
+    "폭발 💥": "Explode 💥",
+    "흩어지는 것들을": "Scattered things,",
+    "붙잡아 형태로.": "caught into form.",
+    "페스티벌 타이틀 시퀀스": "Festival Title Sequence",
+    "브랜드 모션 아이덴티티": "Brand Motion Identity",
+    "인터랙티브 전시 그래픽": "Interactive Exhibition Graphics",
+    "프로젝트 시작 →": "Start a Project →"
+  };
+  const swap = s => { const t = s.trim(); return TR[t] != null ? s.replace(t, TR[t]) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (TR[n.nodeValue.trim()] != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ['placeholder','title','alt','aria-label'].forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && TR[n.getAttribute(a).trim()] != null) n.setAttribute(a, TR[n.getAttribute(a).trim()]); });
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  if (TR[document.title.trim()]) document.title = TR[document.title.trim()];
+})();
+</script>
+</body>
+</html>

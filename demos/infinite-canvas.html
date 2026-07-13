@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>무한 캔버스 작업실 — 드래그로 탐험하는 공간</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&family=Nanum+Pen+Script&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: Inter, "Noto Sans KR", sans-serif;
+  background: #17181d; color: #e8e8ec;
+  -webkit-font-smoothing: antialiased;
+  user-select: none; -webkit-user-select: none;
+  overscroll-behavior: none;
+}
+
+/* ── 뷰포트: 도트 그리드가 팬을 따라 흐른다 ── */
+#viewport {
+  position: fixed; inset: 0; overflow: hidden; cursor: grab;
+  touch-action: none;
+  background-color: #17181d;
+  background-image: radial-gradient(rgba(255,255,255,.13) 1.1px, transparent 1.6px);
+  background-size: 28px 28px;
+}
+#viewport.dragging { cursor: grabbing; }
+.vignette { position: fixed; inset: 0; pointer-events: none; z-index: 3;
+  background: radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,.42) 100%); }
+
+#world { position: absolute; left: 0; top: 0; width: 3600px; height: 2600px;
+  transform-origin: 0 0; will-change: transform; }
+
+/* ── 오브젝트 공통 ── */
+.obj { position: absolute; transform: rotate(var(--r, 0deg));
+  transition: scale .38s cubic-bezier(.22,1.4,.36,1), box-shadow .38s, filter .38s;
+  scale: 1; will-change: translate; }
+.obj.grab { cursor: pointer; }
+.obj.focus { scale: 1.16; z-index: 90 !important;
+  filter: drop-shadow(0 30px 50px rgba(0,0,0,.55)); }
+
+/* 폴라로이드 */
+.polaroid { width: 208px; padding: 12px 12px 0; background: #f5f2ea; border-radius: 3px;
+  box-shadow: 0 14px 34px rgba(0,0,0,.45), 0 2px 6px rgba(0,0,0,.3); z-index: 10; }
+.polaroid .ph { width: 100%; height: 182px; border-radius: 2px;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,.12); position: relative; overflow: hidden; }
+.polaroid .cap { font-family: "Nanum Pen Script", cursive; font-size: 23px; color: #3c3833;
+  text-align: center; padding: 10px 0 14px; letter-spacing: .5px; }
+.ph.sunset { background: linear-gradient(180deg, #2b2d5e 0%, #7b4397 34%, #e96443 62%, #f7b733 86%, #1c1c2e 86.5%); }
+.ph.sunset::after { content: ""; position: absolute; left: 50%; top: 52%; width: 52px; height: 52px;
+  transform: translateX(-50%); border-radius: 50%;
+  background: radial-gradient(circle, #fff6d8 0 34%, rgba(255,220,150,.5) 60%, transparent 72%); }
+.ph.sea { background: linear-gradient(180deg, #a9c6d9 0%, #d9e6ea 42%, #37678b 42.5%, #1e3b55 74%, #12263a 100%); }
+.ph.sea::before { content: ""; position: absolute; left: 0; right: 0; top: 46%; height: 3px;
+  background: rgba(255,255,255,.55); filter: blur(1px); }
+.ph.forest { background:
+  repeating-linear-gradient(88deg, transparent 0 26px, rgba(10,26,16,.55) 26px 34px),
+  linear-gradient(180deg, #d7e4c8 0%, #7fa06a 30%, #33582f 62%, #16301c 100%); }
+.ph.forest::after { content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at 30% 20%, rgba(255,246,200,.5), transparent 55%); }
+
+/* 스티키 노트 */
+.sticky { width: 186px; min-height: 178px; padding: 20px 18px;
+  font-family: "Nanum Pen Script", cursive; font-size: 25px; line-height: 1.32; color: #4a4233;
+  box-shadow: 0 10px 24px rgba(0,0,0,.4); z-index: 11;
+  background: linear-gradient(180deg, #ffe98a, #f8d95f); }
+.sticky.pink { background: linear-gradient(180deg, #ffc7d8, #f9a8c2); color: #5c3040; }
+.sticky::before { content: ""; position: absolute; top: -11px; left: 50%; transform: translateX(-50%) rotate(-2deg);
+  width: 84px; height: 24px; background: rgba(240,236,220,.55); border-left: 1px dashed rgba(0,0,0,.08);
+  border-right: 1px dashed rgba(0,0,0,.08); box-shadow: 0 2px 4px rgba(0,0,0,.12); }
+.sticky small { display: block; margin-top: 12px; font-size: 18px; opacity: .62; }
+.sticky .txt { outline: none; min-height: 88px; }
+.sticky .txt:focus { user-select: text; -webkit-user-select: text; cursor: text; }
+.obj.dragging-obj { z-index: 95 !important; filter: drop-shadow(0 26px 44px rgba(0,0,0,.55));
+                    transition: none; }
+
+/* 할 일 카드 */
+.todo { width: 248px; background: #23242b; border: 1px solid rgba(255,255,255,.1);
+  border-radius: 14px; padding: 18px 18px 12px; z-index: 12;
+  box-shadow: 0 16px 40px rgba(0,0,0,.5); }
+.todo h4 { font-size: 13px; font-weight: 700; letter-spacing: .04em; color: #b9bac4;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.todo h4 em { font-family: "JetBrains Mono", monospace; font-style: normal; font-size: 10px;
+  color: #6f717e; letter-spacing: 1px; }
+.todo-item { display: flex; align-items: center; gap: 10px; padding: 8px 6px; border-radius: 8px;
+  font-size: 13.5px; color: #d6d7de; cursor: pointer; transition: background .2s; }
+.todo-item:hover { background: rgba(255,255,255,.05); }
+.todo-item .box { width: 17px; height: 17px; flex: none; border-radius: 5px;
+  border: 1.6px solid #5a5c68; display: grid; place-items: center; font-size: 11px; color: transparent;
+  transition: all .2s; }
+.todo-item.done .box { background: #7c8cf8; border-color: #7c8cf8; color: #17181d; }
+.todo-item.done { color: #6f717e; text-decoration: line-through; }
+
+/* 인용구 카드 */
+.quote { width: 316px; padding: 30px 30px 24px; background: #f5f2ea; color: #232019;
+  border-radius: 4px; z-index: 9; box-shadow: 0 16px 40px rgba(0,0,0,.45); }
+.quote .q { font-family: "Noto Sans KR", sans-serif; font-weight: 900; font-size: 22px;
+  line-height: 1.45; letter-spacing: -.02em; word-break: keep-all; }
+.quote .q::before { content: "“"; font-size: 42px; line-height: 0; vertical-align: -14px;
+  margin-right: 4px; color: #c9553e; }
+.quote .who { margin-top: 16px; font-family: "JetBrains Mono", monospace; font-size: 11px;
+  letter-spacing: 1.5px; color: #8a8474; }
+
+/* 미니 플레이어 */
+.player { width: 268px; padding: 14px; display: flex; gap: 13px; align-items: center;
+  background: rgba(30,31,38,.92); border: 1px solid rgba(255,255,255,.12); border-radius: 16px;
+  backdrop-filter: blur(8px); box-shadow: 0 16px 36px rgba(0,0,0,.5); z-index: 13; }
+.player .cover { width: 56px; height: 56px; flex: none; border-radius: 10px;
+  background: conic-gradient(from 220deg, #f5576c, #f093fb, #5ee7df, #b490ca, #f5576c); }
+.player .meta { flex: 1; min-width: 0; }
+.player .song { font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; }
+.player .artist { font-size: 11px; color: #85879a; margin-top: 2px; }
+.player .bar { margin-top: 9px; height: 3.5px; border-radius: 3px; background: #3a3b45; overflow: hidden; }
+.player .bar i { display: block; height: 100%; width: 62%; border-radius: 3px;
+  background: linear-gradient(90deg, #7c8cf8, #d78cf8); animation: prog 24s linear infinite alternate; }
+@keyframes prog { from { width: 32% } to { width: 88% } }
+.player .btn { width: 34px; height: 34px; flex: none; border-radius: 50%; background: #e8e8ec;
+  color: #17181d; display: grid; place-items: center; font-size: 12px; }
+
+/* 타이포 카드 */
+.typo { padding: 26px 34px; z-index: 8; }
+.typo b { display: block; font-family: Inter; font-weight: 900; font-size: 84px; letter-spacing: -.04em;
+  line-height: .95; color: transparent; -webkit-text-stroke: 2px rgba(255,255,255,.75); }
+.typo span { display: block; margin-top: 10px; font-family: "JetBrains Mono", monospace;
+  font-size: 11px; letter-spacing: 4px; color: #8b8da0; }
+
+/* 팔레트 카드 */
+.palette { width: 216px; background: #f5f2ea; border-radius: 10px; padding: 14px;
+  box-shadow: 0 12px 30px rgba(0,0,0,.42); z-index: 10; }
+.palette .row { display: flex; gap: 7px; }
+.palette .sw { flex: 1; height: 74px; border-radius: 6px; }
+.palette .nm { font-family: "JetBrains Mono", monospace; font-size: 9.5px; color: #8a8474;
+  margin-top: 9px; display: flex; justify-content: space-between; letter-spacing: .5px; }
+
+/* 뱃지 / 손글씨 카드 */
+.brb { font-family: "Nanum Pen Script", cursive; font-size: 34px; color: #ffd77a;
+  padding: 18px 30px; border: 2.5px dashed rgba(255,215,122,.55); border-radius: 18px;
+  transform: rotate(var(--r)); z-index: 7; background: rgba(255,215,122,.05); }
+.badge { width: 128px; height: 128px; border-radius: 50%; display: grid; place-items: center;
+  background: conic-gradient(#2b2d3a 0 25%, #232430 0 50%, #2b2d3a 0 75%, #232430 0);
+  border: 1px solid rgba(255,255,255,.14); box-shadow: 0 14px 30px rgba(0,0,0,.45); z-index: 9; }
+.badge div { text-align: center; }
+.badge b { font-family: "JetBrains Mono", monospace; font-size: 26px; color: #8be9b7; display: block; }
+.badge span { font-size: 10px; letter-spacing: 2px; color: #8b8da0; }
+
+/* 시작 라벨 · 화살표 · 테이프 */
+.start-label { font-family: "Nanum Pen Script", cursive; font-size: 30px; color: #9fd0ff;
+  z-index: 14; white-space: nowrap; text-shadow: 0 4px 18px rgba(0,0,0,.5); }
+.doodle { z-index: 6; pointer-events: none; }
+.doodle svg { overflow: visible; }
+.tape { width: 112px; height: 30px; z-index: 20; pointer-events: none;
+  background: rgba(226,220,196,.42);
+  border-left: 1px dashed rgba(0,0,0,.14); border-right: 1px dashed rgba(0,0,0,.14);
+  box-shadow: 0 2px 5px rgba(0,0,0,.18); }
+.tape.mint { background: rgba(150,222,200,.4); }
+
+/* ── 글래스 툴바 ── */
+.toolbar { position: fixed; z-index: 60; top: 20px; left: 50%; transform: translateX(-50%);
+  display: flex; align-items: center; gap: 4px; padding: 7px 8px;
+  background: rgba(28,29,36,.62); border: 1px solid rgba(255,255,255,.14); border-radius: 99px;
+  backdrop-filter: blur(18px) saturate(1.4); box-shadow: 0 12px 34px rgba(0,0,0,.4);
+  font-size: 13px; }
+.toolbar .name { font-weight: 800; padding: 7px 16px; letter-spacing: -.01em; }
+.toolbar .name i { font-style: normal; margin-right: 7px; }
+.toolbar .sep { width: 1px; height: 18px; background: rgba(255,255,255,.14); margin: 0 4px; }
+.toolbar .zoom { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #a9abb8;
+  padding: 7px 12px; min-width: 62px; text-align: center; }
+.toolbar button { font: inherit; font-weight: 600; font-size: 12.5px; color: #e8e8ec;
+  background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.13); border-radius: 99px;
+  padding: 7px 16px; cursor: pointer; transition: background .2s; }
+.toolbar button:hover { background: rgba(255,255,255,.18); }
+
+/* ── 미니맵 ── */
+#minimap { position: fixed; z-index: 60; right: 18px; bottom: 18px; padding: 8px;
+  background: rgba(28,29,36,.62); border: 1px solid rgba(255,255,255,.14); border-radius: 14px;
+  backdrop-filter: blur(18px); box-shadow: 0 12px 34px rgba(0,0,0,.4); cursor: pointer; }
+#minimap canvas { display: block; border-radius: 8px; }
+#minimap .lbl { font-family: "JetBrains Mono", monospace; font-size: 9px; letter-spacing: 2px;
+  color: #6f717e; text-align: center; margin-top: 6px; }
+
+/* 하단 힌트 */
+.hint { position: fixed; z-index: 60; left: 20px; bottom: 20px;
+  font-family: "JetBrains Mono", monospace; font-size: 10.5px; letter-spacing: 1.5px;
+  color: rgba(232,232,236,.48); pointer-events: none; }
+
+@media (max-width: 800px) {
+  .toolbar { top: 12px; }
+  .toolbar .zoom { display: none; }
+  #minimap { right: 12px; bottom: 12px; transform: scale(.82); transform-origin: bottom right; }
+  .hint { left: 14px; bottom: 14px; font-size: 9.5px; }
+}
+</style>
+</head>
+<body>
+
+<div id="viewport">
+  <div id="world">
+
+    <!-- 시작 라벨 & 낙서 -->
+    <div class="obj start-label" style="left:1440px; top:920px; --r:-4deg" data-depth="1.0">여기서 시작 →</div>
+
+    <div class="obj doodle" style="left:1395px; top:1120px; --r:8deg" data-depth="0.9">
+      <svg width="150" height="90" viewBox="0 0 150 90" fill="none">
+        <path d="M8 10 C 40 70, 95 78, 132 46" stroke="#9fd0ff" stroke-width="3" stroke-linecap="round" stroke-dasharray="1 9"/>
+        <path d="M118 38 L 136 44 L 124 60" stroke="#9fd0ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+    <div class="obj doodle" style="left:2330px; top:1010px; --r:-6deg" data-depth="0.88">
+      <svg width="170" height="110" viewBox="0 0 170 110" fill="none">
+        <path d="M160 14 C 110 6, 40 26, 22 88" stroke="#ffb1c9" stroke-width="3" stroke-linecap="round" stroke-dasharray="12 8"/>
+        <path d="M14 68 L 21 92 L 44 84" stroke="#ffb1c9" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- 폴라로이드 -->
+    <div class="obj polaroid grab" style="left:1210px; top:1010px; --r:-5deg" data-depth="1.08">
+      <div class="ph sunset"></div><div class="cap">제주, 여름의 끝 ☀</div>
+    </div>
+    <div class="obj polaroid grab" style="left:2270px; top:1180px; --r:6deg" data-depth="1.12">
+      <div class="ph sea"></div><div class="cap">새벽 다섯 시의 바다</div>
+    </div>
+    <div class="obj polaroid grab" style="left:880px; top:1660px; --r:-8deg" data-depth="1.05">
+      <div class="ph forest"></div><div class="cap">숲의 결, 필름 3롤째</div>
+    </div>
+
+    <!-- 스티키 노트 -->
+    <div class="obj sticky grab" style="left:1660px; top:1080px; --r:3deg" data-depth="1.1">
+      아이디어 : 스크롤이<br>없는 포트폴리오는<br>어떨까?
+      <small>— 새벽 2시의 나</small>
+    </div>
+    <div class="obj sticky pink grab" style="left:2590px; top:860px; --r:-4deg" data-depth="1.06">
+      금요일까지<br>데모 두 개 완성 ✦<br>할 수 있다!
+    </div>
+    <div class="obj sticky grab" style="left:2480px; top:1620px; --r:5deg" data-depth="0.95">
+      커피 ☕ 그리고 코드<br>그리고 다시 커피
+      <small>무한루프 주의</small>
+    </div>
+
+    <!-- 할 일 카드 (체크 가능) -->
+    <div class="obj todo grab" style="left:1960px; top:960px; --r:-2deg" data-depth="1.0">
+      <h4>오늘의 작업 <em>TODAY</em></h4>
+      <div class="todo-item done"><span class="box">✓</span>무한 캔버스 팬/줌 구현</div>
+      <div class="todo-item done"><span class="box">✓</span>미니맵 뷰포트 동기화</div>
+      <div class="todo-item"><span class="box">✓</span>패럴랙스 깊이 튜닝</div>
+      <div class="todo-item"><span class="box">✓</span>산책하기 (진짜로)</div>
+    </div>
+
+    <!-- 인용구 카드 -->
+    <div class="obj quote grab" style="left:1500px; top:1370px; --r:1deg" data-depth="1.0">
+      <div class="q">페이지는 문서가 아니라 공간이 될 수 있다.</div>
+      <div class="who">— SPATIAL INTERFACE MEMO, 2026</div>
+    </div>
+
+    <!-- 미니 플레이어 -->
+    <div class="obj player grab" style="left:2040px; top:1400px; --r:2deg" data-depth="1.05">
+      <div class="cover"></div>
+      <div class="meta">
+        <div class="song">작업실의 낮과 밤</div>
+        <div class="artist">lo-fi study loop · 24/7</div>
+        <div class="bar"><i></i></div>
+      </div>
+      <div class="btn">▶</div>
+    </div>
+
+    <!-- 타이포 카드 -->
+    <div class="obj typo grab" style="left:2760px; top:1300px; --r:-3deg" data-depth="0.85">
+      <b>KEEP<br>WANDER<br>-ING</b>
+      <span>NO SCROLL, ONLY DRIFT</span>
+    </div>
+
+    <!-- 팔레트 카드 -->
+    <div class="obj palette grab" style="left:1060px; top:660px; --r:2deg" data-depth="1.02">
+      <div class="row">
+        <div class="sw" style="background:#17181d"></div>
+        <div class="sw" style="background:#7c8cf8"></div>
+        <div class="sw" style="background:#ffd77a"></div>
+        <div class="sw" style="background:#f5f2ea"></div>
+      </div>
+      <div class="nm"><span>PALETTE-04</span><span>MIDNIGHT STUDIO</span></div>
+    </div>
+
+    <!-- 손글씨 카드 & 뱃지 -->
+    <div class="obj brb grab" style="left:1180px; top:1930px; --r:-3deg" data-depth="0.92">잠깐 산책 중, 금방 올게요 🚶</div>
+    <div class="obj badge grab" style="left:2130px; top:1730px; --r:0deg" data-depth="1.08">
+      <div><b>127</b><span>DAYS<br>MAKING</span></div>
+    </div>
+
+    <!-- 마스킹테이프 -->
+    <div class="obj tape" style="left:1258px; top:986px; --r:-14deg" data-depth="1.08"></div>
+    <div class="obj tape mint" style="left:2325px; top:1158px; --r:12deg" data-depth="1.12"></div>
+    <div class="obj tape" style="left:936px; top:1638px; --r:6deg" data-depth="1.05"></div>
+    <div class="obj tape mint" style="left:1545px; top:1352px; --r:-9deg" data-depth="1.0"></div>
+
+  </div>
+</div>
+
+<div class="vignette"></div>
+
+<div class="toolbar">
+  <span class="name"><i>◫</i>무한 작업실</span>
+  <span class="sep"></span>
+  <span class="zoom" id="zoomLbl">100%</span>
+  <span class="sep"></span>
+  <button id="addNote">＋ 메모</button>
+  <button id="homeBtn">처음 위치로</button>
+</div>
+
+<div id="minimap">
+  <canvas id="mmCanvas" width="180" height="130"></canvas>
+  <div class="lbl">MAP</div>
+</div>
+
+<div class="hint">빈 곳 DRAG — 이동 · 오브젝트 DRAG — 옮기기 · ＋메모 — 추가 · 새로고침 — 원상복구</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   무한 캔버스: 팬(관성) + 커서 중심 줌 + 패럴랙스 + 미니맵
+   ───────────────────────────────────────────── */
+const W = 3600, H = 2600;                 // 가상 공간 크기
+const viewport = document.getElementById('viewport');
+const world = document.getElementById('world');
+const zoomLbl = document.getElementById('zoomLbl');
+const mm = document.getElementById('mmCanvas');
+const mmCtx = mm.getContext('2d');
+const objs = [...document.querySelectorAll('.obj')].map(el => ({
+  el,
+  x: parseFloat(el.style.left), y: parseFloat(el.style.top),
+  w: el.offsetWidth || 100, h: el.offsetHeight || 100,
+  depth: parseFloat(el.dataset.depth || 1)
+}));
+
+/* 상태: 실제값(pan/scale)과 목표값(t*) — 매 프레임 lerp로 부드럽게 */
+let scale = 1, panX = 0, panY = 0;
+let ts = 1, tx = 0, ty = 0;
+
+function homeTargets() {
+  const s = Math.min(1, Math.max(.62, innerWidth / 1500));
+  ts = s;
+  tx = innerWidth / 2 - 1840 * s;          // 핵심 클러스터 중심 근처
+  ty = innerHeight / 2 - 1230 * s;
+}
+homeTargets();
+/* 로드 직후 썸네일에서도 클러스터가 보이도록 즉시 스냅 */
+scale = ts; panX = tx; panY = ty;
+
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+function clampPan() {
+  /* 공간 밖으로 무한히 나가지 않게 여유 마진을 두고 제한 */
+  const m = 260;
+  tx = clamp(tx, innerWidth - W * ts - m * ts, m * ts);
+  ty = clamp(ty, innerHeight - H * ts - m * ts, m * ts);
+}
+
+/* ── 드래그: 빈 곳 = 캔버스 팬(관성), 오브젝트 = 그 오브젝트 이동 ── */
+let down = false, moved = 0, lx = 0, ly = 0, vx = 0, vy = 0, downTarget = null;
+let dragObj = null, dragEntry = null;
+
+viewport.addEventListener('pointerdown', e => {
+  downTarget = e.target;
+  /* 편집 중인 메모 안: 드래그를 시작하지 않고 텍스트 선택/커서 이동 허용 */
+  if (e.target.isContentEditable && e.target === document.activeElement) return;
+  down = true; moved = 0; vx = vy = 0;
+  lx = e.clientX; ly = e.clientY;
+  const o = e.target.closest('.obj.grab');
+  if (o) {                                   // 오브젝트 집기
+    dragObj = o;
+    dragEntry = objs.find(en => en.el === o) || null;
+    o.classList.add('dragging-obj');
+  } else viewport.classList.add('dragging'); // 빈 곳: 캔버스 팬
+  viewport.setPointerCapture(e.pointerId);
+});
+viewport.addEventListener('pointermove', e => {
+  if (!down) return;
+  const dx = e.clientX - lx, dy = e.clientY - ly;
+  lx = e.clientX; ly = e.clientY;
+  moved += Math.abs(dx) + Math.abs(dy);
+  if (dragObj) {                             // 오브젝트 이동 (월드 좌표로 환산)
+    const nx = parseFloat(dragObj.style.left) + dx / scale;
+    const ny = parseFloat(dragObj.style.top) + dy / scale;
+    dragObj.style.left = nx + 'px'; dragObj.style.top = ny + 'px';
+    if (dragEntry) { dragEntry.x = nx; dragEntry.y = ny; }   // 미니맵 동기화
+    return;
+  }
+  panX += dx; panY += dy; tx = panX; ty = panY;
+  vx = vx * .5 + dx * .5; vy = vy * .5 + dy * .5;
+  clampPan();
+});
+viewport.addEventListener('pointerup', e => {
+  const wasObj = dragObj;
+  if (dragObj) { dragObj.classList.remove('dragging-obj'); dragObj = null; dragEntry = null; }
+  if (!down) return;
+  down = false;
+  viewport.classList.remove('dragging');
+  if (moved < 7) {                          // 클릭: 오브젝트 포커스 토글 / 메모 편집
+    const todo = downTarget && downTarget.closest('.todo-item');
+    if (todo) { todo.classList.toggle('done'); return; }
+    const o = downTarget && downTarget.closest('.obj.grab');
+    if (o) {
+      if (o.classList.contains('user-note')) { o.querySelector('.txt').focus(); return; }
+      const was = o.classList.contains('focus');
+      document.querySelectorAll('.obj.focus').forEach(x => x.classList.remove('focus'));
+      if (!was) o.classList.add('focus');
+    }
+  } else if (!wasObj) {                     // 캔버스 드래그 종료: 관성 글라이드
+    tx = panX + vx * 14; ty = panY + vy * 14;
+    clampPan();
+  }
+});
+viewport.addEventListener('pointercancel', () => {
+  down = false; viewport.classList.remove('dragging');
+  if (dragObj) { dragObj.classList.remove('dragging-obj'); dragObj = null; dragEntry = null; }
+});
+
+/* ── ＋ 메모: 화면 중앙에 새 스티키 노트 (저장하지 않음 — 새로고침하면 원상복구) ── */
+document.getElementById('addNote').addEventListener('click', () => {
+  const wx = (innerWidth / 2 - panX) / scale - 93 + (Math.random() * 60 - 30);
+  const wy = (innerHeight / 2 - panY) / scale - 89 + (Math.random() * 40 - 20);
+  const el = document.createElement('div');
+  el.className = 'obj sticky grab user-note' + (Math.random() < .5 ? ' pink' : '');
+  el.style.left = wx + 'px'; el.style.top = wy + 'px';
+  el.style.setProperty('--r', (Math.random() * 10 - 5).toFixed(1) + 'deg');
+  el.innerHTML = `<div class="txt" contenteditable="true" spellcheck="false">새 메모 ✏️</div>
+                  <small>클릭해 쓰고 · 드래그로 옮기고 · 새로고침하면 사라져요</small>`;
+  world.appendChild(el);
+  objs.push({ el, x: wx, y: wy, w: 186, h: 178, depth: 1 });
+  const txt = el.querySelector('.txt');
+  setTimeout(() => {
+    txt.focus();
+    const sel = getSelection(), rg = document.createRange();
+    rg.selectNodeContents(txt); sel.removeAllRanges(); sel.addRange(rg);
+  }, 60);
+});
+
+/* ── 커서 중심 줌 ── */
+viewport.addEventListener('wheel', e => {
+  e.preventDefault();
+  const ns = clamp(ts * Math.exp(-e.deltaY * 0.0011), 0.5, 1.6);
+  /* 커서 아래의 월드 좌표가 그대로 유지되도록 목표 팬 보정 */
+  const wx = (e.clientX - tx) / ts, wy = (e.clientY - ty) / ts;
+  ts = ns;
+  tx = e.clientX - wx * ns;
+  ty = e.clientY - wy * ns;
+  clampPan();
+}, { passive: false });
+
+/* ── 미니맵 ── */
+const MMW = 180, MMH = 130;
+mm.parentElement.addEventListener('pointerdown', e => {
+  e.stopPropagation();
+  const r = mm.getBoundingClientRect();
+  const wx = (e.clientX - r.left) / r.width * W;
+  const wy = (e.clientY - r.top) / r.height * H;
+  tx = innerWidth / 2 - wx * ts;
+  ty = innerHeight / 2 - wy * ts;
+  clampPan();
+});
+function drawMinimap() {
+  mmCtx.clearRect(0, 0, MMW, MMH);
+  mmCtx.fillStyle = 'rgba(255,255,255,.045)';
+  mmCtx.fillRect(0, 0, MMW, MMH);
+  const kx = MMW / W, ky = MMH / H;
+  for (const o of objs) {
+    mmCtx.fillStyle = 'rgba(255,255,255,.55)';
+    mmCtx.fillRect(o.x * kx, o.y * ky, Math.max(2.5, o.w * kx), Math.max(2.5, o.h * ky));
+  }
+  /* 현재 뷰포트 사각형 */
+  const vx0 = (-panX / scale) * kx, vy0 = (-panY / scale) * ky;
+  const vw = (innerWidth / scale) * kx, vh = (innerHeight / scale) * ky;
+  mmCtx.strokeStyle = '#7c8cf8'; mmCtx.lineWidth = 1.5;
+  mmCtx.strokeRect(vx0, vy0, vw, vh);
+  mmCtx.fillStyle = 'rgba(124,140,248,.13)';
+  mmCtx.fillRect(vx0, vy0, vw, vh);
+}
+
+/* ── 툴바 ── */
+document.getElementById('homeBtn').addEventListener('click', () => {
+  document.querySelectorAll('.obj.focus').forEach(x => x.classList.remove('focus'));
+  homeTargets();
+});
+addEventListener('resize', clampPan);
+
+/* ── 메인 루프: lerp + 그리드 + 패럴랙스 + 미니맵 ── */
+let frames = 0;
+(function loop() {
+  /* 갤러리 썸네일에서는 몇 프레임만 그리고 저빈도 폴링으로 대기 (window.__paused) */
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+
+  if (!down) {
+    panX += (tx - panX) * 0.12;
+    panY += (ty - panY) * 0.12;
+  }
+  scale += (ts - scale) * 0.14;
+
+  world.style.transform = `translate(${panX}px, ${panY}px) scale(${scale})`;
+
+  /* 도트 그리드가 팬/줌을 따라 흐른다 */
+  const g = 28 * scale;
+  viewport.style.backgroundSize = `${g}px ${g}px`;
+  viewport.style.backgroundPosition = `${panX}px ${panY}px`;
+
+  /* 깊이 계수 패럴랙스: 팬 양에 비례한 미세 오프셋 */
+  const bx = innerWidth / 2 - panX, by = innerHeight / 2 - panY;
+  for (const o of objs) {
+    if (o.depth === 1) continue;
+    const k = (o.depth - 1) * 0.06;
+    o.el.style.translate = `${bx * k / scale}px ${by * k / scale}px`;
+  }
+
+  zoomLbl.textContent = Math.round(scale * 100) + '%';
+  drawMinimap();
+  requestAnimationFrame(loop);
+})();
+</script>
+
+<script>
+/* ── English mode (?lang=en) — non-destructive text swap ── */
+(function () {
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "무한 캔버스 작업실 — 드래그로 탐험하는 공간": "Infinite Canvas Studio — A Space You Explore by Dragging",
+    "여기서 시작 →": "Start here →",
+    "제주, 여름의 끝 ☀": "Jeju, the end of summer ☀",
+    "새벽 다섯 시의 바다": "The sea at five a.m.",
+    "숲의 결, 필름 3롤째": "Grain of the forest, roll 3",
+    "아이디어 : 스크롤이": "Idea: a portfolio",
+    "없는 포트폴리오는": "with no scrolling —",
+    "어떨까?": "what if?",
+    "— 새벽 2시의 나": "— me at 2 a.m.",
+    "금요일까지": "By Friday",
+    "데모 두 개 완성 ✦": "finish two demos ✦",
+    "할 수 있다!": "I can do it!",
+    "커피 ☕ 그리고 코드": "Coffee ☕ then code",
+    "그리고 다시 커피": "then coffee again",
+    "무한루프 주의": "warning: infinite loop",
+    "오늘의 작업": "Today's work ",
+    "무한 캔버스 팬/줌 구현": "Build infinite-canvas pan/zoom",
+    "미니맵 뷰포트 동기화": "Sync the minimap viewport",
+    "패럴랙스 깊이 튜닝": "Tune parallax depth",
+    "산책하기 (진짜로)": "Take a walk (for real)",
+    "페이지는 문서가 아니라 공간이 될 수 있다.": "A page can be a space, not just a document.",
+    "작업실의 낮과 밤": "Day and Night in the Studio",
+    "잠깐 산책 중, 금방 올게요 🚶": "Out for a quick walk, back soon 🚶",
+    "무한 작업실": "Infinite Studio",
+    "＋ 메모": "＋ Note",
+    "처음 위치로": "Back to start",
+    "빈 곳 DRAG — 이동 · 오브젝트 DRAG — 옮기기 · ＋메모 — 추가 · 새로고침 — 원상복구": "DRAG empty space — pan · DRAG an object — move it · ＋Note — add · Refresh — reset",
+    "새 메모 ✏️": "New note ✏️",
+    "클릭해 쓰고 · 드래그로 옮기고 · 새로고침하면 사라져요": "Click to write · drag to move · gone on refresh"
+  };
+  const KEYS = Object.keys(TR).sort((a, b) => b.length - a.length);
+  const swap = s => { let o = s; for (const k of KEYS) if (o.indexOf(k) !== -1) o = o.split(k).join(TR[k]); return o; };
+  const ATTRS = ['placeholder', 'title', 'alt', 'aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const v = n.nodeValue; if (!v || !v.trim()) return;
+      const c = v.replace(/\s+/g, ' ').trim();
+      if (TR[c] != null) { if (n.nodeValue !== TR[c]) n.nodeValue = TR[c]; return; }
+      const nv = swap(v); if (nv !== v) n.nodeValue = nv; return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) { const av = n.getAttribute(a); if (av && TR[av.trim()] != null) n.setAttribute(a, TR[av.trim()]); } });
+    if ((n.tagName === 'INPUT' || n.tagName === 'TEXTAREA') && n.value != null && TR[n.value.trim()] != null) n.value = TR[n.value.trim()];
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, { childList: true, subtree: true });
+  walk(document.body);
+  const dt = swap(document.title); if (dt !== document.title) document.title = dt;
+})();
+</script>
+</body>
+</html>

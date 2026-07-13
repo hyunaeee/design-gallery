@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>시네마틱 비디오 히어로 — 크리에이티브 스튜디오</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Noto+Serif+KR:wght@600;900&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: #0a0a0a; color: #f4f1ea;
+       -webkit-font-smoothing: antialiased; overflow-x: hidden; cursor: none; }
+a, button { cursor: none; }
+
+/* ── 커스텀 커서 ── */
+.cur-dot { position: fixed; z-index: 999; width: 8px; height: 8px; border-radius: 50%;
+           background: #f4f1ea; pointer-events: none; transform: translate(-50%,-50%);
+           mix-blend-mode: difference; }
+.cur-ring { position: fixed; z-index: 999; width: 42px; height: 42px; border-radius: 50%;
+            border: 1px solid rgba(244,241,234,.65); pointer-events: none;
+            transform: translate(-50%,-50%); transition: width .3s, height .3s, background .3s;
+            mix-blend-mode: difference; display: flex; align-items: center; justify-content: center;
+            font-size: 0; color: #0a0a0a; }
+.cur-ring.big { width: 92px; height: 92px; background: #f4f1ea; font-size: 11px; font-weight: 700;
+                letter-spacing: 2px; }
+
+/* ── 프리로더 ── */
+.loader { position: fixed; inset: 0; z-index: 200; background: #0a0a0a; display: flex;
+          align-items: flex-end; justify-content: space-between; padding: 5vh 5vw;
+          transition: transform 1s cubic-bezier(.76,0,.24,1); }
+.loader.done { transform: translateY(-101%); }
+.loader .pct { font-family: "Playfair Display", "Noto Serif KR", serif; font-size: clamp(70px,14vw,160px);
+               font-weight: 700; line-height: .9; font-variant-numeric: tabular-nums; }
+.loader .word { font-size: 13px; letter-spacing: 5px; color: #8a867d; margin-bottom: 3vh; }
+
+/* ── 비디오 배경 ── */
+.hero { position: relative; height: 100vh; overflow: hidden; }
+.vidbox { position: absolute; inset: 0;
+  /* 영상/캔버스가 뜨기 전에도 검정 화면이 아니도록 딥 그라디언트 베이스 */
+  background:
+    radial-gradient(60% 50% at 25% 30%, #16324f, transparent 70%),
+    radial-gradient(55% 55% at 78% 65%, #2b1d3a, transparent 70%),
+    radial-gradient(45% 45% at 55% 90%, #0e4d45, transparent 70%),
+    #0a0a0a; }
+.vidbox video, .vidbox canvas { position: absolute; inset: 0; width: 100%; height: 100%;
+                                object-fit: cover; filter: saturate(.85) contrast(1.05); }
+.vidbox::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,10,10,.55), rgba(10,10,10,.18) 40%, rgba(10,10,10,.75) 92%); }
+.grain { position: fixed; inset: -100%; z-index: 90; pointer-events: none; opacity: .5;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(%23g)" opacity="0.16"/></svg>');
+  animation: grainShift .9s steps(4) infinite; }
+@keyframes grainShift { 0%{transform:translate(0,0)} 25%{transform:translate(-3%,2%)}
+  50%{transform:translate(2%,-3%)} 75%{transform:translate(-2%,-2%)} 100%{transform:translate(3%,3%)} }
+
+/* ── 히어로 콘텐츠 ── */
+nav { position: absolute; z-index: 20; top: 0; left: 0; right: 0; display: flex; align-items: center;
+      justify-content: space-between; padding: 34px 5vw; }
+.logo { font-family: "Playfair Display", serif; font-size: 20px; font-weight: 700; letter-spacing: 1px; }
+.logo i { font-style: italic; color: #d8c39a; }
+.menu { display: flex; gap: 34px; font-size: 13px; letter-spacing: 1.5px; }
+.menu a { color: #f4f1ea; text-decoration: none; position: relative; padding: 4px 0; }
+.menu a::after { content: ""; position: absolute; left: 0; bottom: 0; width: 100%; height: 1px;
+                 background: #f4f1ea; transform: scaleX(0); transform-origin: right;
+                 transition: transform .45s cubic-bezier(.76,0,.24,1); }
+.menu a:hover::after { transform: scaleX(1); transform-origin: left; }
+
+.hero-inner { position: relative; z-index: 10; height: 100%; display: flex; flex-direction: column;
+              justify-content: center; padding: 0 5vw; }
+.eyebrow { display: flex; align-items: center; gap: 14px; font-size: 12px; letter-spacing: 5px;
+           color: #d8c39a; }
+.eyebrow::before { content: ""; width: 52px; height: 1px; background: #d8c39a; }
+h1 { margin-top: 3vh; font-family: "Noto Serif KR", "Playfair Display", serif; font-weight: 900;
+     font-size: clamp(44px, 8.6vw, 116px); line-height: 1.04; letter-spacing: -.02em; }
+h1 .line { display: block; overflow: hidden; }
+h1 .line span { display: block; transform: translateY(110%); transition: transform 1.1s cubic-bezier(.76,0,.24,1); }
+body.ready h1 .line:nth-child(1) span { transform: none; transition-delay: .15s; }
+body.ready h1 .line:nth-child(2) span { transform: none; transition-delay: .28s; }
+h1 em { font-family: "Playfair Display", serif; font-style: italic; font-weight: 500; color: #d8c39a; }
+.hero-foot { position: absolute; z-index: 10; left: 5vw; right: 5vw; bottom: 5vh; display: flex;
+             align-items: flex-end; justify-content: space-between; }
+.hero-desc { max-width: 320px; font-size: 14px; line-height: 1.8; color: rgba(244,241,234,.75);
+             word-break: keep-all; }
+
+/* 쇼릴 버튼: 회전하는 원형 텍스트 */
+.showreel { position: relative; width: 128px; height: 128px; }
+.showreel svg { position: absolute; inset: 0; animation: spin 14s linear infinite; }
+.showreel svg text { font-size: 10.5px; letter-spacing: 3.5px; fill: #f4f1ea; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.showreel .play { position: absolute; inset: 38px; border-radius: 50%; background: rgba(244,241,234,.12);
+                  backdrop-filter: blur(8px); border: 1px solid rgba(244,241,234,.3);
+                  display: flex; align-items: center; justify-content: center; font-size: 15px;
+                  transition: background .3s, transform .3s; }
+.showreel:hover .play { background: #f4f1ea; color: #0a0a0a; transform: scale(1.12); }
+
+.scroll-hint { position: absolute; z-index: 10; left: 50%; bottom: 4vh; transform: translateX(-50%);
+               font-size: 10.5px; letter-spacing: 4px; color: rgba(244,241,234,.6); }
+.scroll-hint::after { content: ""; display: block; width: 1px; height: 44px; margin: 10px auto 0;
+                      background: linear-gradient(rgba(244,241,234,.7), transparent);
+                      animation: dropline 1.8s ease-in-out infinite; }
+@keyframes dropline { 0% { transform: scaleY(0); transform-origin: top; }
+  55% { transform: scaleY(1); transform-origin: top; }
+  56% { transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+
+/* ── 아웃라인 마퀴 ── */
+.marquee { padding: 9vh 0 4vh; overflow: hidden; background: #0a0a0a; }
+.mq-track { display: flex; gap: 5vw; width: max-content; animation: mq 22s linear infinite; }
+.mq-track span { font-family: "Playfair Display", serif; font-size: clamp(56px,9vw,120px); font-weight: 700;
+  white-space: nowrap; color: transparent; -webkit-text-stroke: 1px rgba(244,241,234,.45); }
+.mq-track span.fill { color: #f4f1ea; -webkit-text-stroke: 0; }
+@keyframes mq { to { transform: translateX(-50%); } }
+
+/* ── 작품 리스트: 호버하면 커서를 따라오는 프리뷰 ── */
+.works { position: relative; padding: 6vh 5vw 14vh; }
+.works-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 5vh; }
+.works-head h2 { font-size: 13px; letter-spacing: 5px; color: #8a867d; }
+.works-head span { font-size: 13px; color: #8a867d; }
+.work-row { display: grid; grid-template-columns: 80px 1fr auto auto; gap: 3vw; align-items: baseline;
+            padding: 4.2vh 8px; border-top: 1px solid rgba(244,241,234,.16); transition: padding .4s; }
+.work-row:last-child { border-bottom: 1px solid rgba(244,241,234,.16); }
+.work-row:hover { padding-left: 26px; }
+.work-row .idx { font-family: "Playfair Display", serif; font-style: italic; color: #8a867d; font-size: 15px; }
+.work-row .name { font-family: "Noto Serif KR", serif; font-weight: 600; font-size: clamp(24px,3.4vw,44px);
+                  letter-spacing: -.01em; transition: color .3s; }
+.work-row:hover .name { color: #d8c39a; }
+.work-row .cat, .work-row .year { font-size: 13px; color: #8a867d; letter-spacing: 1px; }
+.float-img { position: fixed; z-index: 60; width: 300px; height: 200px; pointer-events: none;
+             border-radius: 6px; object-fit: cover; opacity: 0; transform: scale(.85) rotate(-3deg);
+             transition: opacity .35s, transform .35s; box-shadow: 0 30px 70px rgba(0,0,0,.6); }
+.float-img.show { opacity: 1; transform: scale(1) rotate(0); }
+
+footer { padding: 7vh 5vw 6vh; border-top: 1px solid rgba(244,241,234,.14); display: flex;
+         justify-content: space-between; align-items: center; font-size: 12.5px; color: #8a867d;
+         letter-spacing: 1px; }
+
+@media (max-width: 760px) {
+  body { cursor: auto; } .cur-dot, .cur-ring { display: none; }
+  .menu { display: none; }
+  .hero-foot { flex-direction: column; align-items: flex-start; gap: 24px; }
+  .work-row { grid-template-columns: 50px 1fr; } .work-row .cat, .work-row .year { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="cur-dot"></div><div class="cur-ring">VIEW</div>
+<div class="grain"></div>
+
+<div class="loader" id="loader">
+  <div class="pct" id="pct">0</div>
+  <div class="word">STUDIO NOIR — 감각을 로딩하는 중</div>
+</div>
+
+<header class="hero">
+  <div class="vidbox">
+    <video id="bgvid" autoplay muted loop playsinline preload="auto" poster="">
+      <source src="https://assets.mixkit.co/videos/preview/mixkit-waves-in-the-water-1164-large.mp4" type="video/mp4">
+      <source src="https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4" type="video/mp4">
+    </video>
+    <canvas id="fallback" style="display:none"></canvas>
+  </div>
+
+  <nav>
+    <div class="logo">STUDIO <i>noir</i></div>
+    <div class="menu">
+      <a href="#" data-hover>작품</a><a href="#" data-hover>스튜디오</a><a href="#" data-hover>저널</a><a href="#" data-hover>연락</a>
+    </div>
+  </nav>
+
+  <div class="hero-inner">
+    <div class="eyebrow">CREATIVE STUDIO — SEOUL & TOKYO</div>
+    <h1>
+      <span class="line"><span>감각을 설계하는</span></span>
+      <span class="line"><span>크리에이티브 <em>스튜디오</em></span></span>
+    </h1>
+  </div>
+
+  <div class="hero-foot">
+    <p class="hero-desc">우리는 브랜드의 다음 장을 씁니다. 영상, 인터랙션, 공간 —
+    매체를 가리지 않는 서사와 몰입의 경험을 만듭니다.</p>
+    <div class="showreel" data-hover>
+      <svg viewBox="0 0 128 128">
+        <defs><path id="circ" d="M64,64 m-52,0 a52,52 0 1,1 104,0 a52,52 0 1,1 -104,0"/></defs>
+        <text><textPath href="#circ">SHOWREEL 2026 · PLAY · SHOWREEL 2026 · PLAY ·</textPath></text>
+      </svg>
+      <div class="play">▶</div>
+    </div>
+  </div>
+  <div class="scroll-hint">SCROLL</div>
+</header>
+
+<div class="marquee">
+  <div class="mq-track">
+    <span>FILM</span><span class="fill">BRAND</span><span>SPATIAL</span><span class="fill">DIGITAL</span>
+    <span>FILM</span><span class="fill">BRAND</span><span>SPATIAL</span><span class="fill">DIGITAL</span>
+  </div>
+</div>
+
+<section class="works">
+  <div class="works-head"><h2>SELECTED WORKS</h2><span>2023 — 2026</span></div>
+  <img class="float-img" id="floatImg" alt="">
+  <div class="work-row" data-hover data-img="https://picsum.photos/id/1067/600/400">
+    <span class="idx">01</span><span class="name">한강의 밤 — 서울관광재단</span>
+    <span class="cat">FILM / CAMPAIGN</span><span class="year">2026</span>
+  </div>
+  <div class="work-row" data-hover data-img="https://picsum.photos/id/1041/600/400">
+    <span class="idx">02</span><span class="name">MUTE — 사운드 브랜딩</span>
+    <span class="cat">IDENTITY</span><span class="year">2025</span>
+  </div>
+  <div class="work-row" data-hover data-img="https://picsum.photos/id/1084/600/400">
+    <span class="idx">03</span><span class="name">Depth — 몰입형 전시</span>
+    <span class="cat">SPATIAL / WEBGL</span><span class="year">2025</span>
+  </div>
+  <div class="work-row" data-hover data-img="https://picsum.photos/id/1050/600/400">
+    <span class="idx">04</span><span class="name">오후의 결 — 티 하우스</span>
+    <span class="cat">BRAND / DIGITAL</span><span class="year">2024</span>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 STUDIO NOIR</span>
+  <span>hello@studionoir.kr</span>
+  <span>INSTAGRAM ↗ &nbsp; VIMEO ↗</span>
+</footer>
+
+<script>
+/* ── 프리로더 ── */
+const pctEl = document.getElementById('pct');
+let p = 0;
+const pTimer = setInterval(() => {
+  p = Math.min(100, p + Math.ceil(Math.random() * 14));
+  pctEl.textContent = p;
+  if (p >= 100) {
+    clearInterval(pTimer);
+    setTimeout(() => { document.getElementById('loader').classList.add('done');
+                       document.body.classList.add('ready'); }, 250);
+  }
+}, 90);
+
+/* ── 비디오 실패 시 캔버스 유체 그라디언트 폴백 ── */
+const vid = document.getElementById('bgvid');
+const fb = document.getElementById('fallback');
+function startFallback() {
+  if (fb.dataset.on) return; fb.dataset.on = 1;
+  vid.style.display = 'none'; fb.style.display = 'block';
+  const ctx = fb.getContext('2d');
+  const resize = () => { fb.width = innerWidth; fb.height = innerHeight; };
+  resize(); addEventListener('resize', resize);
+  const orbs = [
+    { c: '#16324f', r: .9, sx: .00021, sy: .00017, px: .2, py: .3 },
+    { c: '#2b1d3a', r: .8, sx: .00017, sy: .00023, px: .8, py: .6 },
+    { c: '#0e4d45', r: .7, sx: .00025, sy: .00019, px: .5, py: .85 },
+    { c: '#5b3a24', r: .55, sx: .00019, sy: .00026, px: .75, py: .15 },
+  ];
+  let fbFrames = 0;
+  (function draw(t) {
+    /* 일시정지여도 첫 프레임들은 그려서 썸네일이 비지 않게 */
+    if (window.__paused && fbFrames > 5) { setTimeout(() => requestAnimationFrame(draw), 300); return; }
+    fbFrames++;
+    {
+      ctx.fillStyle = '#0a0a0a'; ctx.fillRect(0, 0, fb.width, fb.height);
+      ctx.globalCompositeOperation = 'lighter';
+      for (const o of orbs) {
+        const x = (o.px + Math.sin(t * o.sx) * .3) * fb.width;
+        const y = (o.py + Math.cos(t * o.sy) * .3) * fb.height;
+        const rad = o.r * Math.min(fb.width, fb.height) * .8;
+        const g = ctx.createRadialGradient(x, y, 0, x, y, rad);
+        g.addColorStop(0, o.c); g.addColorStop(1, 'transparent');
+        ctx.fillStyle = g; ctx.fillRect(0, 0, fb.width, fb.height);
+      }
+      ctx.globalCompositeOperation = 'source-over';
+    }
+    requestAnimationFrame(draw);
+  })(0);
+}
+vid.querySelectorAll('source')[1].addEventListener('error', startFallback);
+setTimeout(() => { if (vid.readyState < 2) startFallback(); }, 2200);
+
+/* ── 커스텀 커서 ── */
+const dot = document.querySelector('.cur-dot'), ring = document.querySelector('.cur-ring');
+let mx = innerWidth / 2, my = innerHeight / 2, rx = mx, ry = my;
+addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY;
+  dot.style.left = mx + 'px'; dot.style.top = my + 'px'; });
+(function lerp() {
+  if (window.__paused) { setTimeout(() => requestAnimationFrame(lerp), 300); return; }
+  rx += (mx - rx) * .13; ry += (my - ry) * .13;
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(lerp);
+})();
+document.querySelectorAll('[data-hover]').forEach(el => {
+  el.addEventListener('mouseenter', () => ring.classList.add('big'));
+  el.addEventListener('mouseleave', () => ring.classList.remove('big'));
+});
+
+/* ── 작품 리스트: 커서를 따라오는 프리뷰 이미지 ── */
+const fi = document.getElementById('floatImg');
+let fx = 0, fy = 0, tx = 0, ty = 0;
+addEventListener('mousemove', e => { tx = e.clientX + 26; ty = e.clientY - 100; });
+(function follow() {
+  if (window.__paused) { setTimeout(() => requestAnimationFrame(follow), 300); return; }
+  fx += (tx - fx) * .12; fy += (ty - fy) * .12;
+  fi.style.left = fx + 'px'; fi.style.top = fy + 'px';
+  requestAnimationFrame(follow);
+})();
+document.querySelectorAll('.work-row').forEach(row => {
+  row.addEventListener('mouseenter', () => { fi.src = row.dataset.img; fi.classList.add('show'); });
+  row.addEventListener('mouseleave', () => fi.classList.remove('show'));
+});
+</script>
+<script>
+/* English mode: ?lang=en swaps every visible Korean string to English. Adds only — no markup/CSS/logic changed. */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "시네마틱 비디오 히어로 — 크리에이티브 스튜디오": "Cinematic Video Hero — Creative Studio",
+    "STUDIO NOIR — 감각을 로딩하는 중": "STUDIO NOIR — Loading the senses",
+    "작품": "Work",
+    "스튜디오": "Studio",
+    "저널": "Journal",
+    "연락": "Contact",
+    "감각을 설계하는": "The sensation-designing",
+    "크리에이티브": "Creative",
+    "우리는 브랜드의 다음 장을 씁니다. 영상, 인터랙션, 공간 — 매체를 가리지 않는 서사와 몰입의 경험을 만듭니다.": "We write the next chapter for brands. Film, interaction, space — we craft narrative and immersive experiences across every medium.",
+    "한강의 밤 — 서울관광재단": "Night on the Han River — Seoul Tourism Organization",
+    "MUTE — 사운드 브랜딩": "MUTE — Sound Branding",
+    "Depth — 몰입형 전시": "Depth — Immersive Exhibition",
+    "오후의 결 — 티 하우스": "Afternoon Grain — Tea House"
+  };
+  const norm = s => s.replace(/\s+/g,' ').trim();
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swapText = n => {
+    const raw = n.nodeValue, key = norm(raw);
+    if (!key || TR[key] == null) return;
+    n.nodeValue = raw.match(/^\s*/)[0] + TR[key] + raw.match(/\s*$/)[0];
+  };
+  const walk = n => {
+    if (n.nodeType === 3) { swapText(n); return; }
+    if (n.nodeType !== 1) return;
+    for (const a of ATTRS) {
+      if (n.hasAttribute && n.hasAttribute(a)) {
+        const k = norm(n.getAttribute(a));
+        if (TR[k] != null) n.setAttribute(a, TR[k]);
+      }
+    }
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = norm(document.title);
+  if (TR[dt] != null) document.title = TR[dt];
+})();
+</script>
+</body>
+</html>

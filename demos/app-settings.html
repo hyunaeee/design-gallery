@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앱 · 프로필/설정 — 다크 모드 전환</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ──────────────────────────────────────────────
+   WWIT 분류
+   카테고리: 라이프스타일  |  패턴: 마이페이지, 설정  |  컴포넌트: 스위치, 리스트 그룹, 다이얼로그
+   실제로 동작: 다크 모드 스위치 → 폰 화면 전체가 CSS 변수 교체로 부드럽게 다크 전환,
+   iOS 스타일 스위치 토글 애니메이션, 로그아웃 확인 다이얼로그, 토스트
+   ────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --accent: #fa4e6e; --switch-on: #34c759; --danger: #ff3b30; }
+body { font-family: "Noto Sans KR", sans-serif; min-height: 100vh; display: flex; align-items: center;
+       justify-content: center; gap: 64px; padding: 40px 24px;
+       background: linear-gradient(160deg, #fbeaee, #f1f0f6); -webkit-font-smoothing: antialiased; }
+
+/* ── 아이폰 프레임 ── */
+.phone { position: relative; width: 375px; height: 780px; flex-shrink: 0;
+         border-radius: 54px; background: #0b0c0e; padding: 10px;
+         box-shadow: 0 50px 100px -24px rgba(25,31,40,.45), inset 0 0 0 2px #3a3d42; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden;
+          display: flex; flex-direction: column; background: var(--s-bg);
+          /* 라이트 테마 변수 — 다크 모드 스위치가 .dark 클래스로 교체 */
+          --s-bg: #f2f2f7; --s-card: #ffffff; --s-ink: #1c1c1e; --s-sub: #8e8e93; --s-line: #e5e5ea; }
+.screen.dark { --s-bg: #0b0b0f; --s-card: #1c1c1e; --s-ink: #f2f2f7; --s-sub: #98989f; --s-line: #2c2c2e; }
+.screen * { transition: background-color .35s, border-color .35s, color .35s; }
+.island { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 110px;
+          height: 30px; background: #0b0c0e; border-radius: 99px; z-index: 50; }
+.statusbar { display: flex; justify-content: space-between; padding: 20px 30px 4px; font-size: 14px;
+             font-weight: 700; color: var(--s-ink); }
+.home-bar { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 130px;
+            height: 5px; border-radius: 99px; background: #0b0c0e; z-index: 60; opacity: .85; }
+
+.nav-title { padding: 8px 20px 2px; font-size: 26px; font-weight: 900; letter-spacing: -.6px;
+             color: var(--s-ink); }
+.body-scroll { flex: 1; overflow-y: auto; padding: 6px 16px 50px; scrollbar-width: none; }
+.body-scroll::-webkit-scrollbar { display: none; }
+
+/* ── 프로필 헤더 ── */
+.profile { display: flex; align-items: center; gap: 14px; background: var(--s-card);
+           border-radius: 16px; padding: 16px; margin-top: 10px; }
+.avatar { width: 62px; height: 62px; border-radius: 50%; flex-shrink: 0; display: flex;
+          align-items: center; justify-content: center; font-size: 28px; color: #fff;
+          background: linear-gradient(135deg, #fa4e6e, #ff9500); }
+.profile .who { flex: 1; min-width: 0; }
+.profile .nm { font-size: 17px; font-weight: 800; color: var(--s-ink); }
+.profile .em { margin-top: 3px; font-size: 12.5px; color: var(--s-sub); }
+.profile .edit { border: none; background: var(--s-bg); color: var(--accent); font-family: inherit;
+                 font-size: 12.5px; font-weight: 700; border-radius: 99px; padding: 8px 13px;
+                 cursor: pointer; }
+.profile .edit:active { filter: brightness(.94); }
+
+/* ── iOS 스타일 그룹 리스트 ── */
+.group-label { margin: 20px 6px 7px; font-size: 12.5px; font-weight: 500; color: var(--s-sub);
+               letter-spacing: .3px; }
+.group { background: var(--s-card); border-radius: 14px; overflow: hidden; }
+.row { display: flex; align-items: center; gap: 12px; padding: 11px 14px; cursor: pointer; }
+.row:not(:first-child) { border-top: 1px solid var(--s-line); }
+.row .ic { width: 30px; height: 30px; border-radius: 8px; flex-shrink: 0; display: flex;
+           align-items: center; justify-content: center; font-size: 15px; }
+.row .lbl { flex: 1; font-size: 14.5px; color: var(--s-ink); }
+.row .val { font-size: 13px; color: var(--s-sub); }
+.row .go { color: #c7c7cc; font-size: 15px; margin-left: 2px; }
+.row.danger .lbl { color: var(--danger); font-weight: 500; }
+
+/* ── 순수 CSS 스위치 (체크박스 + 트랙/썸) ── */
+.sw { position: relative; width: 51px; height: 31px; flex-shrink: 0; cursor: pointer; }
+.sw input { display: none; }
+.sw .track { position: absolute; inset: 0; border-radius: 99px; background: var(--s-line);
+             transition: background-color .25s; }
+.sw .thumb { position: absolute; top: 2px; left: 2px; width: 27px; height: 27px; border-radius: 50%;
+             background: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.15), 0 1px 1px rgba(0,0,0,.06);
+             transition: transform .25s cubic-bezier(.2,.8,.2,1); }
+.sw input:checked ~ .track { background: var(--switch-on); }
+.sw input:checked ~ .thumb { transform: translateX(20px); }
+.sw:active .thumb { width: 30px; }
+
+.foot-note { text-align: center; margin-top: 22px; font-size: 11.5px; color: var(--s-sub);
+             line-height: 1.8; }
+
+/* ── 확인 다이얼로그 ── */
+.dlg-dim { position: absolute; inset: 0; z-index: 80; background: rgba(0,0,0,.42); opacity: 0;
+           pointer-events: none; transition: opacity .25s; display: flex; align-items: center;
+           justify-content: center; }
+.screen.dlg-open .dlg-dim { opacity: 1; pointer-events: auto; }
+.dlg { width: 272px; background: var(--s-card); border-radius: 16px; overflow: hidden;
+       text-align: center; transform: scale(1.1); transition: transform .25s cubic-bezier(.2,.8,.2,1); }
+.screen.dlg-open .dlg { transform: scale(1); }
+.dlg h3 { padding: 20px 20px 7px; font-size: 16px; font-weight: 700; color: var(--s-ink); }
+.dlg p { padding: 0 22px 18px; font-size: 12.5px; line-height: 1.6; color: var(--s-sub);
+         word-break: keep-all; }
+.dlg .btns { display: flex; border-top: 1px solid var(--s-line); }
+.dlg .btns button { flex: 1; border: none; background: none; font-family: inherit; font-size: 15px;
+                    padding: 13px; cursor: pointer; color: var(--s-ink); }
+.dlg .btns button + button { border-left: 1px solid var(--s-line); color: var(--danger);
+                             font-weight: 700; }
+.dlg .btns button:active { background: var(--s-bg); }
+
+/* ── 토스트 ── */
+.toast { position: absolute; z-index: 95; bottom: 84px; left: 50%;
+         transform: translate(-50%, 14px); background: rgba(28,28,30,.94); color: #fff;
+         font-size: 13px; padding: 11px 18px; border-radius: 99px; opacity: 0;
+         pointer-events: none; transition: opacity .3s, transform .3s; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* ── WWIT 스타일 명세 패널 ── */
+.specs { max-width: 360px; }
+.specs .pill { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+               color: #b0475d; border: 1.5px solid #eec3cd; border-radius: 99px; padding: 6px 16px; }
+.specs h1 { margin-top: 18px; font-size: 34px; font-weight: 900; letter-spacing: -1px; color: #1c1c1e; }
+.specs .desc { margin-top: 12px; font-size: 14.5px; line-height: 1.75; color: #4e5968; word-break: keep-all; }
+.spec-group { margin-top: 22px; }
+.spec-group h4 { font-size: 11.5px; font-weight: 700; letter-spacing: 2px; color: #8e8e93; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.tags span { font-size: 12.5px; font-weight: 600; background: #fff; border: 1px solid #f0dbe1;
+             padding: 6px 13px; border-radius: 99px; color: #333d4b; }
+.tokens { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.tk { display: flex; align-items: center; gap: 7px; font-family: "JetBrains Mono", monospace;
+      font-size: 11px; color: #6b7684; background: #fff; border: 1px solid #f0dbe1;
+      border-radius: 10px; padding: 7px 11px; }
+.tk i { width: 15px; height: 15px; border-radius: 5px; }
+.hint { margin-top: 24px; font-size: 12.5px; color: #8e8e93; line-height: 1.7; }
+.hint b { color: #fa4e6e; }
+
+@media (max-width: 900px) { body { flex-direction: column; gap: 32px; } .specs { max-width: 375px; } }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="screen" id="screen">
+    <div class="statusbar"><span>9:41</span><span>􀙇 􀙈 􀛨</span></div>
+    <div class="nav-title">설정</div>
+
+    <div class="body-scroll">
+      <!-- 프로필 헤더 -->
+      <div class="profile">
+        <div class="avatar">🍒</div>
+        <div class="who">
+          <div class="nm">루나</div>
+          <div class="em">luna@example.com</div>
+        </div>
+        <button class="edit" id="editBtn">프로필 편집</button>
+      </div>
+
+      <!-- 계정 -->
+      <div class="group-label">계정</div>
+      <div class="group">
+        <div class="row"><span class="ic" style="background:#e8f1ff">👤</span>
+          <span class="lbl">계정 정보</span><span class="val">luna</span><span class="go">›</span></div>
+        <div class="row"><span class="ic" style="background:#efedff">🔒</span>
+          <span class="lbl">보안 및 로그인</span><span class="go">›</span></div>
+        <div class="row"><span class="ic" style="background:#fff2e0">🔗</span>
+          <span class="lbl">연결된 서비스</span><span class="val">3개</span><span class="go">›</span></div>
+      </div>
+
+      <!-- 앱 설정 -->
+      <div class="group-label">앱 설정</div>
+      <div class="group">
+        <div class="row"><span class="ic" style="background:#e9e9ee">🌙</span>
+          <span class="lbl">다크 모드</span>
+          <label class="sw"><input type="checkbox" id="darkSw"><span class="track"></span><span class="thumb"></span></label></div>
+        <div class="row"><span class="ic" style="background:#e6f9ec">🌐</span>
+          <span class="lbl">언어</span><span class="val">한국어</span><span class="go">›</span></div>
+        <div class="row" id="cacheRow"><span class="ic" style="background:#e0f7f6">🧹</span>
+          <span class="lbl">캐시 삭제</span><span class="val" id="cacheVal">128MB</span><span class="go">›</span></div>
+      </div>
+
+      <!-- 알림 -->
+      <div class="group-label">알림</div>
+      <div class="group">
+        <div class="row"><span class="ic" style="background:#ffe9ed">🔔</span>
+          <span class="lbl">푸시 알림</span>
+          <label class="sw"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+        <div class="row"><span class="ic" style="background:#fff2e0">📣</span>
+          <span class="lbl">마케팅 알림</span>
+          <label class="sw"><input type="checkbox"><span class="track"></span><span class="thumb"></span></label></div>
+        <div class="row"><span class="ic" style="background:#efedff">🌜</span>
+          <span class="lbl">야간 알림 제한</span>
+          <label class="sw"><input type="checkbox" checked><span class="track"></span><span class="thumb"></span></label></div>
+      </div>
+
+      <!-- 정보 -->
+      <div class="group-label">정보</div>
+      <div class="group">
+        <div class="row"><span class="ic" style="background:#eeeef2">📄</span>
+          <span class="lbl">이용약관</span><span class="go">›</span></div>
+        <div class="row"><span class="ic" style="background:#e3f4ff">ℹ️</span>
+          <span class="lbl">버전 정보</span><span class="val">v2.4.1 (최신)</span></div>
+        <div class="row danger" id="logoutRow"><span class="ic" style="background:#ffe9e7">🚪</span>
+          <span class="lbl">로그아웃</span></div>
+      </div>
+
+      <p class="foot-note">루나 디자인 갤러리 · 대한민국<br>© 2026 luna. All rights reserved.</p>
+    </div>
+
+    <!-- 로그아웃 확인 다이얼로그 -->
+    <div class="dlg-dim" id="dlgDim">
+      <div class="dlg" id="dlg">
+        <h3>로그아웃할까요?</h3>
+        <p>로그아웃해도 계정 데이터는 안전하게 보관돼요. 언제든 다시 로그인할 수 있어요.</p>
+        <div class="btns">
+          <button id="dlgCancel">취소</button>
+          <button id="dlgOk">로그아웃</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">캐시를 삭제했어요</div>
+    <div class="home-bar"></div>
+  </div>
+</div>
+
+<aside class="specs">
+  <span class="pill">APP REFERENCE</span>
+  <h1>프로필/설정<br>— 다크 모드 전환</h1>
+  <p class="desc">iOS 스타일 그룹 리스트로 구성한 설정 화면. <b>다크 모드 스위치를 켜면 폰 화면
+  전체가 CSS 변수 교체로 부드럽게 다크 테마로 전환</b>됩니다. 스위치는 순수 CSS
+  (체크박스 + 트랙/썸)이고, 로그아웃은 확인 다이얼로그와 토스트까지 이어집니다.</p>
+
+  <div class="spec-group"><h4>카테고리</h4>
+    <div class="tags"><span>라이프스타일</span></div></div>
+  <div class="spec-group"><h4>패턴</h4>
+    <div class="tags"><span>마이페이지</span><span>설정</span><span>다크 모드</span></div></div>
+  <div class="spec-group"><h4>컴포넌트</h4>
+    <div class="tags"><span>스위치</span><span>리스트 그룹</span><span>다이얼로그</span><span>토스트</span><span>아바타</span></div></div>
+  <div class="spec-group"><h4>디자인 토큰</h4>
+    <div class="tokens">
+      <span class="tk"><i style="background:#fa4e6e"></i>#FA4E6E</span>
+      <span class="tk"><i style="background:#34c759"></i>#34C759</span>
+      <span class="tk"><i style="background:#1c1c1e"></i>#1C1C1E</span>
+    </div>
+    <div class="tokens"><span class="tk">switch 51×31</span><span class="tk">radius 14px</span><span class="tk">Noto Sans KR</span></div></div>
+
+  <p class="hint">💡 다크 모드는 <b>.screen에 .dark 클래스 하나</b>를 토글해 CSS 변수(--s-bg,
+  --s-card, --s-ink…)를 통째로 교체하는 방식 — 컴포넌트 코드는 그대로 두고 테마만 갈아끼웁니다.</p>
+</aside>
+
+<script>
+const screen = document.getElementById('screen');
+
+/* ── 다크 모드: CSS 변수 교체로 화면 전체 테마 전환 ── */
+document.getElementById('darkSw').addEventListener('change', e => {
+  screen.classList.toggle('dark', e.target.checked);
+});
+
+/* ── 토스트 ── */
+let toastTimer;
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 1800);
+}
+
+/* ── 로그아웃 확인 다이얼로그 ── */
+document.getElementById('logoutRow').addEventListener('click', () => screen.classList.add('dlg-open'));
+document.getElementById('dlgCancel').addEventListener('click', () => screen.classList.remove('dlg-open'));
+document.getElementById('dlgOk').addEventListener('click', () => {
+  screen.classList.remove('dlg-open');
+  toast('로그아웃 되었습니다');
+});
+document.getElementById('dlgDim').addEventListener('click', e => {
+  if (e.target === e.currentTarget) screen.classList.remove('dlg-open');
+});
+
+/* ── 캐시 삭제 / 프로필 편집 피드백 ── */
+document.getElementById('cacheRow').addEventListener('click', () => {
+  document.getElementById('cacheVal').textContent = '0MB';
+  toast('캐시를 삭제했어요 (128MB)');
+});
+document.getElementById('editBtn').addEventListener('click', () => toast('프로필 편집 화면은 준비 중이에요'));
+</script>
+
+<script>
+/* ── English mode (?lang=en) — translation layer only, no logic changes ── */
+(function(){
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "앱 · 프로필/설정 — 다크 모드 전환": "App · Profile & Settings — Dark Mode",
+    "설정": "Settings",
+    "루나": "Luna",
+    "프로필 편집": "Edit Profile",
+    "계정": "Account",
+    "계정 정보": "Account Info",
+    "보안 및 로그인": "Security & Login",
+    "연결된 서비스": "Connected Services",
+    "3개": "3",
+    "앱 설정": "App Settings",
+    "다크 모드": "Dark Mode",
+    "언어": "Language",
+    "한국어": "Korean",
+    "캐시 삭제": "Clear Cache",
+    "알림": "Notifications",
+    "푸시 알림": "Push Notifications",
+    "마케팅 알림": "Marketing Notifications",
+    "야간 알림 제한": "Quiet Hours",
+    "정보": "About",
+    "이용약관": "Terms of Service",
+    "버전 정보": "Version",
+    "v2.4.1 (최신)": "v2.4.1 (Latest)",
+    "로그아웃": "Log Out",
+    "루나 디자인 갤러리 · 대한민국": "Luna Design Gallery · Republic of Korea",
+    "로그아웃할까요?": "Log out?",
+    "로그아웃해도 계정 데이터는 안전하게 보관돼요. 언제든 다시 로그인할 수 있어요.": "Your account data stays safe after logging out. You can sign back in anytime.",
+    "취소": "Cancel",
+    "캐시를 삭제했어요": "Cache cleared",
+    "로그아웃 되었습니다": "Logged out",
+    "캐시를 삭제했어요 (128MB)": "Cache cleared (128MB)",
+    "프로필 편집 화면은 준비 중이에요": "Profile editing is coming soon",
+    "프로필/설정": "Profile & Settings",
+    "— 다크 모드 전환": "— Dark Mode",
+    "iOS 스타일 그룹 리스트로 구성한 설정 화면.": "A settings screen built as an iOS-style grouped list.",
+    "다크 모드 스위치를 켜면 폰 화면 전체가 CSS 변수 교체로 부드럽게 다크 테마로 전환": "Flip the dark-mode switch and the whole phone screen smoothly shifts to a dark theme by swapping CSS variables",
+    "됩니다. 스위치는 순수 CSS (체크박스 + 트랙/썸)이고, 로그아웃은 확인 다이얼로그와 토스트까지 이어집니다.": ". The switch is pure CSS (checkbox + track/thumb), and logout flows through a confirm dialog and a toast.",
+    "카테고리": "Category",
+    "패턴": "Pattern",
+    "컴포넌트": "Component",
+    "디자인 토큰": "Design Tokens",
+    "라이프스타일": "Lifestyle",
+    "마이페이지": "My Page",
+    "스위치": "Switch",
+    "리스트 그룹": "List Group",
+    "다이얼로그": "Dialog",
+    "토스트": "Toast",
+    "아바타": "Avatar",
+    "💡 다크 모드는": "💡 Dark mode toggles",
+    ".screen에 .dark 클래스 하나": "a single .dark class on .screen",
+    "를 토글해 CSS 변수(--s-bg, --s-card, --s-ink…)를 통째로 교체하는 방식 — 컴포넌트 코드는 그대로 두고 테마만 갈아끼웁니다.": " to swap the entire set of CSS variables (--s-bg, --s-card, --s-ink…) — the component code stays put and only the theme changes."
+  };
+  const RE = [];
+  const tr = t => {
+    if (TR[t] != null) return TR[t];
+    for (const [re, rep] of RE) { if (re.test(t)) return t.replace(re, rep); }
+    return null;
+  };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const raw = n.nodeValue, t = raw.trim().replace(/\s+/g,' ');
+      if (t) { const out = tr(t); if (out != null) {
+        const lead = (raw.match(/^\s*/)||[''])[0], trail = (raw.match(/\s*$/)||[''])[0];
+        n.nodeValue = lead + out + trail;
+      }}
+      return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) {
+      const out = tr(n.getAttribute(a).trim().replace(/\s+/g,' ')); if (out != null) n.setAttribute(a, out);
+    }});
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim().replace(/\s+/g,' ')); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DRIFT-01 — 스니커 제품 쇼케이스</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Inter:wght@400;500;600;700;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+/* AI 생성 스니커(Higgsfield · sneaker.png). 마우스로 좌우 드래그하면 제품이 기울고,
+   색상 스와치로 배경/포인트가 전환되는 프리미엄 제품 쇼케이스 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --accent: #ff6a2b; --bg1: #f6ede3; --bg2: #ffe4cf; --ink: #1a1410; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: var(--ink); color: var(--ink);
+       height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased;
+       transition: background .6s; }
+
+.stage { position: relative; height: 100vh; display: grid; grid-template-columns: 1.15fr .85fr;
+         background: radial-gradient(120% 100% at 30% 30%, var(--bg2), var(--bg1) 70%);
+         transition: background .6s; overflow: hidden; }
+
+/* 좌: 제품 무대 */
+.product { position: relative; display: flex; align-items: center; justify-content: center;
+           perspective: 1400px; cursor: grab; user-select: none; }
+.product.grabbing { cursor: grabbing; }
+.halo { position: absolute; width: 62%; aspect-ratio: 1; border-radius: 50%;
+        background: radial-gradient(circle, var(--accent), transparent 62%); opacity: .3;
+        filter: blur(30px); transition: background .6s; }
+.big-word { position: absolute; font-family: "Space Grotesk", sans-serif; font-weight: 700;
+            font-size: clamp(120px, 22vw, 320px); color: rgba(26,20,16,.06); letter-spacing: -.04em;
+            white-space: nowrap; pointer-events: none; }
+.shoe-wrap { position: relative; width: 82%; will-change: transform; }
+/* 이미지의 밝은 스튜디오 배경을 multiply로 무대에 녹여 사각 경계를 없앤다 */
+.shoe-wrap img { width: 100%; display: block; mix-blend-mode: multiply;
+                 filter: contrast(1.05) saturate(1.05); }
+.shoe-wrap .fallback { width: 100%; aspect-ratio: 1;
+  background: radial-gradient(circle at 40% 35%, #fff, var(--accent) 90%); border-radius: 40% 45% 50% 40%; }
+.spin-hint { position: absolute; bottom: 8%; left: 50%; transform: translateX(-50%);
+             font-family: "Space Grotesk", monospace; font-size: 11px; letter-spacing: 3px;
+             color: rgba(26,20,16,.45); }
+.spin-hint::before { content: "↤ "; } .spin-hint::after { content: " ↦"; }
+
+/* 우: 정보 패널 */
+.info { position: relative; display: flex; flex-direction: column; justify-content: center;
+        padding: 0 6vw 0 2vw; }
+.eyebrow { font-family: "Space Grotesk", monospace; font-size: 12px; letter-spacing: 4px;
+           color: var(--accent); }
+.title { margin-top: 14px; font-size: clamp(34px, 4.4vw, 58px); font-weight: 900; letter-spacing: -.03em;
+         line-height: .98; }
+.desc { margin-top: 18px; font-size: 14.5px; line-height: 1.8; color: #5c4f44; max-width: 340px;
+        word-break: keep-all; }
+.price { margin-top: 22px; display: flex; align-items: baseline; gap: 12px; }
+.price b { font-size: 30px; font-weight: 900; }
+.price s { color: #a99a8c; font-size: 16px; }
+.price .off { font-size: 12px; font-weight: 700; color: #fff; background: var(--accent);
+              padding: 3px 9px; border-radius: 6px; }
+
+.swatches { margin-top: 28px; }
+.swatches .lbl { font-size: 12px; letter-spacing: 1px; color: #8a7c6e; text-transform: uppercase; }
+.sw-row { display: flex; gap: 12px; margin-top: 12px; }
+.sw { width: 40px; height: 40px; border-radius: 50%; cursor: pointer; position: relative;
+      box-shadow: inset 0 -4px 8px rgba(0,0,0,.2); transition: transform .2s; }
+.sw:hover { transform: scale(1.12); }
+.sw.on::after { content: ""; position: absolute; inset: -5px; border: 2px solid var(--ink);
+                border-radius: 50%; }
+
+.size-row { margin-top: 26px; }
+.sizes { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+.size { width: 46px; height: 42px; border: 1px solid #cdbba9; border-radius: 10px; background: none;
+        font-family: inherit; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer;
+        transition: all .15s; }
+.size:hover { border-color: var(--ink); }
+.size.on { background: var(--ink); color: #fff; border-color: var(--ink); }
+
+.cta { margin-top: 32px; display: flex; gap: 12px; }
+.cta button { font-family: inherit; font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer;
+              transition: all .2s; }
+.cta .buy { flex: 1; background: var(--ink); color: #fff; border: none; padding: 17px;
+            position: relative; overflow: hidden; }
+.cta .buy:hover { background: var(--accent); }
+.cta .fav { width: 56px; border: 1px solid #cdbba9; background: none; font-size: 19px; }
+.cta .fav.on { color: var(--accent); border-color: var(--accent); }
+
+.credit { position: absolute; bottom: 22px; right: 6vw; font-family: "Space Grotesk", monospace;
+          font-size: 10px; letter-spacing: 2px; color: #a99a8c; }
+
+@media (max-width: 820px) {
+  .stage { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
+  .info { padding: 0 8vw 8vh; } .big-word { font-size: 40vw; }
+}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="product" id="product">
+    <div class="halo"></div>
+    <div class="big-word">DRIFT</div>
+    <div class="shoe-wrap" id="shoe">
+      <img src="../assets/gen/sneaker.png" alt="스니커" onerror="this.outerHTML='&lt;div class=fallback&gt;&lt;/div&gt;'">
+    </div>
+    <div class="spin-hint">드래그해서 돌려보기</div>
+  </div>
+
+  <div class="info">
+    <div class="eyebrow">NEW DROP — 2026 SS</div>
+    <h1 class="title">DRIFT-01<br>부양 감각</h1>
+    <p class="desc">중력을 잊은 미드솔. 발을 딛는 순간 0.1초의 부양이 시작됩니다.
+    도시를 미끄러지듯 달리기 위해 설계된 데일리 러너.</p>
+    <div class="price"><b>189,000원</b><s>239,000원</s><span class="off">21% OFF</span></div>
+
+    <div class="swatches">
+      <div class="lbl">컬러웨이</div>
+      <div class="sw-row" id="swRow">
+        <div class="sw on" data-a="#ff6a2b" data-b1="#f6ede3" data-b2="#ffe4cf" style="background:linear-gradient(135deg,#ffb08a,#ff6a2b)" title="선셋 오렌지"></div>
+        <div class="sw" data-a="#3b82f6" data-b1="#e8eef6" data-b2="#d3e2f5" style="background:linear-gradient(135deg,#8fb8 f6,#3b82f6);background:linear-gradient(135deg,#8fb8f6,#3b82f6)" title="오션 블루"></div>
+        <div class="sw" data-a="#22a06b" data-b1="#e8f3ec" data-b2="#d0eadb" style="background:linear-gradient(135deg,#7fd3a8,#22a06b)" title="포레스트"></div>
+        <div class="sw" data-a="#111" data-b1="#e6e6e8" data-b2="#d2d2d6" style="background:linear-gradient(135deg,#555,#111)" title="모노 블랙"></div>
+        <div class="sw" data-a="#c026a5" data-b1="#f6e8f3" data-b2="#f0d3ea" style="background:linear-gradient(135deg,#e77fd0,#c026a5)" title="마젠타"></div>
+      </div>
+    </div>
+
+    <div class="size-row">
+      <div class="lbl" style="font-size:12px;letter-spacing:1px;color:#8a7c6e;text-transform:uppercase">사이즈 (mm)</div>
+      <div class="sizes" id="sizes">
+        <button class="size">240</button><button class="size">250</button>
+        <button class="size on">260</button><button class="size">270</button>
+        <button class="size">280</button><button class="size">290</button>
+      </div>
+    </div>
+
+    <div class="cta">
+      <button class="buy">장바구니에 담기</button>
+      <button class="fav" id="fav">♡</button>
+    </div>
+  </div>
+  <div class="credit">PRODUCT IMAGE — AI GENERATED (HIGGSFIELD)</div>
+</div>
+
+<script>
+/* 드래그로 신발 3D 회전(기울임) */
+const product = document.getElementById('product');
+const shoe = document.getElementById('shoe');
+let down = false, lastX = 0, rotY = -12, rotX = 6, targetY = -12, targetX = 6, vy = 0;
+
+function setGrab(on){ product.classList.toggle('grabbing', on); }
+product.addEventListener('pointerdown', e => { down = true; lastX = e.clientX; vy = 0; setGrab(true);
+  product.setPointerCapture(e.pointerId); });
+product.addEventListener('pointermove', e => {
+  if (down){ const dx = e.clientX - lastX; lastX = e.clientX; targetY += dx * .4; vy = dx * .4; }
+  else { /* 호버 시 커서 방향으로 미세 틸트 */
+    const r = product.getBoundingClientRect();
+    targetX = 6 - ((e.clientY - r.top)/r.height - .5) * 16;
+  }
+});
+product.addEventListener('pointerup', () => { down = false; setGrab(false); targetY += vy * 6; });
+product.addEventListener('pointercancel', () => { down = false; setGrab(false); });
+
+let frames = 0;
+(function loop(){
+  if (window.__paused && frames > 5) { setTimeout(()=>requestAnimationFrame(loop), 300); return; }
+  frames++;
+  rotY += (targetY - rotY) * .1;
+  rotX += (targetX - rotX) * .1;
+  if (!down){ targetY += 0.15; }            // 입력 없을 때 은은히 자동 회전
+  shoe.style.transform = `rotateY(${rotY.toFixed(2)}deg) rotateX(${rotX.toFixed(2)}deg)`;
+  requestAnimationFrame(loop);
+})();
+
+/* 컬러웨이 전환 */
+const root = document.documentElement;
+document.getElementById('swRow').addEventListener('click', e => {
+  const sw = e.target.closest('.sw'); if (!sw) return;
+  document.querySelectorAll('.sw').forEach(x => x.classList.toggle('on', x === sw));
+  root.style.setProperty('--accent', sw.dataset.a);
+  root.style.setProperty('--bg1', sw.dataset.b1);
+  root.style.setProperty('--bg2', sw.dataset.b2);
+  /* 신발 색조 살짝 변경(hue-rotate 근사) */
+  const hues = { '#ff6a2b':0, '#3b82f6':200, '#22a06b':120, '#111':0, '#c026a5':300 };
+  const img = shoe.querySelector('img');
+  if (img){
+    const h = hues[sw.dataset.a] ?? 0;
+    img.style.filter = `drop-shadow(0 40px 50px rgba(0,0,0,.28)) hue-rotate(${h}deg) saturate(${sw.dataset.a==='#111'?.2:1.05})`;
+  }
+});
+
+/* 사이즈 · 찜 */
+document.getElementById('sizes').addEventListener('click', e => {
+  const s = e.target.closest('.size'); if (!s) return;
+  document.querySelectorAll('.size').forEach(x => x.classList.toggle('on', x === s));
+});
+document.getElementById('fav').addEventListener('click', function(){
+  this.classList.toggle('on'); this.textContent = this.classList.contains('on') ? '♥' : '♡';
+});
+</script>
+<script>
+/* English mode: ?lang=en swaps every visible Korean string to English. Adds only — no markup/CSS/logic changed. */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "DRIFT-01 — 스니커 제품 쇼케이스": "DRIFT-01 — Sneaker Product Showcase",
+    "스니커": "Sneaker",
+    "드래그해서 돌려보기": "Drag to spin",
+    "부양 감각": "Float Sensation",
+    "중력을 잊은 미드솔. 발을 딛는 순간 0.1초의 부양이 시작됩니다. 도시를 미끄러지듯 달리기 위해 설계된 데일리 러너.": "A midsole that forgets gravity. The instant your foot lands, 0.1 seconds of float begins. A daily runner engineered to glide through the city.",
+    "189,000원": "189,000 KRW",
+    "239,000원": "239,000 KRW",
+    "컬러웨이": "Colorway",
+    "선셋 오렌지": "Sunset Orange",
+    "오션 블루": "Ocean Blue",
+    "포레스트": "Forest",
+    "모노 블랙": "Mono Black",
+    "마젠타": "Magenta",
+    "사이즈 (mm)": "Size (mm)",
+    "장바구니에 담기": "Add to Cart"
+  };
+  const norm = s => s.replace(/\s+/g,' ').trim();
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swapText = n => {
+    const raw = n.nodeValue, key = norm(raw);
+    if (!key || TR[key] == null) return;
+    n.nodeValue = raw.match(/^\s*/)[0] + TR[key] + raw.match(/\s*$/)[0];
+  };
+  const walk = n => {
+    if (n.nodeType === 3) { swapText(n); return; }
+    if (n.nodeType !== 1) return;
+    for (const a of ATTRS) {
+      if (n.hasAttribute && n.hasAttribute(a)) {
+        const k = norm(n.getAttribute(a));
+        if (TR[k] != null) n.setAttribute(a, TR[k]);
+      }
+    }
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = norm(document.title);
+  if (TR[dt] != null) document.title = TR[dt];
+})();
+</script>
+</body>
+</html>

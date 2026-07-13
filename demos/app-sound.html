@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n>오르빗 — 뮤직 스트리밍 앱 UI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --accent: #d946ef; --accent2: #22d3ee; --app-bg: #0b0710; --panel: #150c1e;
+  --ink: #f4eefb; --dim: #a597b3; --line: rgba(255,255,255,.08);
+}
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', 'Noto Sans KR', sans-serif; -webkit-font-smoothing: antialiased;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px; position: relative; overflow-x: hidden; color: #1c1c22;
+  background: radial-gradient(ellipse 80% 55% at 50% 32%, #ffffff 0%, #e7e8ec 55%, #d7d9de 100%);
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(circle at 22% 18%, rgba(217,70,239,.08), transparent 40%),
+              radial-gradient(circle at 82% 78%, rgba(34,211,238,.08), transparent 42%);
+}
+
+/* ── 폰 목업 ── */
+.phone { position: relative; z-index: 1; width: 390px; height: 844px; flex-shrink: 0;
+  border-radius: 54px; background: linear-gradient(160deg, #2a2a30, #0a0a0c 60%); padding: 12px;
+  box-shadow: 0 60px 120px -40px rgba(20, 20, 30, .45), 0 24px 50px -24px rgba(20, 20, 30, .35),
+              inset 0 0 0 2px #3a3a40; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 42px; overflow: hidden;
+  background: var(--app-bg); display: flex; flex-direction: column; color: var(--ink); }
+.notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px;
+  height: 32px; background: #0a0a0c; border-radius: 20px; z-index: 100; }
+.statusbar { display: flex; justify-content: space-between; align-items: center; padding: 18px 26px 4px;
+  flex-shrink: 0; position: relative; z-index: 60; }
+.statusbar .time { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.stat-icons { display: flex; align-items: center; gap: 5px; }
+.stat-icons svg { fill: var(--ink); }
+.i-signal { width: 17px; height: 11px; }
+.i-wifi { width: 16px; height: 12px; }
+.i-battery { width: 24px; height: 12px; border: 1.4px solid var(--ink); border-radius: 3.5px;
+  padding: 1.5px; position: relative; opacity: .95; }
+.i-battery::after { content: ""; position: absolute; right: -3.5px; top: 3.5px; width: 2px; height: 5px;
+  background: var(--ink); border-radius: 0 2px 2px 0; }
+.i-battery .fill { height: 100%; width: 82%; background: var(--ink); border-radius: 1.5px; }
+.home-indicator { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 134px;
+  height: 5px; border-radius: 99px; background: rgba(255,255,255,.75); z-index: 90; }
+
+/* ── 화면 전환 ── */
+.scr { position: absolute; inset: 0; padding-top: 54px; opacity: 0; pointer-events: none;
+  transform: translateY(10px); transition: opacity .3s cubic-bezier(.2,.7,.2,1), transform .3s cubic-bezier(.2,.7,.2,1);
+  overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none; }
+.scr::-webkit-scrollbar { display: none; }
+.scr.active { opacity: 1; pointer-events: auto; transform: translateY(0); z-index: 5; }
+#scr-player.active { z-index: 20; }
+
+/* ── 지금 재생 화면 ── */
+#scr-player { display: flex; flex-direction: column; padding: 54px 26px 118px; overflow: hidden; }
+.player-top { display: flex; align-items: center; justify-content: space-between; padding: 4px 2px 8px; flex-shrink: 0; }
+.icon-btn { background: none; border: none; color: var(--ink); font-size: 18px; cursor: pointer;
+  width: 34px; height: 34px; display: grid; place-items: center; border-radius: 50%; transition: background .2s, transform .15s; }
+.icon-btn:hover { background: rgba(255,255,255,.08); }
+.icon-btn:active { transform: scale(.9); }
+.playing-from { font-size: 11.5px; font-weight: 700; letter-spacing: .06em; color: var(--dim); text-transform: uppercase; }
+
+.art-wrap { position: relative; margin: 14px auto 22px; width: 260px; height: 260px; flex-shrink: 0; }
+.vinyl { position: absolute; top: 50%; right: -34px; transform: translateY(-50%); width: 216px; height: 216px;
+  border-radius: 50%; background: radial-gradient(circle, #1c1420 0 12%, #0c0810 13% 96%, #1c1420 97%),
+  repeating-radial-gradient(circle, rgba(255,255,255,.05) 0 2px, transparent 2px 5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,.5); animation: spin 6s linear infinite; animation-play-state: paused; }
+.vinyl.spin { animation-play-state: running; }
+.vinyl::after { content: ""; position: absolute; inset: 40%; border-radius: 50%; background: #26102c;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,.12); }
+@keyframes spin { to { transform: translateY(-50%) rotate(360deg); } }
+.art { position: relative; z-index: 2; width: 100%; height: 100%; border-radius: 20px; overflow: hidden;
+  background: linear-gradient(135deg, #3a1250, #0e0620); box-shadow: 0 30px 60px -20px rgba(217,70,239,.35), 0 10px 30px rgba(0,0,0,.5); }
+.art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+.track-meta { display: flex; align-items: center; justify-content: space-between; gap: 14px; flex-shrink: 0; }
+.tm-text { min-width: 0; }
+.tm-text h1 { font-size: 21px; font-weight: 800; letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tm-text p { margin-top: 4px; font-size: 14px; color: var(--dim); font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.like-btn { flex-shrink: 0; background: none; border: none; color: var(--dim); cursor: pointer;
+  width: 38px; height: 38px; display: grid; place-items: center; transition: transform .15s, color .2s; }
+.like-btn svg { width: 25px; height: 25px; }
+.like-btn.liked { color: var(--accent); animation: pop-heart .35s ease; }
+@keyframes pop-heart { 40% { transform: scale(1.3); } 100% { transform: scale(1); } }
+
+.seek-row { margin-top: 20px; flex-shrink: 0; }
+.seek { padding: 8px 0; cursor: pointer; }
+.seek .rail { position: relative; height: 4px; border-radius: 99px; background: rgba(255,255,255,.16); }
+.seek .fill { position: absolute; inset: 0 auto 0 0; width: 0%; border-radius: 99px;
+  background: linear-gradient(90deg, var(--accent2), var(--accent)); }
+.seek .knob { position: absolute; top: 50%; left: 0%; width: 12px; height: 12px; border-radius: 50%;
+  background: #fff; transform: translate(-50%, -50%); box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+.time-row { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--dim);
+  font-variant-numeric: tabular-nums; margin-top: 2px; }
+
+.wave { display: block; width: 100%; height: 46px; margin: 14px 0 6px; flex-shrink: 0; }
+
+.controls { display: flex; align-items: center; justify-content: space-between; margin: 8px 0 20px; flex-shrink: 0; }
+.ctrl-btn { background: none; border: none; color: var(--ink); cursor: pointer; font-size: 22px;
+  width: 44px; height: 44px; display: grid; place-items: center; transition: transform .15s, opacity .2s; }
+.ctrl-btn.sm { font-size: 17px; color: var(--dim); }
+.ctrl-btn.sm.active { color: var(--accent2); }
+.ctrl-btn:active { transform: scale(.88); }
+.play-toggle { width: 62px; height: 62px; border-radius: 50%; border: none; cursor: pointer;
+  background: linear-gradient(135deg, var(--accent2), var(--accent)); color: #140819; font-size: 24px;
+  display: grid; place-items: center; box-shadow: 0 14px 30px -8px rgba(217,70,239,.55);
+  transition: transform .15s; }
+.play-toggle:active { transform: scale(.92); }
+
+.volume-row { display: flex; align-items: center; gap: 12px; margin-top: auto; padding-top: 6px; flex-shrink: 0; }
+.vol-ico { font-size: 15px; width: 20px; text-align: center; }
+.volume-row input { -webkit-appearance: none; appearance: none; flex: 1; height: 4px; border-radius: 99px;
+  outline: none; cursor: pointer; background: linear-gradient(90deg, var(--accent2) var(--v, 72%), rgba(255,255,255,.16) var(--v, 72%)); }
+.volume-row input::-webkit-slider-thumb { -webkit-appearance: none; width: 13px; height: 13px; border-radius: 50%;
+  background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+
+/* ── 홈 화면 ── */
+#scr-home { padding: 54px 22px 150px; }
+.home-head { display: flex; align-items: flex-end; justify-content: space-between; padding: 10px 2px 18px; }
+.home-head .hi { display: block; font-size: 13px; color: var(--dim); font-weight: 600; }
+.home-head h2 { margin-top: 4px; font-size: 22px; font-weight: 800; letter-spacing: -.01em; }
+.home-head .avatar { width: 38px; height: 38px; border-radius: 50%; display: grid; place-items: center;
+  font-size: 18px; background: linear-gradient(135deg, #2a1740, #401055); flex-shrink: 0; }
+
+.chip-row { display: flex; gap: 8px; padding: 4px 0 20px; }
+.chip { border: 1px solid var(--line); background: rgba(255,255,255,.04); color: var(--dim); font-family: inherit;
+  font-size: 12.5px; font-weight: 700; padding: 7px 15px; border-radius: 99px; cursor: pointer; transition: all .2s; }
+.chip.on { background: var(--ink); color: #140819; border-color: var(--ink); }
+
+.sec-label { font-size: 15.5px; font-weight: 800; letter-spacing: -.01em; margin: 6px 0 12px; }
+
+.continue-row { display: flex; align-items: center; gap: 12px; background: var(--panel); border-radius: 16px;
+  padding: 10px 12px; margin-bottom: 26px; cursor: pointer; transition: background .2s; border: 1px solid var(--line); }
+.continue-row:hover { background: #1c1224; }
+.cont-art { width: 52px; height: 52px; border-radius: 10px; overflow: hidden; flex-shrink: 0; background: #2a1740; }
+.cont-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.cont-meta { flex: 1; min-width: 0; }
+.cont-meta b { display: block; font-size: 14.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cont-meta span { font-size: 12px; color: var(--dim); }
+.mini-play { flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%; border: none; cursor: pointer;
+  background: var(--accent); color: #140819; font-size: 13px; display: grid; place-items: center; }
+
+.pl-list { display: flex; flex-direction: column; gap: 4px; }
+.pl-row { display: flex; align-items: center; gap: 13px; padding: 8px 6px; border-radius: 12px; cursor: pointer;
+  transition: background .18s; }
+.pl-row:hover { background: rgba(255,255,255,.06); }
+.pl-thumb { width: 54px; height: 54px; border-radius: 12px; flex-shrink: 0; overflow: hidden; position: relative; }
+.pl-thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pl-thumb.g1 { background: linear-gradient(135deg, #7c1fa0, #d946ef); }
+.pl-thumb.g2 { background: linear-gradient(135deg, #0e7490, #22d3ee); }
+.pl-thumb.g3 { background: linear-gradient(135deg, #1e293b, #475569); }
+.pl-thumb.g4 { background: linear-gradient(135deg, #be123c, #fb7185); }
+.pl-thumb.g5 { background: linear-gradient(135deg, #4d1a7a, #8b3fd4); }
+.pl-thumb .live { position: absolute; bottom: 4px; left: 4px; font-size: 8.5px; font-weight: 800; letter-spacing: .04em;
+  background: #ef4444; color: #fff; padding: 2px 5px; border-radius: 5px; }
+.pl-text { flex: 1; min-width: 0; }
+.pl-text b { display: block; font-size: 14.5px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pl-text span { font-size: 12px; color: var(--dim); }
+
+/* ── 검색 화면 ── */
+#scr-search { padding: 54px 22px 150px; }
+#scr-search h2 { font-size: 24px; font-weight: 800; padding: 10px 2px 18px; letter-spacing: -.01em; }
+.search-box { display: flex; align-items: center; gap: 9px; background: var(--panel); border: 1px solid var(--line);
+  border-radius: 13px; padding: 12px 14px; margin-bottom: 22px; }
+.search-box span { opacity: .6; font-size: 15px; }
+.search-box input { flex: 1; background: none; border: none; outline: none; color: var(--ink); font-family: inherit;
+  font-size: 14.5px; min-width: 0; }
+.search-box input::placeholder { color: var(--dim); }
+.genre-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.genre { border-radius: 14px; padding: 20px 14px; font-size: 15px; font-weight: 800; cursor: pointer; height: 84px;
+  display: flex; align-items: flex-end; transition: transform .15s, filter .15s; }
+.genre:active { transform: scale(.96); }
+.genre.on { filter: brightness(1.25); box-shadow: 0 0 0 2px rgba(255,255,255,.5) inset; }
+.genre.gA { background: linear-gradient(135deg, #7c1fa0, #d946ef); }
+.genre.gB { background: linear-gradient(135deg, #0e7490, #22d3ee); color: #04303a; }
+.genre.gC { background: linear-gradient(135deg, #1e293b, #475569); }
+.genre.gD { background: linear-gradient(135deg, #be123c, #fb7185); }
+
+/* ── 보관함 화면 ── */
+#scr-library { padding: 54px 22px 150px; }
+#scr-library h2 { font-size: 24px; font-weight: 800; padding: 10px 2px 18px; letter-spacing: -.01em; }
+.lib-tabs { display: flex; gap: 20px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+.lib-tabs button { background: none; border: none; color: var(--dim); font-family: inherit; font-size: 13.5px;
+  font-weight: 700; padding: 0 0 12px; cursor: pointer; border-bottom: 2px solid transparent; }
+.lib-tabs button.on { color: var(--ink); border-color: var(--accent2); }
+.lib-list { display: flex; flex-direction: column; gap: 4px; }
+
+/* ── 미니 플레이어 바 ── */
+.mini-bar { position: absolute; left: 10px; right: 10px; bottom: 88px; z-index: 40; display: flex; align-items: center;
+  gap: 11px; background: rgba(30, 18, 38, .88); backdrop-filter: blur(16px); border: 1px solid rgba(255,255,255,.1);
+  border-radius: 16px; padding: 8px 10px; cursor: pointer; box-shadow: 0 14px 30px -10px rgba(0,0,0,.5); }
+.mini-art { width: 38px; height: 38px; border-radius: 9px; overflow: hidden; flex-shrink: 0; background: #2a1740; }
+.mini-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mini-meta { flex: 1; min-width: 0; }
+.mini-meta b { display: block; font-size: 13px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.mini-meta span { font-size: 11px; color: var(--dim); }
+.mini-toggle { flex-shrink: 0; width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+  background: rgba(255,255,255,.1); color: var(--ink); font-size: 12px; display: grid; place-items: center; }
+
+/* ── 탭바 ── */
+.tabbar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 40; display: flex;
+  background: rgba(11, 7, 16, .92); backdrop-filter: blur(14px); border-top: 1px solid var(--line);
+  padding: 9px 6px 22px; }
+.tab { flex: 1; border: none; background: none; font-family: inherit; display: flex; flex-direction: column;
+  align-items: center; gap: 3px; font-size: 10.5px; color: var(--dim); cursor: pointer; font-weight: 600;
+  padding: 4px 0; transition: color .2s; }
+.tab i { font-style: normal; font-size: 19px; filter: grayscale(1) opacity(.6); transition: filter .2s; }
+.tab.on { color: var(--ink); font-weight: 800; }
+.tab.on i { filter: none; }
+
+/* ── 언어 토글 ── */
+.lang-toggle { position: fixed; top: 22px; right: 22px; z-index: 500; background: rgba(20,20,26,.85);
+  color: #fff; border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); font-family: inherit;
+  font-weight: 700; font-size: 12.5px; letter-spacing: .03em; padding: 9px 16px; border-radius: 99px;
+  cursor: pointer; box-shadow: 0 10px 24px -8px rgba(0,0,0,.35); transition: transform .15s, background .2s; }
+.lang-toggle:hover { background: #26262f; }
+.lang-toggle:active { transform: scale(.94); }
+
+@media (max-width: 480px) {
+  body { padding: 0; }
+  .phone { width: 100vw; height: 100dvh; border-radius: 0; padding: 0; box-shadow: none; }
+  .screen { border-radius: 0; }
+  .notch { top: 10px; }
+}
+</style>
+</head>
+<body>
+
+<button class="lang-toggle" id="lang">EN</button>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+
+    <div class="statusbar">
+      <span class="time">9:41</span>
+      <div class="stat-icons">
+        <svg class="i-signal" viewBox="0 0 18 12"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+        <svg class="i-wifi" viewBox="0 0 18 14"><path d="M9 12.5a1.6 1.6 0 100-3.2 1.6 1.6 0 000 3.2zM3.5 7.2a8 8 0 0111 0l-1.5 1.6a5.8 5.8 0 00-8 0zM.7 4.2a12 12 0 0116.6 0L15.8 6a9.4 9.4 0 00-13.6 0z"/></svg>
+        <div class="i-battery"><div class="fill"></div></div>
+      </div>
+    </div>
+
+    <!-- 지금 재생 화면 -->
+    <section class="scr" id="scr-player">
+      <div class="player-top">
+        <button class="icon-btn" id="collapseBtn" aria-label="닫기">︾</button>
+        <span class="playing-from" data-i18n>재생 목록 · 오르빗 라디오</span>
+        <button class="icon-btn">⋯</button>
+      </div>
+
+      <div class="art-wrap">
+        <div class="vinyl spin" id="vinyl"></div>
+        <div class="art"><img src="../assets/gen/app-music.jpg" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+      </div>
+
+      <div class="track-meta">
+        <div class="tm-text">
+          <h1 id="trackTitle">블랙홀 러버</h1>
+          <p id="trackArtist">네뷸러</p>
+        </div>
+        <button class="like-btn liked" id="likeBtn" aria-label="좋아요">
+          <svg viewBox="0 0 24 24" id="likeIcon"><path d="M12 21s-7.5-4.9-10-9.4C.3 8.4 2.4 4.9 6 4.9c2 0 3.4 1 4.3 2.4l1.7 2.5 1.7-2.5c.9-1.4 2.3-2.4 4.3-2.4 3.6 0 5.7 3.5 4 6.7-2.5 4.5-10 9.4-10 9.4z" fill="currentColor" stroke="currentColor" stroke-width="2"/></svg>
+        </button>
+      </div>
+
+      <div class="seek-row">
+        <div class="seek" id="seek"><div class="rail"><div class="fill" id="seekFill"></div><div class="knob" id="seekKnob"></div></div></div>
+        <div class="time-row"><span id="tCur">1:02</span><span id="tDur">3:42</span></div>
+      </div>
+
+      <canvas class="wave" id="wave" width="330" height="46"></canvas>
+
+      <div class="controls">
+        <button class="ctrl-btn sm" id="shuffleBtn" aria-label="셔플">🔀</button>
+        <button class="ctrl-btn" id="prevBtn" aria-label="이전 트랙">⏮</button>
+        <button class="play-toggle" id="playBtn" aria-label="재생 또는 일시정지"><span id="playIcon">⏸</span></button>
+        <button class="ctrl-btn" id="nextBtn" aria-label="다음 트랙">⏭</button>
+        <button class="ctrl-btn sm" id="repeatBtn" aria-label="반복">🔁</button>
+      </div>
+
+      <div class="volume-row">
+        <span class="vol-ico" id="volIco">🔊</span>
+        <input type="range" id="volume" min="0" max="100" value="72" aria-label="볼륨">
+      </div>
+    </section>
+
+    <!-- 홈 화면 -->
+    <section class="scr active" id="scr-home">
+      <header class="home-head">
+        <div><span class="hi" data-i18n>안녕하세요 👋</span><h2 data-i18n>무엇을 들을까요?</h2></div>
+        <span class="avatar">🌙</span>
+      </header>
+      <div class="chip-row">
+        <button class="chip on" data-i18n>전체</button>
+        <button class="chip" data-i18n>음악</button>
+        <button class="chip" data-i18n>팟캐스트</button>
+      </div>
+
+      <p class="sec-label" data-i18n>이어듣기</p>
+      <div class="continue-row" id="continueRow">
+        <div class="cont-art"><img src="../assets/gen/app-music.jpg" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+        <div class="cont-meta"><b id="contTitle">블랙홀 러버</b><span id="contSub">네뷸러 · 오르빗</span></div>
+        <button class="mini-play" id="contPlay" aria-label="재생">▶</button>
+      </div>
+
+      <p class="sec-label" data-i18n>내 플레이리스트</p>
+      <div class="pl-list" id="plList"></div>
+    </section>
+
+    <!-- 검색 화면 -->
+    <section class="scr" id="scr-search">
+      <h2 data-i18n>검색</h2>
+      <div class="search-box"><span>🔍</span><input type="text" id="searchInput" data-i18n-ph="아티스트, 노래, 팟캐스트 검색" placeholder="아티스트, 노래, 팟캐스트 검색" autocomplete="off"></div>
+      <p class="sec-label" data-i18n>둘러보기</p>
+      <div class="genre-grid">
+        <div class="genre gA" data-genre="0" data-i18n>로파이</div>
+        <div class="genre gB" data-genre="1" data-i18n>신스팝</div>
+        <div class="genre gC" data-genre="2" data-i18n>심야 드라이브</div>
+        <div class="genre gD" data-genre="3" data-i18n>집중 모드</div>
+      </div>
+    </section>
+
+    <!-- 보관함 화면 -->
+    <section class="scr" id="scr-library">
+      <h2 data-i18n>보관함</h2>
+      <div class="lib-tabs">
+        <button class="on" data-i18n>플레이리스트</button>
+        <button data-i18n>아티스트</button>
+        <button data-i18n>앨범</button>
+      </div>
+      <div class="lib-list" id="libList"></div>
+    </section>
+
+    <!-- 미니 플레이어 바 -->
+    <div class="mini-bar" id="miniBar">
+      <div class="mini-art"><img src="../assets/gen/app-music.jpg" alt="" loading="lazy" onerror="this.style.display='none'"></div>
+      <div class="mini-meta"><b id="miniTitle">블랙홀 러버</b><span id="miniArtist">네뷸러</span></div>
+      <button class="mini-toggle" id="miniPlayBtn" aria-label="재생 또는 일시정지"><span id="miniPlayIcon">⏸</span></button>
+    </div>
+
+    <!-- 탭바 -->
+    <nav class="tabbar" id="tabbar">
+      <button class="tab on" data-tab="home"><i>🏠</i><span data-i18n>홈</span></button>
+      <button class="tab" data-tab="search"><i>🔍</i><span data-i18n>검색</span></button>
+      <button class="tab" data-tab="library"><i>📚</i><span data-i18n>보관함</span></button>
+    </nav>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+
+<script>
+/* ═══ 오르빗 뮤직 앱 로직 ═══ */
+const $ = id => document.getElementById(id);
+
+const TRACKS = [
+  { title: '블랙홀 러버',  artist: '네뷸러',   album: '오르빗',      dur: 222 },
+  { title: '표류',        artist: '코스모',   album: '딥 다이브',   dur: 245 },
+  { title: '제로 중력',    artist: '네뷸러',   album: '오르빗',      dur: 178 },
+  { title: '새틀라이트',   artist: '루나틱',   album: '나이트 사이드', dur: 201 },
+];
+
+const PLAYLISTS = [
+  { title: '오늘의 플레이리스트', sub: '오르빗 추천 · 24곡', cls: 'g1', img: true },
+  { title: '새벽 드라이브',      sub: '코스모 · 18곡',      cls: 'g2' },
+  { title: '포커스 모드',        sub: '루프 · 32곡',        cls: 'g3' },
+  { title: '설렘 가득',          sub: '네뷸러 · 15곡',      cls: 'g4' },
+  { title: '심야 라디오',        sub: '라이브 방송 중',     cls: 'g5', live: true },
+];
+
+let cur = 0, playing = true, elapsed = 62, liked = true;
+let shuffleOn = false, repeatOn = false;
+let vol = 72, lastT = null, frames = 0, curTab = 'home';
+
+const fmt = s => `${Math.floor(s / 60)}:${String(Math.floor(s % 60)).padStart(2, '0')}`;
+
+function heartFill(on) {
+  liked = on;
+  $('likeBtn').classList.toggle('liked', on);
+  $('likeIcon').querySelector('path').setAttribute('fill', on ? 'currentColor' : 'none');
+}
+
+function renderTrack() {
+  const t = TRACKS[cur];
+  $('trackTitle').textContent = t.title;
+  $('trackArtist').textContent = t.artist;
+  $('tDur').textContent = fmt(t.dur);
+  $('contTitle').textContent = t.title;
+  $('contSub').textContent = `${t.artist} · ${t.album}`;
+  $('miniTitle').textContent = t.title;
+  $('miniArtist').textContent = t.artist;
+}
+
+function renderPlayState() {
+  const pp = playing ? '⏸' : '▶';
+  $('playIcon').textContent = pp;
+  $('miniPlayIcon').textContent = pp;
+  $('vinyl').classList.toggle('spin', playing);
+}
+
+function togglePlay() { playing = !playing; renderPlayState(); }
+
+function selectTrack(i) {
+  cur = ((i % TRACKS.length) + TRACKS.length) % TRACKS.length;
+  elapsed = 0; playing = true;
+  renderTrack(); renderPlayState();
+}
+
+function openPlayer() {
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('active'));
+  $('scr-player').classList.add('active');
+  $('tabbar').style.display = 'none';
+  $('miniBar').style.display = 'none';
+}
+function showTab(name) {
+  curTab = name;
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('active'));
+  $('scr-' + name).classList.add('active');
+  $('tabbar').style.display = 'flex';
+  $('miniBar').style.display = 'flex';
+}
+
+/* ── 리스트 렌더 ── */
+function rowHTML(p, i) {
+  const thumb = p.img
+    ? `<div class="pl-thumb ${p.cls}"><img src="../assets/gen/app-music.jpg" alt="" loading="lazy" onerror="this.style.display='none'">${p.live ? '<span class="live" data-i18n>LIVE</span>' : ''}</div>`
+    : `<div class="pl-thumb ${p.cls}">${p.live ? '<span class="live" data-i18n>LIVE</span>' : ''}</div>`;
+  return `<div class="pl-row" data-i="${i}">${thumb}
+    <div class="pl-text"><b data-i18n-dyn="${p.title}">${p.title}</b><span data-i18n-dyn="${p.sub}">${p.sub}</span></div></div>`;
+}
+function buildLists() {
+  $('plList').innerHTML = PLAYLISTS.map(rowHTML).join('');
+  $('libList').innerHTML = PLAYLISTS.slice().reverse().map(rowHTML).join('');
+  document.querySelectorAll('.pl-row').forEach(row => {
+    row.addEventListener('click', () => { selectTrack(+row.dataset.i); openPlayer(); });
+  });
+}
+
+/* ── 이벤트 ── */
+$('playBtn').addEventListener('click', togglePlay);
+$('miniPlayBtn').addEventListener('click', e => { e.stopPropagation(); togglePlay(); });
+$('nextBtn').addEventListener('click', () => selectTrack(cur + 1));
+$('prevBtn').addEventListener('click', () => selectTrack(cur - 1));
+$('shuffleBtn').addEventListener('click', e => { shuffleOn = !shuffleOn; e.currentTarget.classList.toggle('active', shuffleOn); });
+$('repeatBtn').addEventListener('click', e => { repeatOn = !repeatOn; e.currentTarget.classList.toggle('active', repeatOn); });
+$('likeBtn').addEventListener('click', () => heartFill(!liked));
+$('collapseBtn').addEventListener('click', () => showTab(curTab));
+$('miniBar').addEventListener('click', openPlayer);
+$('continueRow').addEventListener('click', openPlayer);
+$('contPlay').addEventListener('click', e => { e.stopPropagation(); openPlayer(); });
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+document.querySelectorAll('.genre').forEach(g => g.addEventListener('click', () => g.classList.toggle('on')));
+document.querySelectorAll('.lib-tabs button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('.lib-tabs button').forEach(x => x.classList.remove('on')); b.classList.add('on');
+}));
+
+$('seek').addEventListener('click', e => {
+  const r = $('seek').getBoundingClientRect();
+  const frac = Math.min(Math.max((e.clientX - r.left) / r.width, 0), 1);
+  elapsed = frac * TRACKS[cur].dur;
+});
+$('volume').addEventListener('input', e => {
+  vol = +e.target.value;
+  e.target.style.setProperty('--v', vol + '%');
+  $('volIco').textContent = vol === 0 ? '🔇' : vol < 45 ? '🔉' : '🔊';
+});
+
+/* ═══ rAF 루프: 진행률 + 파형 (갤러리 공통 __paused 가드) ═══ */
+const wave = $('wave'), wc = wave.getContext('2d');
+
+function updateSeek() {
+  const dur = TRACKS[cur].dur;
+  const pct = Math.min(elapsed / dur * 100, 100);
+  $('seekFill').style.width = pct + '%';
+  $('seekKnob').style.left = pct + '%';
+  $('tCur').textContent = fmt(elapsed);
+  if (elapsed >= dur) { repeatOn ? (elapsed = 0) : selectTrack(shuffleOn ? Math.floor(Math.random() * TRACKS.length) : cur + 1); }
+}
+
+function drawWave(t) {
+  wc.clearRect(0, 0, wave.width, wave.height);
+  const N = 46, bw = wave.width / N;
+  for (let i = 0; i < N; i++) {
+    let h;
+    if (playing) h = 6 + (Math.sin(i * 0.9 + t * 0.006) * 0.5 + 0.5) * 30 * (0.4 + Math.sin(i * 0.35 + t * 0.002) * 0.3 + 0.3);
+    else h = 4 + Math.sin(i * 0.7) * 2;
+    const hue = 285 + (i / N) * 60;
+    wc.fillStyle = `hsl(${hue} 85% 65%)`;
+    wc.fillRect(i * bw + 1.2, (wave.height - h) / 2, bw - 2.4, h);
+  }
+}
+
+(function loop(t) {
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+  if (lastT == null) lastT = t;
+  const dt = (t - lastT) / 1000; lastT = t;
+  if (playing) elapsed += dt;
+  updateSeek();
+  drawWave(t);
+  requestAnimationFrame(loop);
+})();
+
+buildLists();
+renderTrack();
+renderPlayState();
+heartFill(true);
+$('volume').style.setProperty('--v', '72%');
+
+/* ═══ 언어 전환 (?lang=en + 코너 토글) ═══ */
+const STR = {
+  '오르빗 — 뮤직 스트리밍 앱 UI': 'Orbit — Music Streaming App UI',
+  '재생 목록 · 오르빗 라디오': 'Playing from · Orbit Radio',
+  '안녕하세요 👋': 'Good evening 👋',
+  '무엇을 들을까요?': 'What do you want to hear?',
+  '전체': 'All', '음악': 'Music', '팟캐스트': 'Podcasts',
+  '이어듣기': 'Continue listening',
+  '내 플레이리스트': 'Your playlists',
+  '검색': 'Search',
+  '둘러보기': 'Browse all',
+  '로파이': 'Lo-fi', '신스팝': 'Synthpop', '심야 드라이브': 'Late-Night Drive', '집중 모드': 'Deep Focus',
+  '보관함': 'Library',
+  '플레이리스트': 'Playlists', '아티스트': 'Artists', '앨범': 'Albums',
+  '홈': 'Home',
+  'LIVE': 'LIVE',
+  '블랙홀 러버': 'Black Hole Lover', '네뷸러': 'Nebula', '오르빗': 'Orbit',
+  '표류': 'Drift', '코스모': 'Cosmo', '딥 다이브': 'Deep Dive',
+  '제로 중력': 'Zero Gravity',
+  '새틀라이트': 'Satellite', '루나틱': 'Lunatic', '나이트 사이드': 'Night Side',
+  '오늘의 플레이리스트': "Today's Playlist", '오르빗 추천 · 24곡': 'Orbit picks · 24 tracks',
+  '새벽 드라이브': 'Dawn Drive', '코스모 · 18곡': 'Cosmo · 18 tracks',
+  '포커스 모드': 'Focus Mode', '루프 · 32곡': 'Loop · 32 tracks',
+  '설렘 가득': 'Butterflies', '네뷸러 · 15곡': 'Nebula · 15 tracks',
+  '심야 라디오': 'Late-Night Radio', '라이브 방송 중': 'Live now'
+};
+let EN = new URLSearchParams(location.search).get('lang') === 'en';
+const orig = new WeakMap();
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    if (!orig.has(el)) orig.set(el, el.innerHTML);
+    const ko = orig.get(el).trim();
+    el.innerHTML = EN ? (STR[ko] ?? orig.get(el)) : orig.get(el);
+  });
+  document.documentElement.lang = EN ? 'en' : 'ko';
+}
+applyLang();
+
+/* 정적 패턴 외 동적으로 주입되는 한국어(트랙명·플레이리스트명)도 동일한 STR 사전으로 번역 */
+function tr(ko) { return EN ? (STR[ko] ?? ko) : ko; }
+function refreshDynamic() {
+  document.querySelectorAll('[data-i18n-dyn]').forEach(el => { el.textContent = tr(el.dataset.i18nDyn); });
+  $('trackTitle').textContent = tr(TRACKS[cur].title);
+  $('trackArtist').textContent = tr(TRACKS[cur].artist);
+  $('contTitle').textContent = tr(TRACKS[cur].title);
+  $('contSub').textContent = `${tr(TRACKS[cur].artist)} · ${tr(TRACKS[cur].album)}`;
+  $('miniTitle').textContent = tr(TRACKS[cur].title);
+  $('miniArtist').textContent = tr(TRACKS[cur].artist);
+  $('searchInput').placeholder = tr('아티스트, 노래, 팟캐스트 검색');
+  document.getElementById('lang').textContent = EN ? 'KO' : 'EN';
+}
+document.getElementById('lang').addEventListener('click', () => { EN = !EN; applyLang(); refreshDynamic(); });
+refreshDynamic();
+</script>
+</body>
+</html>

@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>별을 잇다 — 나만의 별자리 만들기</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;900&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* AI 생성 성운(Higgsfield · nebula.png) 위에 별을 클릭해 잇는 인터랙티브 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: "Noto Sans KR", sans-serif; background: #05060f; color: #eef2ff;
+       height: 100vh; overflow: hidden; -webkit-font-smoothing: antialiased; }
+#sky { position: fixed; inset: 0; display: block; cursor: crosshair; }
+.bg { position: fixed; inset: 0; background: url('../assets/gen/nebula.png') center/cover, #05060f;
+      opacity: .5; }
+.bg::after { content: ""; position: absolute; inset: 0;
+  background: radial-gradient(ellipse at center, transparent 30%, rgba(5,6,15,.72)); }
+
+/* 상단 타이틀 */
+.head { position: fixed; z-index: 5; top: 34px; left: 0; right: 0; text-align: center; pointer-events: none; }
+.head .k { font-family: "Space Mono", monospace; font-size: 12px; letter-spacing: 5px; color: #8fa6d8; }
+.head h1 { margin-top: 10px; font-family: "Noto Serif KR", serif; font-weight: 900;
+           font-size: clamp(28px, 4.4vw, 46px); letter-spacing: -.01em;
+           text-shadow: 0 0 30px rgba(150,180,255,.4); }
+.head p { margin-top: 10px; font-size: 13px; color: #9fb0d8; }
+
+/* 툴바 */
+.toolbar { position: fixed; z-index: 6; bottom: 30px; left: 50%; transform: translateX(-50%);
+           display: flex; gap: 8px; align-items: center; padding: 8px;
+           background: rgba(15,20,40,.6); border: 1px solid rgba(150,180,255,.2); border-radius: 99px;
+           backdrop-filter: blur(16px); }
+.toolbar button { font-family: "Noto Sans KR", sans-serif; font-size: 13px; font-weight: 600;
+                  color: #dfe6ff; background: rgba(150,180,255,.1); border: 1px solid rgba(150,180,255,.18);
+                  border-radius: 99px; padding: 10px 18px; cursor: pointer; transition: all .2s; }
+.toolbar button:hover { background: rgba(150,180,255,.24); }
+.toolbar .count { font-family: "Space Mono", monospace; font-size: 12px; color: #8fa6d8;
+                  padding: 0 12px; min-width: 92px; text-align: center; }
+
+/* 이름짓기 입력 (별자리 완성 시) */
+.namer { position: fixed; z-index: 7; top: 50%; left: 50%; transform: translate(-50%,-50%) scale(.9);
+         background: rgba(12,16,34,.9); border: 1px solid rgba(150,180,255,.3); border-radius: 18px;
+         padding: 28px 30px; text-align: center; opacity: 0; pointer-events: none; transition: all .3s;
+         box-shadow: 0 30px 80px rgba(0,0,0,.6); }
+.namer.on { opacity: 1; pointer-events: auto; transform: translate(-50%,-50%) scale(1); }
+.namer h3 { font-family: "Noto Serif KR", serif; font-size: 20px; }
+.namer p { font-size: 12.5px; color: #9fb0d8; margin-top: 6px; }
+.namer input { margin-top: 16px; width: 240px; background: rgba(150,180,255,.08);
+               border: 1px solid rgba(150,180,255,.3); border-radius: 10px; padding: 12px 16px;
+               color: #fff; font-family: inherit; font-size: 15px; text-align: center; outline: none; }
+.namer input:focus { border-color: #9fb0ff; }
+.namer .go { margin-top: 14px; background: linear-gradient(90deg, #7c8cf8, #b06dff); border: none;
+             color: #fff; font-weight: 700; font-size: 14px; padding: 12px 28px; border-radius: 10px;
+             cursor: pointer; }
+
+/* 완성 토스트 */
+.toast { position: fixed; z-index: 8; top: 90px; left: 50%; transform: translateX(-50%) translateY(-14px);
+         background: rgba(124,140,248,.16); border: 1px solid rgba(124,140,248,.5); color: #dfe6ff;
+         font-size: 13px; padding: 10px 20px; border-radius: 99px; opacity: 0; transition: all .35s;
+         backdrop-filter: blur(10px); }
+.toast.on { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+.hint { position: fixed; z-index: 5; bottom: 92px; left: 50%; transform: translateX(-50%);
+        font-family: "Space Mono", monospace; font-size: 11px; letter-spacing: 2px; color: #6b7ba8;
+        pointer-events: none; }
+</style>
+</head>
+<body>
+<div class="bg"></div>
+<canvas id="sky"></canvas>
+
+<div class="head">
+  <div class="k">STELLAR CARTOGRAPHY</div>
+  <h1>별을 이어 별자리를 만드세요</h1>
+  <p>빛나는 별을 차례로 클릭해 선으로 잇고, 완성하면 이름을 붙여주세요</p>
+</div>
+
+<div class="toast" id="toast">✦ 새 별자리가 하늘에 새겨졌어요</div>
+
+<div class="namer" id="namer">
+  <h3>✧ 별자리에 이름을</h3>
+  <p>당신이 그린 <b id="starCount">0</b>개의 별</p>
+  <input id="nameInput" type="text" maxlength="16" placeholder="예: 새벽의 고래자리" autocomplete="off">
+  <button class="go" id="nameGo">하늘에 새기기</button>
+</div>
+
+<div class="hint">CLICK — 별 잇기 · 빈 곳 DBLCLICK — 완성 · 새로고침 — 초기화</div>
+
+<div class="toolbar">
+  <button id="undoBtn">↶ 되돌리기</button>
+  <span class="count" id="count">별 0개 이음</span>
+  <button id="finishBtn">✦ 별자리 완성</button>
+  <button id="clearBtn">전체 지우기</button>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   별 클릭 → 잇기 → 완성하면 이름 붙여 하늘에 고정 (저장 안 함, 새로고침 초기화)
+   ───────────────────────────────────────────── */
+const cv = document.getElementById('sky');
+const ctx = cv.getContext('2d');
+let W, H, DPR;
+function resize(){
+  DPR = Math.min(devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  cv.width = W*DPR; cv.height = H*DPR; cv.style.width=W+'px'; cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+}
+resize(); addEventListener('resize', () => { resize(); scatter(); });
+
+/* 배경 별 필드 */
+let stars = [];
+function scatter(){
+  stars = [];
+  const n = Math.round(W*H/6500);
+  for (let i=0;i<n;i++){
+    stars.push({
+      x: Math.random()*W, y: Math.random()*H,
+      r: Math.random()*1.5 + .4,
+      base: Math.random()*.5 + .3,
+      tw: Math.random()*Math.PI*2,
+      tws: Math.random()*.04 + .01,
+      big: Math.random() < .09,              // 큰 별(클릭 대상 강조)
+    });
+  }
+}
+scatter();
+
+let current = [];        // 현재 잇는 중인 별 목록
+let done = [];           // 완성된 별자리 [{stars:[{x,y}], name}]
+let mx = -999, my = -999;
+
+/* 가장 가까운 별 찾기 (클릭 스냅) */
+function nearest(x, y){
+  let best = null, bd = 26*26;
+  for (const s of stars){
+    const d = (s.x-x)**2 + (s.y-y)**2;
+    if (d < bd){ bd = d; best = s; }
+  }
+  return best;
+}
+
+function updateCount(){
+  document.getElementById('count').textContent = `별 ${current.length}개 이음`;
+}
+
+/* ── 극적 효과 상태: 파문 · 스파클 · 유성 ── */
+const ripples = [];   // {x,y,r,max,life}
+const sparks = [];    // {x,y,vx,vy,life,hue}
+const meteors = [];   // {x,y,vx,vy,len,life}
+
+function burst(x, y, n, spread){
+  ripples.push({ x, y, r: 4, max: 46, life: 1 });
+  for (let i=0;i<n;i++){
+    const a = Math.random()*Math.PI*2, sp = Math.random()*spread + .6;
+    sparks.push({ x, y, vx: Math.cos(a)*sp, vy: Math.sin(a)*sp,
+                  life: 1, hue: 200 + Math.random()*80 });
+  }
+}
+function spawnMeteor(){
+  const fromLeft = Math.random() < .5;
+  const y0 = Math.random()*H*.5;
+  meteors.push({ x: fromLeft ? -40 : W+40, y: y0,
+                 vx: (fromLeft?1:-1)*(6+Math.random()*4), vy: 2.5+Math.random()*2,
+                 len: 90+Math.random()*70, life: 1 });
+}
+
+cv.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+cv.addEventListener('click', e => {
+  const s = nearest(e.clientX, e.clientY);
+  const p = s ? { x: s.x, y: s.y } : { x: e.clientX, y: e.clientY };  // 별 없으면 그 자리에 새 점
+  current.push(p);
+  burst(p.x, p.y, 14, 3.2);           // 별을 이을 때마다 스파클 폭발
+  updateCount();
+});
+cv.addEventListener('dblclick', () => finish());
+
+/* 터치 */
+cv.addEventListener('touchstart', e => {
+  const t = e.touches[0]; const s = nearest(t.clientX, t.clientY);
+  current.push(s ? {x:s.x,y:s.y} : {x:t.clientX,y:t.clientY}); updateCount();
+}, { passive: true });
+
+function toast(){
+  const t = document.getElementById('toast');
+  t.classList.add('on'); setTimeout(()=>t.classList.remove('on'), 2200);
+}
+
+/* 완성 → 이름 입력 */
+const namer = document.getElementById('namer');
+function finish(){
+  if (current.length < 2) return;
+  document.getElementById('starCount').textContent = current.length;
+  namer.classList.add('on');
+  setTimeout(()=>document.getElementById('nameInput').focus(), 80);
+}
+document.getElementById('finishBtn').addEventListener('click', finish);
+document.getElementById('nameGo').addEventListener('click', commit);
+document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key==='Enter') commit(); });
+let flash = 0;      // 완성 시 화면 플래시
+function commit(){
+  const name = document.getElementById('nameInput').value.trim() || '이름 없는 별자리';
+  const pts = current.slice();
+  done.push({ stars: pts, name, born: performance.now(), pulse: 0 });
+  /* 완성 축하: 모든 별에서 스파클 분출 + 선을 따라 빛나는 파티클 + 화면 플래시 */
+  for (const p of pts) burst(p.x, p.y, 20, 4);
+  for (let i=0;i<pts.length-1;i++){
+    for (let k=0;k<=6;k++){
+      const x = pts[i].x + (pts[i+1].x-pts[i].x)*k/6;
+      const y = pts[i].y + (pts[i+1].y-pts[i].y)*k/6;
+      sparks.push({ x, y, vx:(Math.random()-.5)*1.4, vy:(Math.random()-.5)*1.4, life:1, hue:210+Math.random()*60 });
+    }
+  }
+  flash = 1;
+  current = []; updateCount();
+  namer.classList.remove('on');
+  document.getElementById('nameInput').value = '';
+  toast();
+}
+
+document.getElementById('undoBtn').addEventListener('click', () => { current.pop(); updateCount(); });
+document.getElementById('clearBtn').addEventListener('click', () => {
+  current = []; done = []; updateCount();
+});
+
+/* ── 렌더 루프 ── */
+let frames = 0;
+(function loop(t){
+  if (window.__paused && frames > 5) { setTimeout(()=>requestAnimationFrame(loop), 300); return; }
+  frames++;
+
+  ctx.clearRect(0,0,W,H);
+
+  /* 배경 별 (반짝임) */
+  for (const s of stars){
+    s.tw += s.tws;
+    const a = s.base + Math.sin(s.tw)*.25;
+    const near = (s.x-mx)**2 + (s.y-my)**2 < 40*40;
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r + (s.big?.8:0) + (near?1.2:0), 0, Math.PI*2);
+    ctx.fillStyle = near ? `rgba(180,210,255,${Math.min(1,a+.5)})`
+                         : `rgba(210,224,255,${a})`;
+    if (s.big || near){ ctx.shadowColor = 'rgba(150,190,255,.9)'; ctx.shadowBlur = near?14:6; }
+    ctx.fill(); ctx.shadowBlur = 0;
+  }
+
+  /* 유성 (주기적으로 하늘을 가로지름) */
+  if (!window.__paused && Math.sin(t*0.0007) > 0.9995) spawnMeteor();  // 가끔
+  if (frames % 240 === 0) spawnMeteor();
+  for (let i=meteors.length-1;i>=0;i--){
+    const m = meteors[i]; m.x += m.vx; m.y += m.vy; m.life -= .012;
+    const g = ctx.createLinearGradient(m.x, m.y, m.x - m.vx*m.len/8, m.y - m.vy*m.len/8);
+    g.addColorStop(0, `rgba(255,255,255,${m.life})`);
+    g.addColorStop(1, 'rgba(160,190,255,0)');
+    ctx.strokeStyle = g; ctx.lineWidth = 2; ctx.shadowColor='#cfe0ff'; ctx.shadowBlur=8;
+    ctx.beginPath(); ctx.moveTo(m.x, m.y);
+    ctx.lineTo(m.x - m.vx*m.len/8, m.y - m.vy*m.len/8); ctx.stroke(); ctx.shadowBlur=0;
+    if (m.life <= 0 || m.x < -60 || m.x > W+60) meteors.splice(i,1);
+  }
+
+  /* 완성된 별자리 (맥동 + 선을 따라 흐르는 빛) */
+  for (const c of done){
+    c.pulse += .03;
+    const glow = .5 + Math.sin(c.pulse)*.18;
+    drawConstellation(c.stars, c.name, glow, '#9fb4ff');
+    /* 선을 따라 흐르는 빛 점 */
+    const age = (t - c.born)/1000;
+    if (age < 8){
+      const prog = (age % 2)/2;                 // 2초 주기로 선을 훑음
+      const seg = prog*(c.stars.length-1);
+      const si = Math.floor(seg), f = seg-si;
+      if (si < c.stars.length-1){
+        const a2 = c.stars[si], b2 = c.stars[si+1];
+        const lx = a2.x+(b2.x-a2.x)*f, ly = a2.y+(b2.y-a2.y)*f;
+        ctx.beginPath(); ctx.arc(lx, ly, 3, 0, Math.PI*2);
+        ctx.fillStyle = '#fff'; ctx.shadowColor='#bcd2ff'; ctx.shadowBlur=16; ctx.fill(); ctx.shadowBlur=0;
+      }
+    }
+  }
+
+  /* 파문 (별 이을 때) */
+  for (let i=ripples.length-1;i>=0;i--){
+    const r = ripples[i]; r.r += (r.max-r.r)*.12; r.life -= .04;
+    ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI*2);
+    ctx.strokeStyle = `rgba(160,195,255,${r.life*.7})`; ctx.lineWidth = 1.5; ctx.stroke();
+    if (r.life <= 0) ripples.splice(i,1);
+  }
+  /* 스파클 파티클 */
+  ctx.globalCompositeOperation = 'lighter';
+  for (let i=sparks.length-1;i>=0;i--){
+    const p = sparks[i]; p.x += p.vx; p.y += p.vy; p.vx*=.94; p.vy*=.94; p.life -= .025;
+    ctx.beginPath(); ctx.arc(p.x, p.y, 1.8*p.life+.4, 0, Math.PI*2);
+    ctx.fillStyle = `hsla(${p.hue},90%,72%,${p.life})`; ctx.fill();
+    if (p.life <= 0) sparks.splice(i,1);
+  }
+  ctx.globalCompositeOperation = 'source-over';
+
+  /* 완성 플래시 */
+  if (flash > 0){
+    ctx.fillStyle = `rgba(180,205,255,${flash*.14})`; ctx.fillRect(0,0,W,H);
+    flash -= .04;
+  }
+
+  /* 현재 잇는 중 (밝은 선 + 커서까지 미리보기 선) */
+  if (current.length){
+    ctx.strokeStyle = 'rgba(160,190,255,.9)';
+    ctx.lineWidth = 1.4; ctx.shadowColor = 'rgba(124,140,248,.9)'; ctx.shadowBlur = 8;
+    ctx.beginPath(); ctx.moveTo(current[0].x, current[0].y);
+    for (let i=1;i<current.length;i++) ctx.lineTo(current[i].x, current[i].y);
+    ctx.lineTo(mx, my);                 // 마지막 별 → 커서 미리보기
+    ctx.stroke(); ctx.shadowBlur = 0;
+    for (const p of current){
+      ctx.beginPath(); ctx.arc(p.x, p.y, 3.2, 0, Math.PI*2);
+      ctx.fillStyle = '#fff'; ctx.shadowColor='#9fb4ff'; ctx.shadowBlur=12; ctx.fill(); ctx.shadowBlur=0;
+    }
+  }
+
+  requestAnimationFrame(loop);
+})(0);
+
+function drawConstellation(pts, name, alpha, color){
+  ctx.strokeStyle = `rgba(159,180,255,${alpha})`;
+  ctx.lineWidth = 1.1; ctx.shadowColor = color; ctx.shadowBlur = 5;
+  ctx.beginPath(); ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i=1;i<pts.length;i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.stroke(); ctx.shadowBlur = 0;
+  for (const p of pts){
+    ctx.beginPath(); ctx.arc(p.x, p.y, 2.4, 0, Math.PI*2);
+    ctx.fillStyle = '#dfe8ff'; ctx.fill();
+  }
+  /* 별자리 이름 (중심 아래) */
+  let cxp=0, cyp=0; for(const p of pts){cxp+=p.x;cyp+=p.y;}
+  cxp/=pts.length; cyp/=pts.length;
+  let maxY = Math.max(...pts.map(p=>p.y));
+  ctx.font = '600 13px "Noto Serif KR", serif';
+  ctx.fillStyle = 'rgba(200,214,255,.7)';
+  ctx.textAlign = 'center';
+  ctx.fillText('✦ '+name, cxp, maxY + 24);
+}
+</script>
+
+<script>
+/* ── English mode (?lang=en): translate all visible Korean text, no logic changes ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "별을 잇다 — 나만의 별자리 만들기": "Connect the Stars — Make Your Own Constellation",
+    "별을 이어 별자리를 만드세요": "Connect the stars into a constellation",
+    "빛나는 별을 차례로 클릭해 선으로 잇고, 완성하면 이름을 붙여주세요": "Click the glowing stars one by one to draw lines, then name your constellation when it's done",
+    "✦ 새 별자리가 하늘에 새겨졌어요": "✦ A new constellation has been etched into the sky",
+    "✧ 별자리에 이름을": "✧ Name Your Constellation",
+    "당신이 그린": "You drew",
+    "개의 별": " stars",
+    "예: 새벽의 고래자리": "e.g. The Whale of Dawn",
+    "하늘에 새기기": "Etch into the sky",
+    "CLICK — 별 잇기 · 빈 곳 DBLCLICK — 완성 · 새로고침 — 초기화": "CLICK — link stars · DBLCLICK empty space — finish · Refresh — reset",
+    "↶ 되돌리기": "↶ Undo",
+    "✦ 별자리 완성": "✦ Finish Constellation",
+    "전체 지우기": "Clear all"
+  };
+  const PATTERNS = [
+    [/^별 (\d+)개 이음$/, m => `${m[1]} stars linked`]
+  ];
+  const tr = t => { if (TR[t] != null) return TR[t]; for (const [re,fn] of PATTERNS){ const m = t.match(re); if (m) return fn(m); } return null; };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swap = s => { const t = s.trim(); const r = tr(t); return r != null ? s.replace(t, r) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (tr(n.nodeValue.trim()) != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && tr(n.getAttribute(a).trim()) != null) n.setAttribute(a, tr(n.getAttribute(a).trim())); });
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim()); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

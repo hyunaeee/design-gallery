@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>벽돌깨기 — 진짜 플레이되는 아케이드</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Noto+Sans+KR:wght@400;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; }
+body { font-family: "JetBrains Mono", monospace; background: #060814; color: #e6f1ff;
+       overflow: hidden; -webkit-font-smoothing: antialiased; }
+
+#game { position: fixed; inset: 0; display: block; cursor: none; touch-action: none; }
+
+/* 상단 HUD */
+.hud { position: fixed; top: 54px; left: 0; right: 0; z-index: 11; display: flex;
+       align-items: center; justify-content: space-between; padding: 12px 26px;
+       pointer-events: none; }
+.hud .group { display: flex; gap: 26px; align-items: center; }
+.hud .stat { display: flex; flex-direction: column; gap: 2px; }
+.hud .stat .label { font-size: 9px; letter-spacing: 2px; color: rgba(110,231,255,.55); }
+.hud .stat .val { font-size: 20px; font-weight: 800; color: #6ee7ff; text-shadow: 0 0 12px rgba(110,231,255,.6); }
+.hud .stat .val.combo { color: #ff5edb; text-shadow: 0 0 12px rgba(255,94,219,.6); }
+.hud .brand { font-size: 14px; font-weight: 800; letter-spacing: 3px; color: #e6f1ff;
+              text-shadow: 0 0 16px rgba(230,241,255,.5); }
+.lives { display: flex; gap: 6px; }
+.lives i { width: 11px; height: 11px; border-radius: 50%; background: #ff5edb;
+           box-shadow: 0 0 10px rgba(255,94,219,.7); }
+
+/* 오버레이 (시작/클리어/게임오버) */
+.overlay { position: fixed; inset: 0; z-index: 20; display: flex; flex-direction: column;
+           align-items: center; justify-content: center; text-align: center;
+           background: rgba(6,8,20,.72); backdrop-filter: blur(6px); gap: 20px;
+           transition: opacity .3s; }
+.overlay.hidden { opacity: 0; pointer-events: none; }
+.overlay h1 { font-size: clamp(40px, 9vw, 96px); font-weight: 800; letter-spacing: -.02em;
+              color: #6ee7ff; text-shadow: 0 0 30px rgba(110,231,255,.6); }
+.overlay h1.win { color: #8ce05a; text-shadow: 0 0 30px rgba(140,224,90,.6); }
+.overlay h1.lose { color: #ff5e5e; text-shadow: 0 0 30px rgba(255,94,94,.6); }
+.overlay p { font-size: 13px; letter-spacing: 1px; color: rgba(230,241,255,.7); max-width: 420px;
+             line-height: 1.7; word-break: keep-all; }
+.overlay .score-big { font-size: 15px; color: #ff5edb; }
+.overlay button { font-family: "JetBrains Mono", monospace; font-size: 14px; font-weight: 800;
+                  letter-spacing: 2px; color: #060814; background: #6ee7ff; border: none;
+                  padding: 15px 40px; border-radius: 8px; cursor: pointer; margin-top: 6px;
+                  box-shadow: 0 0 30px rgba(110,231,255,.5); transition: all .2s; }
+.overlay button:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(110,231,255,.8); }
+.foot { position: fixed; bottom: 14px; left: 50%; transform: translateX(-50%); z-index: 10;
+        font-size: 10px; letter-spacing: 2px; color: rgba(230,241,255,.35); pointer-events: none; }
+
+/* ── PIXELFORGE 브랜드 랜딩 오버레이 ── */
+.pf-layer { position: fixed; inset: 0; z-index: 12; pointer-events: none; }
+.pf-nav { position: absolute; top: 0; left: 0; right: 0; height: 52px;
+  display: flex; align-items: center; justify-content: space-between; padding: 0 26px;
+  border-bottom: 1px solid rgba(110,231,255,.12); background: rgba(6,8,20,.4);
+  backdrop-filter: blur(8px); }
+.pf-logo { font-size: 15px; font-weight: 800; letter-spacing: 3px; color: #e6f1ff;
+  text-shadow: 0 0 16px rgba(110,231,255,.5); pointer-events: auto; }
+.pf-logo b { color: #6ee7ff; }
+.pf-nav .links { display: flex; gap: 22px; pointer-events: auto; }
+.pf-nav .links a { color: rgba(230,241,255,.62); text-decoration: none; font-size: 12px;
+  font-weight: 700; letter-spacing: 1px; transition: color .18s; }
+.pf-nav .links a:hover { color: #6ee7ff; }
+.pf-hero { position: absolute; left: 50%; top: 50%; transform: translate(-50%,-50%);
+  text-align: center; width: 90%; max-width: 640px; }
+.pf-hero .kick { font-size: 11px; font-weight: 800; letter-spacing: 4px; color: #ff5edb;
+  text-shadow: 0 0 14px rgba(255,94,219,.5); }
+.pf-hero h2 { margin-top: 14px; font-size: clamp(34px, 7vw, 74px); font-weight: 800;
+  letter-spacing: -.02em; color: #e6f1ff; word-break: keep-all;
+  text-shadow: 0 2px 30px rgba(6,8,20,.85), 0 0 30px rgba(110,231,255,.25); }
+.pf-hero p { margin: 16px auto 0; font-size: 13px; line-height: 1.7; color: rgba(230,241,255,.72);
+  max-width: 400px; word-break: keep-all; text-shadow: 0 1px 12px rgba(6,8,20,.95); }
+.pf-hero .cta { pointer-events: auto; margin-top: 22px; font-family: "JetBrains Mono", monospace;
+  font-size: 14px; font-weight: 800; letter-spacing: 2px; color: #060814; background: #6ee7ff;
+  border: none; padding: 15px 38px; border-radius: 8px; cursor: pointer;
+  box-shadow: 0 0 30px rgba(110,231,255,.5); transition: all .2s; }
+.pf-hero .cta:hover { transform: translateY(-2px); box-shadow: 0 0 44px rgba(110,231,255,.85); }
+.pf-foot { position: absolute; left: 0; right: 0; bottom: 38px; display: flex; justify-content: center;
+  gap: 40px; pointer-events: none; }
+.pf-foot .s { text-align: center; }
+.pf-foot .s .n { font-size: 20px; font-weight: 800; color: #6ee7ff; text-shadow: 0 0 12px rgba(110,231,255,.5); }
+.pf-foot .s .l { font-size: 9px; letter-spacing: 2px; color: rgba(230,241,255,.45); margin-top: 3px; }
+@media (max-width: 640px){ .pf-nav .links { gap: 13px; } .pf-foot { gap: 22px; } }
+</style>
+</head>
+<body>
+<canvas id="game"></canvas>
+
+<div class="hud">
+  <div class="group">
+    <div class="stat"><span class="label">SCORE</span><span class="val" id="score">0</span></div>
+    <div class="stat"><span class="label">COMBO</span><span class="val combo" id="combo">x1</span></div>
+  </div>
+  <div class="brand">◆ BREAKOUT</div>
+  <div class="group">
+    <div class="stat" style="align-items:flex-end"><span class="label">LIVES</span>
+      <div class="lives" id="lives"></div></div>
+  </div>
+</div>
+
+<div class="overlay" id="overlay">
+  <h1 id="ovTitle">BREAKOUT</h1>
+  <p id="ovDesc">마우스로 패들을 움직이고 · 클릭 또는 스페이스로 발사<br>벽돌을 모두 깨면 클리어. 공을 놓치면 라이프가 줄어요.</p>
+  <button id="ovBtn">게임 시작</button>
+</div>
+
+<div class="foot">MOUSE = MOVE · CLICK / SPACE = LAUNCH</div>
+
+<div class="pf-layer">
+  <div class="pf-nav">
+    <div class="pf-logo"><b>◆</b> PIXEL<b>FORGE</b></div>
+    <div class="links"><a href="#">게임</a><a href="#">스튜디오</a><a href="#">뉴스</a></div>
+  </div>
+  <div class="pf-hero">
+    <div class="kick">INDIE ARCADE STUDIO</div>
+    <h2>부술 준비 됐나요?</h2>
+    <p>단 한 발의 공으로 픽셀을 무너뜨리는 네온 아케이드. 지금 이 화면이 곧 플레이 데모입니다.</p>
+    <button class="cta" id="pfPlay">지금 플레이 ▸</button>
+  </div>
+  <div class="pf-foot">
+    <div class="s"><div class="n">12종</div><div class="l">출시작</div></div>
+    <div class="s"><div class="n">240만+</div><div class="l">다운로드</div></div>
+    <div class="s"><div class="n">4.8</div><div class="l">평균 평점</div></div>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   벽돌깨기 — 실제 플레이 가능 (데모 자동 모드 포함)
+   벽돌이 "PLAY" 글자 모양으로 배열
+   ───────────────────────────────────────────── */
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+
+/* DOM 참조는 루프 前 모두 선언 */
+const scoreEl = document.getElementById('score');
+const comboEl = document.getElementById('combo');
+const livesEl = document.getElementById('lives');
+const overlay = document.getElementById('overlay');
+const ovTitle = document.getElementById('ovTitle');
+const ovDesc = document.getElementById('ovDesc');
+const ovBtn = document.getElementById('ovBtn');
+
+let W = 0, H = 0, DPR = 1;
+
+/* 게임 상태 */
+let state = 'ready';   // ready | playing | clear | over
+let score = 0, combo = 1, lives = 3;
+let bricks = [], balls = [], particles = [];
+let paddle = { x: 0, y: 0, w: 130, h: 14 };
+let stuck = true;      // 공이 패들에 붙어있음
+let auto = true;       // 데모 자동 모드 (마우스 입력 시 해제)
+let lastInput = 0;
+
+/* 5x5 픽셀 폰트로 "PLAY" 배열 */
+const FONT = {
+  P: ["11110","10001","11110","10000","10000"],
+  L: ["10000","10000","10000","10000","11111"],
+  A: ["01110","10001","11111","10001","10001"],
+  Y: ["10001","01010","00100","00100","00100"]
+};
+const WORD = "PLAY";
+const BRICK_COLORS = ['#6ee7ff', '#8ce05a', '#ffd23f', '#ff9f45', '#ff5edb'];
+
+function resize() {
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  paddle.y = H - 70;
+  paddle.w = Math.max(90, Math.min(150, W * 0.12));
+  if (bricks.length === 0) buildBricks();
+}
+
+/* "PLAY" 글자 모양 벽돌 생성 */
+function buildBricks() {
+  bricks = [];
+  const letters = WORD.split('');
+  const cols = letters.length * 5 + (letters.length - 1); // 글자간 1칸 간격
+  const rows = 5;
+  const maxW = W * 0.82;
+  let bw = maxW / cols;
+  bw = Math.min(bw, 46);
+  const bh = bw * 0.62;
+  const gap = 3;
+  const gridW = cols * (bw) ;
+  const startX = (W - gridW) / 2;
+  const startY = Math.max(90, H * 0.13);
+
+  letters.forEach((ch, li) => {
+    const pat = FONT[ch];
+    const colOffset = li * 6; // 5 + 1 간격
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < 5; c++) {
+        if (pat[r][c] === '1') {
+          const x = startX + (colOffset + c) * bw;
+          const y = startY + r * bh;
+          bricks.push({
+            x: x + gap / 2, y: y + gap / 2,
+            w: bw - gap, h: bh - gap,
+            color: BRICK_COLORS[r % BRICK_COLORS.length],
+            points: (rows - r) * 10,   // 위쪽 벽돌 고득점
+            alive: true, hit: 0
+          });
+        }
+      }
+    }
+  });
+}
+
+function newBall(x, y, vx, vy) {
+  return { x, y, vx, vy, r: 8 };
+}
+function resetBall() {
+  stuck = true;
+  balls = [newBall(paddle.x, paddle.y - 16, 0, 0)];
+}
+
+function launch() {
+  if (stuck && balls[0]) {
+    stuck = false;
+    const speed = 7.5;
+    const ang = -Math.PI / 2 + (Math.random() - 0.5) * 0.6;
+    balls[0].vx = Math.cos(ang) * speed;
+    balls[0].vy = Math.sin(ang) * speed;
+  }
+}
+
+function startGame() {
+  score = 0; combo = 1; lives = 3;
+  particles = [];
+  buildBricks();
+  paddle.x = W / 2;
+  resetBall();
+  state = 'playing';
+  overlay.classList.add('hidden');
+  updateHUD();
+}
+
+function updateHUD() {
+  scoreEl.textContent = score;
+  comboEl.textContent = 'x' + combo;
+  livesEl.innerHTML = '';
+  for (let i = 0; i < lives; i++) { const d = document.createElement('i'); livesEl.appendChild(d); }
+}
+
+function spawnParticles(x, y, color, n = 12) {
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const s = 1 + Math.random() * 5;
+    particles.push({ x, y, vx: Math.cos(a) * s, vy: Math.sin(a) * s,
+                     life: 1, color, size: 1.5 + Math.random() * 2.5 });
+  }
+}
+
+/* 입력 */
+function setPaddle(x) {
+  paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, x));
+  auto = false; lastInput = performance.now();
+}
+addEventListener('mousemove', e => setPaddle(e.clientX));
+addEventListener('touchmove', e => { setPaddle(e.touches[0].clientX); e.preventDefault(); }, { passive: false });
+addEventListener('mousedown', e => {
+  if (e.target.tagName === 'BUTTON') return;
+  auto = false;
+  if (state === 'ready') startGame(); else if (state === 'playing') launch();
+});
+addEventListener('touchstart', e => {
+  if (e.target.tagName === 'BUTTON') return;
+  auto = false; setPaddle(e.touches[0].clientX);
+  if (state === 'ready') startGame(); else if (state === 'playing') launch();
+}, { passive: true });
+addEventListener('keydown', e => {
+  if (e.code === 'Space') { e.preventDefault(); auto = false;
+    if (state === 'ready') startGame(); else if (state === 'playing') launch(); }
+});
+ovBtn.onclick = startGame;
+/* 브랜드 히어로 CTA → 게임 시작 (기존 로직 재사용) */
+const pfPlay = document.getElementById('pfPlay');
+if (pfPlay) pfPlay.onclick = startGame;
+
+/* 벽돌 충돌 */
+function hitBrick(ball) {
+  for (const b of bricks) {
+    if (!b.alive) continue;
+    if (ball.x + ball.r > b.x && ball.x - ball.r < b.x + b.w &&
+        ball.y + ball.r > b.y && ball.y - ball.r < b.y + b.h) {
+      /* 침투 방향 판정 */
+      const prevX = ball.x - ball.vx, prevY = ball.y - ball.vy;
+      const fromSide = prevX + ball.r <= b.x || prevX - ball.r >= b.x + b.w;
+      if (fromSide) ball.vx = -ball.vx; else ball.vy = -ball.vy;
+      b.alive = false;
+      score += b.points * combo;
+      combo = Math.min(combo + 1, 9);
+      spawnParticles(ball.x, ball.y, b.color);
+      updateHUD();
+      return true;
+    }
+  }
+  return false;
+}
+
+/* 데모 모드: 공 x를 추적하는 AI 패들 */
+function autoPaddle() {
+  if (!balls.length) return;
+  let target = balls[0].x;
+  /* 아래로 내려오는 공 중 가장 낮은 것 추적 */
+  let low = -1;
+  for (const b of balls) { if (b.vy > 0 && b.y > low) { low = b.y; target = b.x; } }
+  paddle.x += (target - paddle.x) * 0.12;
+  paddle.x = Math.max(paddle.w / 2, Math.min(W - paddle.w / 2, paddle.x));
+  /* 자동 발사 */
+  if (stuck) { if (Math.random() < 0.05) launch(); }
+}
+
+/* 라이프 소진 처리 */
+function loseBall() {
+  lives--;
+  combo = 1;
+  updateHUD();
+  if (lives <= 0) { endGame(false); }
+  else { resetBall(); }
+}
+function endGame(win) {
+  state = win ? 'clear' : 'over';
+  ovTitle.className = win ? 'win' : 'lose';
+  ovTitle.textContent = win ? 'CLEAR!' : 'GAME OVER';
+  ovDesc.innerHTML = `<span class="score-big">최종 점수 ${score}</span><br>` +
+    (win ? '모든 벽돌을 깼어요. 다시 도전할까요?' : '공을 모두 놓쳤어요. 한 번 더!');
+  ovBtn.textContent = '다시하기';
+  overlay.classList.remove('hidden');
+}
+
+/* 초기 데모용 볼 세팅 (ready 상태에서 화면이 살아있게) */
+function initDemo() {
+  buildBricks();
+  paddle.x = W / 2;
+  balls = [newBall(W / 2, H * 0.6, 5, -5.5)];
+  stuck = false;
+  state = 'ready';
+  auto = true;
+  /* 로드 시 데모가 바로 보이도록 시작 오버레이는 숨김 (클릭/스페이스로 실게임 시작) */
+  overlay.classList.add('hidden');
+}
+
+resize();
+addEventListener('resize', resize);
+initDemo();
+updateHUD();
+
+/* ── 메인 루프 ── */
+let frames = 0;
+(function loop() {
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+
+  /* 배경 (은은한 트레일) */
+  ctx.fillStyle = 'rgba(6,8,20,0.35)';
+  ctx.fillRect(0, 0, W, H);
+
+  /* 그리드 라인 배경 */
+  ctx.strokeStyle = 'rgba(110,231,255,0.04)';
+  ctx.lineWidth = 1;
+  for (let gx = 0; gx < W; gx += 40) { ctx.beginPath(); ctx.moveTo(gx, 0); ctx.lineTo(gx, H); ctx.stroke(); }
+
+  const active = (state === 'playing' || state === 'ready');
+
+  /* 데모 자동 패들 (ready이거나, playing인데 auto일 때) */
+  if (auto && active) autoPaddle();
+  /* 입력 없으면 3초 후 자동 모드 복귀 */
+  if (!auto && performance.now() - lastInput > 3000 && state === 'ready') auto = true;
+
+  /* 벽돌 렌더 */
+  for (const b of bricks) {
+    if (!b.alive) continue;
+    ctx.fillStyle = b.color;
+    ctx.shadowColor = b.color; ctx.shadowBlur = 12;
+    ctx.fillRect(b.x, b.y, b.w, b.h);
+    ctx.shadowBlur = 0;
+    ctx.fillStyle = 'rgba(255,255,255,0.18)';
+    ctx.fillRect(b.x, b.y, b.w, b.h * 0.35);
+  }
+
+  /* 공 이동/충돌 */
+  if (active) {
+    for (let i = balls.length - 1; i >= 0; i--) {
+      const ball = balls[i];
+      if (stuck && state === 'playing') { ball.x = paddle.x; ball.y = paddle.y - 16; }
+      else {
+        ball.x += ball.vx; ball.y += ball.vy;
+        /* 벽 */
+        if (ball.x - ball.r < 0) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); }
+        if (ball.x + ball.r > W) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); }
+        if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
+
+        /* 패들 */
+        if (ball.vy > 0 && ball.y + ball.r > paddle.y && ball.y - ball.r < paddle.y + paddle.h &&
+            ball.x > paddle.x - paddle.w / 2 - ball.r && ball.x < paddle.x + paddle.w / 2 + ball.r) {
+          ball.y = paddle.y - ball.r;
+          const rel = (ball.x - paddle.x) / (paddle.w / 2); // -1..1
+          const speed = Math.min(Math.hypot(ball.vx, ball.vy) + 0.06, 14);
+          const ang = -Math.PI / 2 + rel * (Math.PI / 3);
+          ball.vx = Math.cos(ang) * speed;
+          ball.vy = Math.sin(ang) * speed;
+          if (state === 'playing') combo = 1, updateHUD();
+        }
+
+        hitBrick(ball);
+
+        /* 바닥 아래로 */
+        if (ball.y - ball.r > H) {
+          if (state === 'ready') {
+            /* 데모: 새 공 재투입 */
+            balls[i] = newBall(W / 2, H * 0.55, (Math.random() - 0.5) * 8, -6);
+          } else {
+            balls.splice(i, 1);
+            if (balls.length === 0) loseBall();
+          }
+        }
+      }
+    }
+  }
+
+  /* 공 렌더 */
+  for (const ball of balls) {
+    ctx.fillStyle = '#fff';
+    ctx.shadowColor = '#6ee7ff'; ctx.shadowBlur = 18;
+    ctx.beginPath(); ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2); ctx.fill();
+    ctx.shadowBlur = 0;
+  }
+
+  /* 파티클 */
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.vy += 0.15; p.life -= 0.03;
+    if (p.life <= 0) { particles.splice(i, 1); continue; }
+    ctx.globalAlpha = p.life;
+    ctx.fillStyle = p.color;
+    ctx.fillRect(p.x, p.y, p.size, p.size);
+  }
+  ctx.globalAlpha = 1;
+
+  /* 패들 렌더 */
+  const px = paddle.x - paddle.w / 2;
+  const grad = ctx.createLinearGradient(px, 0, px + paddle.w, 0);
+  grad.addColorStop(0, '#6ee7ff'); grad.addColorStop(1, '#ff5edb');
+  ctx.fillStyle = grad;
+  ctx.shadowColor = '#6ee7ff'; ctx.shadowBlur = 20;
+  roundRect(px, paddle.y, paddle.w, paddle.h, 7); ctx.fill();
+  ctx.shadowBlur = 0;
+
+  /* 클리어 판정 */
+  if (state === 'playing' && bricks.every(b => !b.alive)) endGame(true);
+
+  requestAnimationFrame(loop);
+})();
+
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+</script>
+
+<script>
+/* ── English mode (?lang=en) — translation layer only, no logic changes ── */
+(function(){
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "벽돌깨기 — 진짜 플레이되는 아케이드": "Brick Breaker — A Real Playable Arcade",
+    "마우스로 패들을 움직이고 · 클릭 또는 스페이스로 발사": "Move the paddle with your mouse · click or space to launch",
+    "벽돌을 모두 깨면 클리어. 공을 놓치면 라이프가 줄어요.": "Clear by breaking every brick. Miss the ball and you lose a life.",
+    "게임 시작": "Start Game",
+    "게임": "Games",
+    "스튜디오": "Studio",
+    "뉴스": "News",
+    "부술 준비 됐나요?": "Ready to break it all?",
+    "단 한 발의 공으로 픽셀을 무너뜨리는 네온 아케이드. 지금 이 화면이 곧 플레이 데모입니다.": "A neon arcade where a single ball topples pixels. This very screen is the playable demo.",
+    "지금 플레이 ▸": "Play now ▸",
+    "12종": "12",
+    "출시작": "Titles",
+    "240만+": "2.4M+",
+    "다운로드": "Downloads",
+    "평균 평점": "Avg. Rating",
+    "모든 벽돌을 깼어요. 다시 도전할까요?": "You cleared every brick. Play again?",
+    "공을 모두 놓쳤어요. 한 번 더!": "You lost all your balls. One more time!",
+    "다시하기": "Retry"
+  };
+  const RE = [
+    [/^최종 점수 (\d+)$/, "Final Score $1"]
+  ];
+  const tr = t => {
+    if (TR[t] != null) return TR[t];
+    for (const [re, rep] of RE) { if (re.test(t)) return t.replace(re, rep); }
+    return null;
+  };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const raw = n.nodeValue, t = raw.trim().replace(/\s+/g,' ');
+      if (t) { const out = tr(t); if (out != null) {
+        const lead = (raw.match(/^\s*/)||[''])[0], trail = (raw.match(/\s*$/)||[''])[0];
+        n.nodeValue = lead + out + trail;
+      }}
+      return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) {
+      const out = tr(n.getAttribute(a).trim().replace(/\s+/g,' ')); if (out != null) n.setAttribute(a, out);
+    }});
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim().replace(/\s+/g,' ')); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

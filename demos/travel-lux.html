@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AZURA — 럭셔리 리조트 & 여행</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Playfair+Display:wght@500;600;700;800&family=Noto+Serif+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --cream:#f7f1e3; --cream-2:#fbf8f0; --ink:#231f16; --muted:#7a7160;
+  --gold:#c8a24d; --gold-deep:#a4802f; --teal:#0f3a3b; --teal-2:#153f40;
+  --line:#e6dcc4; --radius:18px;
+}
+html{ scroll-behavior:smooth; }
+body{ font-family:'Cormorant Garamond','Noto Serif KR',serif; background:var(--cream); color:var(--ink);
+  -webkit-font-smoothing:antialiased; line-height:1.6; overflow-x:hidden; }
+.wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
+a{ color:inherit; text-decoration:none; }
+img{ max-width:100%; display:block; }
+h1,h2,h3{ font-family:'Playfair Display','Noto Serif KR',serif; letter-spacing:-.01em; }
+.ui{ font-family:'Noto Sans KR',sans-serif; }
+.eyebrow{ display:inline-flex; align-items:center; gap:8px; font-family:'Noto Sans KR',sans-serif;
+  font-size:12.5px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--gold); }
+.eyebrow::before{ content:''; width:22px; height:1px; background:var(--gold); }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-family:'Noto Sans KR',sans-serif;
+  font-weight:600; font-size:14px; letter-spacing:.02em; padding:14px 26px; border-radius:999px; border:1px solid transparent;
+  cursor:pointer; transition:transform .2s, background .25s, border-color .25s, color .25s; }
+.btn:active{ transform:translateY(1px) scale(.98); }
+.btn-primary{ background:var(--gold); color:#241d0e; }
+.btn-primary:hover{ background:#dcb75d; }
+.btn-ghost{ background:transparent; border-color:rgba(255,255,255,.5); color:#fff; }
+.btn-ghost:hover{ border-color:#fff; background:rgba(255,255,255,.08); }
+.section{ padding:104px 0; }
+.section-head{ text-align:center; max-width:640px; margin:0 auto 56px; }
+.section-head h2{ font-size:clamp(30px,4vw,46px); font-weight:700; margin-top:14px; }
+.section-head p{ margin-top:16px; color:var(--muted); font-size:18px; word-break:keep-all; }
+
+/* ── 내비게이션 ─────────────────────────────── */
+.nav{ position:fixed; top:0; left:0; right:0; z-index:50; padding:22px 0; transition:background .35s, padding .35s, box-shadow .35s, border-color .35s;
+  border-bottom:1px solid transparent; }
+.nav.solid{ background:rgba(247,241,227,.92); backdrop-filter:blur(14px); padding:14px 0; border-color:var(--line);
+  box-shadow:0 10px 30px -20px rgba(20,15,5,.35); }
+.nav .wrap{ display:flex; align-items:center; justify-content:space-between; }
+.brand{ font-family:'Playfair Display',serif; font-weight:700; font-size:22px; letter-spacing:.14em; color:#fff; transition:color .35s; }
+.nav.solid .brand{ color:var(--teal); }
+.nav-links{ display:flex; gap:34px; }
+.nav-links a{ font-family:'Noto Sans KR',sans-serif; font-size:14px; font-weight:500; color:rgba(255,255,255,.88); transition:color .3s, opacity .3s; }
+.nav.solid .nav-links a{ color:var(--ink); opacity:.78; }
+.nav-links a:hover{ opacity:1; }
+.nav .btn-primary{ padding:11px 22px; }
+@media(max-width:860px){ .nav-links{ display:none; } }
+
+/* ── 히어로 ──────────────────────────────────── */
+.hero{ position:relative; min-height:100vh; display:flex; align-items:flex-end; overflow:hidden; background:var(--teal); }
+.hero-img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.hero-overlay{ position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(15,20,15,.35) 0%, rgba(15,20,15,.15) 35%, rgba(18,14,8,.55) 78%, rgba(15,10,5,.88) 100%); }
+.hero-content{ position:relative; z-index:2; padding-bottom:88px; padding-top:180px; color:#fff; }
+.hero-content .eyebrow{ color:#e9cd8c; }
+.hero-content .eyebrow::before{ background:#e9cd8c; }
+.hero h1{ margin-top:22px; font-size:clamp(40px,7vw,84px); font-weight:700; line-height:1.06; text-shadow:0 4px 30px rgba(0,0,0,.25); }
+.hero p{ margin:24px 0 0; max-width:560px; font-size:clamp(17px,2vw,21px); color:rgba(255,255,255,.86); word-break:keep-all; font-style:italic; }
+
+/* 예약 바 */
+.booking{ margin-top:46px; background:rgba(251,248,240,.94); backdrop-filter:blur(10px); border-radius:20px; padding:22px 24px;
+  display:grid; grid-template-columns:1.3fr 1fr 1fr auto; gap:18px; align-items:end; box-shadow:0 30px 60px -20px rgba(0,0,0,.4); }
+.booking .field{ display:flex; flex-direction:column; gap:8px; }
+.booking .field:not(:last-child){ border-right:1px solid var(--line); padding-right:18px; }
+.booking label{ font-family:'Noto Sans KR',sans-serif; font-size:11.5px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--gold-deep); }
+.booking input{ font-family:'Noto Sans KR',sans-serif; border:none; background:transparent; font-size:15px; color:var(--ink); outline:none; padding:2px 0; }
+.booking input::placeholder{ color:#a89f88; }
+.booking .btn-search{ background:var(--teal); color:#fff; padding:15px 30px; white-space:nowrap; }
+.booking .btn-search:hover{ background:var(--teal-2); }
+@media(max-width:860px){ .booking{ grid-template-columns:1fr 1fr; } .booking .btn-search{ grid-column:1/-1; } .booking .field:nth-child(2){ border-right:none; } }
+@media(max-width:520px){ .booking{ grid-template-columns:1fr; } .booking .field{ border-right:none !important; padding-right:0; } }
+
+/* ── 추천 여정 ───────────────────────────────── */
+.dest-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+.dest-card{ position:relative; border-radius:var(--radius); overflow:hidden; aspect-ratio:3/4.1; cursor:pointer;
+  background:var(--teal); box-shadow:0 20px 40px -28px rgba(20,15,5,.5); }
+.dest-card img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; transition:transform .7s cubic-bezier(.2,.7,.2,1); }
+.dest-card .grad{ position:absolute; inset:0; transition:transform .7s cubic-bezier(.2,.7,.2,1); }
+.dest-card:hover img, .dest-card:hover .grad{ transform:scale(1.09); }
+.dest-card .shade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(0,0,0,0) 40%, rgba(0,0,0,.72) 100%); }
+.dest-card .info{ position:absolute; left:0; right:0; bottom:0; padding:22px; color:#fff; }
+.dest-card .info .tag{ font-family:'Noto Sans KR',sans-serif; font-size:11px; letter-spacing:.1em; text-transform:uppercase; color:#e9cd8c; }
+.dest-card .info h3{ margin-top:6px; font-size:23px; font-weight:600; }
+.dest-card .info span{ display:block; margin-top:6px; font-family:'Noto Sans KR',sans-serif; font-size:12.5px; color:rgba(255,255,255,.78); }
+@media(max-width:960px){ .dest-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:520px){ .dest-grid{ grid-template-columns:1fr; } }
+
+/* ── 패럴랙스 인용 밴드 ──────────────────────── */
+.quote-band{ position:relative; min-height:520px; display:flex; align-items:center; justify-content:center; overflow:hidden; background:var(--teal); }
+.quote-band .parallax-img{ position:absolute; top:-12%; left:0; width:100%; height:124%; object-fit:cover; opacity:.55; will-change:transform; }
+.quote-band .shade{ position:absolute; inset:0; background:linear-gradient(180deg, rgba(15,20,15,.55), rgba(10,10,8,.75)); }
+.quote-band blockquote{ position:relative; z-index:2; max-width:780px; margin:0 auto; padding:0 28px; text-align:center; color:#fbf8f0; }
+.quote-band blockquote p{ font-size:clamp(24px,3.4vw,38px); font-style:italic; font-weight:500; line-height:1.5; word-break:keep-all; }
+.quote-band blockquote cite{ display:block; margin-top:26px; font-family:'Noto Sans KR',sans-serif; font-style:normal; font-size:13px;
+  letter-spacing:.12em; text-transform:uppercase; color:#e9cd8c; }
+
+/* ── 통계 ───────────────────────────────────── */
+.stats{ background:var(--cream-2); }
+.stats-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; text-align:center; }
+.stat b{ display:block; font-family:'Playfair Display',serif; font-size:clamp(34px,5vw,54px); font-weight:700; color:var(--teal); }
+.stat span{ display:block; margin-top:10px; font-family:'Noto Sans KR',sans-serif; font-size:13.5px; color:var(--muted); letter-spacing:.03em; }
+@media(max-width:720px){ .stats-grid{ grid-template-columns:1fr 1fr; row-gap:36px; } }
+
+/* ── 후기 ───────────────────────────────────── */
+.testis{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+.testi{ background:var(--cream-2); border:1px solid var(--line); border-radius:var(--radius); padding:32px; }
+.testi .stars{ color:var(--gold); letter-spacing:2px; font-size:14px; }
+.testi p{ margin-top:16px; font-size:17px; font-style:italic; color:#2c2718; word-break:keep-all; }
+.testi .who{ margin-top:20px; display:flex; align-items:center; gap:12px; }
+.testi .who .av{ width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,var(--gold),var(--teal)); }
+.testi .who b{ font-family:'Noto Sans KR',sans-serif; font-size:14.5px; font-weight:600; display:block; }
+.testi .who span{ font-family:'Noto Sans KR',sans-serif; font-size:12.5px; color:var(--muted); }
+@media(max-width:920px){ .testis{ grid-template-columns:1fr; } }
+
+/* ── 리빌 ───────────────────────────────────── */
+.reveal{ opacity:0; transform:translateY(28px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+.reveal.in{ opacity:1; transform:translateY(0); }
+
+/* ── 푸터 ───────────────────────────────────── */
+footer{ background:var(--teal); color:#f2ead8; padding:72px 0 40px; }
+footer .cols{ display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; }
+footer .about .brand{ color:#fff; }
+footer .about p{ margin-top:14px; max-width:300px; font-size:16px; color:rgba(242,234,216,.72); word-break:keep-all; }
+.newsletter{ display:flex; gap:0; margin-top:20px; max-width:360px; border-bottom:1px solid rgba(255,255,255,.35); padding-bottom:10px; }
+.newsletter input{ flex:1; background:transparent; border:none; outline:none; color:#fff; font-family:'Noto Sans KR',sans-serif; font-size:14px; }
+.newsletter input::placeholder{ color:rgba(242,234,216,.5); }
+.newsletter button{ background:none; border:none; color:#e9cd8c; font-family:'Noto Sans KR',sans-serif; font-weight:600; font-size:13px; cursor:pointer; letter-spacing:.04em; }
+footer .fcol h4{ font-family:'Noto Sans KR',sans-serif; font-size:12.5px; font-weight:700; letter-spacing:.08em; text-transform:uppercase; color:#e9cd8c; margin-bottom:16px; }
+footer .fcol a{ display:block; font-family:'Noto Sans KR',sans-serif; font-size:14.5px; color:rgba(242,234,216,.78); margin-bottom:11px; }
+footer .fcol a:hover{ color:#fff; }
+footer .copy{ margin-top:52px; padding-top:22px; border-top:1px solid rgba(255,255,255,.14); display:flex; justify-content:space-between;
+  flex-wrap:wrap; gap:12px; font-family:'Noto Sans KR',sans-serif; font-size:12.5px; color:rgba(242,234,216,.55); }
+
+/* ── 언어 토글 ──────────────────────────────── */
+.lang-toggle{ position:fixed; right:20px; bottom:20px; z-index:60; width:48px; height:48px; border-radius:50%;
+  background:var(--teal); color:#f2ead8; border:1px solid rgba(255,255,255,.2); font-family:'Noto Sans KR',sans-serif;
+  font-weight:700; font-size:12.5px; cursor:pointer; box-shadow:0 12px 28px -10px rgba(0,0,0,.5); transition:transform .2s, background .2s; }
+.lang-toggle:hover{ transform:translateY(-2px); background:var(--teal-2); }
+
+.toast{ position:fixed; left:50%; bottom:88px; transform:translate(-50%,20px); z-index:70; background:var(--ink); color:#fbf8f0;
+  font-family:'Noto Sans KR',sans-serif; font-size:14px; padding:14px 22px; border-radius:12px; opacity:0; pointer-events:none;
+  transition:opacity .35s, transform .35s; box-shadow:0 20px 40px -16px rgba(0,0,0,.5); }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+</style>
+</head>
+<body>
+
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <div class="brand">AZURA</div>
+    <div class="nav-links">
+      <a href="#destinations" data-i18n>여정</a>
+      <a href="#experience" data-i18n>경험</a>
+      <a href="#stories" data-i18n>이야기</a>
+      <a href="#contact" data-i18n>문의</a>
+    </div>
+    <a href="#booking" class="btn btn-primary" data-i18n>예약하기</a>
+  </div>
+</nav>
+
+<header class="hero">
+  <img class="hero-img" src="../assets/gen/site-travel.jpg" alt="" onerror="this.style.display='none'">
+  <div class="hero-overlay"></div>
+  <div class="wrap hero-content">
+    <span class="eyebrow" data-i18n>2026 시그니처 컬렉션</span>
+    <h1 data-i18n>세상의 끝에서<br>맞이하는 golden hour</h1>
+    <p data-i18n>깎아지른 절벽과 맞닿은 바다, 그 사이 오롯이 당신만을 위한 스위트. 아주라가 엄선한 여정으로 떠나보세요.</p>
+
+    <div class="booking" id="booking">
+      <div class="field">
+        <label data-i18n>목적지</label>
+        <input type="text" id="ph-dest" placeholder="어디로 떠나시나요?">
+      </div>
+      <div class="field">
+        <label data-i18n>체크인</label>
+        <input type="text" id="ph-checkin" placeholder="날짜 선택">
+      </div>
+      <div class="field">
+        <label data-i18n>인원</label>
+        <input type="text" id="ph-guest" placeholder="게스트 2명">
+      </div>
+      <button class="btn btn-search ui" type="button" id="searchBtn" data-i18n>검색</button>
+    </div>
+  </div>
+</header>
+
+<!-- 추천 여정 -->
+<section class="section" id="destinations">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n>추천 여정</span>
+      <h2 data-i18n>다음 여정을 고르세요</h2>
+      <p data-i18n>절벽과 라군, 화산과 해안선까지. 아주라가 직접 답사한 네 곳의 시그니처 여정.</p>
+    </div>
+    <div class="dest-grid reveal">
+      <div class="dest-card">
+        <img src="../assets/gen/site-travel.jpg" alt="" onerror="this.style.display='none'">
+        <div class="shade"></div>
+        <div class="info">
+          <span class="tag" data-i18n>절벽 위 스위트</span>
+          <h3 data-i18n>코스타 셀레네</h3>
+          <span data-i18n>7박부터 · 프라이빗 인피니티 풀</span>
+        </div>
+      </div>
+      <div class="dest-card">
+        <div class="grad" style="background:linear-gradient(150deg,#c8a24d,#5c4a1f 70%)"></div>
+        <div class="shade"></div>
+        <div class="info">
+          <span class="tag" data-i18n>화산섬</span>
+          <h3 data-i18n>몬테 아주르</h3>
+          <span data-i18n>5박부터 · 선셋 테라스 빌라</span>
+        </div>
+      </div>
+      <div class="dest-card">
+        <div class="grad" style="background:linear-gradient(150deg,#1f5d52,#0d2b28 70%)"></div>
+        <div class="shade"></div>
+        <div class="info">
+          <span class="tag" data-i18n>비밀의 라군</span>
+          <h3 data-i18n>라군 베르데</h3>
+          <span data-i18n>4박부터 · 워터 파빌리온</span>
+        </div>
+      </div>
+      <div class="dest-card">
+        <div class="grad" style="background:linear-gradient(150deg,#b4633f,#3c211a 70%)"></div>
+        <div class="shade"></div>
+        <div class="info">
+          <span class="tag" data-i18n>사막 오아시스</span>
+          <h3 data-i18n>칼데라 로사</h3>
+          <span data-i18n>6박부터 · 프라이빗 듄 캠프</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 패럴랙스 인용 -->
+<section class="quote-band" id="experience">
+  <img class="parallax-img" id="parallaxImg" src="../assets/gen/site-travel.jpg" alt="" onerror="this.style.display='none'">
+  <div class="shade"></div>
+  <blockquote class="reveal">
+    <p data-i18n>“여행이 아니라 하나의 계절을 통째로 선물받은 기분이었습니다.”</p>
+    <cite data-i18n>— 아주라 게스트, 코스타 셀레네</cite>
+  </blockquote>
+</section>
+
+<!-- 통계 -->
+<section class="section stats" id="stats">
+  <div class="wrap">
+    <div class="stats-grid reveal">
+      <div class="stat"><b data-n="120" data-suf="+">0</b><span data-i18n>엄선된 여행지</span></div>
+      <div class="stat"><b data-n="4.9" data-dec="1">0</b><span data-i18n>평균 평점</span></div>
+      <div class="stat"><b data-n="15000" data-suf="+">0</b><span data-i18n>누적 고객</span></div>
+      <div class="stat"><b data-n="32" data-suf="회" data-suf-en="x">0</b><span data-i18n>수상 경력</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 후기 -->
+<section class="section" id="stories">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n>이야기</span>
+      <h2 data-i18n>먼저 다녀온 이들의 이야기</h2>
+    </div>
+    <div class="testis reveal">
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <p data-i18n>“체크인부터 마지막 날까지, 모든 순간이 세심하게 준비되어 있었어요.”</p>
+        <div class="who"><div class="av"></div><div><b data-i18n>이서윤</b><span data-i18n>코스타 셀레네 · 7박</span></div></div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <p data-i18n>“노을이 질 때 테라스에 앉아 있던 순간을 잊을 수 없습니다.”</p>
+        <div class="who"><div class="av"></div><div><b data-i18n>박도현</b><span data-i18n>몬테 아주르 · 5박</span></div></div>
+      </div>
+      <div class="testi">
+        <div class="stars">★★★★★</div>
+        <p data-i18n>“가족 여행이었는데 아이들도 저희도 모두 만족한 완벽한 일정.”</p>
+        <div class="who"><div class="av"></div><div><b data-i18n>최유나</b><span data-i18n>라군 베르데 · 4박</span></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="cols">
+      <div class="about">
+        <div class="brand">AZURA</div>
+        <p data-i18n>세상에서 가장 아름다운 순간들을 찾아, 당신만을 위한 여정으로 엮습니다.</p>
+        <form class="newsletter" id="newsletterForm">
+          <input type="email" id="ph-news" placeholder="이메일 주소">
+          <button type="submit" data-i18n>구독하기</button>
+        </form>
+      </div>
+      <div class="fcol"><h4 data-i18n>여정</h4>
+        <a href="#" data-i18n>코스타 셀레네</a>
+        <a href="#" data-i18n>몬테 아주르</a>
+        <a href="#" data-i18n>라군 베르데</a>
+      </div>
+      <div class="fcol"><h4 data-i18n>안내</h4>
+        <a href="#" data-i18n>예약 절차</a>
+        <a href="#" data-i18n>자주 묻는 질문</a>
+        <a href="#" data-i18n>고객센터</a>
+      </div>
+    </div>
+    <div class="copy">
+      <span>© 2026 AZURA Retreats</span>
+      <span data-i18n>모든 권리 보유 · 데모 목적의 가상 브랜드</span>
+    </div>
+  </div>
+</footer>
+
+<button id="langToggle" class="lang-toggle">EN</button>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── 데이터-i18n placeholder 텍스트 매핑 ── */
+document.getElementById('ph-dest').setAttribute('data-i18n-ph','어디로 떠나시나요?');
+document.getElementById('ph-checkin').setAttribute('data-i18n-ph','날짜 선택');
+document.getElementById('ph-guest').setAttribute('data-i18n-ph','게스트 2명');
+document.getElementById('ph-news').setAttribute('data-i18n-ph','이메일 주소');
+
+/* ── 언어 (?lang=en + 토글) ── */
+const STR={
+  '여정':'Journeys','경험':'Experience','이야기':'Stories','문의':'Contact','예약하기':'Reserve',
+  '2026 시그니처 컬렉션':'2026 Signature Collection',
+  '세상의 끝에서<br>맞이하는 golden hour':'A golden hour<br>at the edge of the world',
+  '깎아지른 절벽과 맞닿은 바다, 그 사이 오롯이 당신만을 위한 스위트. 아주라가 엄선한 여정으로 떠나보세요.':
+    'A suite of your own, poised between sheer cliffs and open sea. Set off on a journey curated by AZURA.',
+  '목적지':'Destination','체크인':'Check-in','인원':'Guests','검색':'Search',
+  '어디로 떠나시나요?':'Where to?','날짜 선택':'Select date','게스트 2명':'2 guests',
+  '추천 여정':'Featured Journeys','다음 여정을 고르세요':'Choose your next journey',
+  '절벽과 라군, 화산과 해안선까지. 아주라가 직접 답사한 네 곳의 시그니처 여정.':
+    'From cliffs and lagoons to volcanoes and coastlines — four signature journeys, scouted by AZURA.',
+  '절벽 위 스위트':'Cliffside Suites','코스타 셀레네':'Costa Selene','7박부터 · 프라이빗 인피니티 풀':'From 7 nights · Private infinity pool',
+  '화산섬':'Volcanic Isle','몬테 아주르':'Monte Azur','5박부터 · 선셋 테라스 빌라':'From 5 nights · Sunset terrace villa',
+  '비밀의 라군':'Hidden Lagoon','라군 베르데':'Laguna Verde','4박부터 · 워터 파빌리온':'From 4 nights · Water pavilion',
+  '사막 오아시스':'Desert Oasis','칼데라 로사':'Caldera Rosa','6박부터 · 프라이빗 듄 캠프':'From 6 nights · Private dune camp',
+  '“여행이 아니라 하나의 계절을 통째로 선물받은 기분이었습니다.”':
+    '“It didn’t feel like a trip — it felt like being given an entire season.”',
+  '— 아주라 게스트, 코스타 셀레네':'— AZURA guest, Costa Selene',
+  '엄선된 여행지':'Curated destinations','평균 평점':'Average rating','누적 고객':'Guests served','수상 경력':'Awards',
+  '먼저 다녀온 이들의 이야기':'Stories from past guests',
+  '“체크인부터 마지막 날까지, 모든 순간이 세심하게 준비되어 있었어요.”':
+    '“From check-in to the last day, every moment was thoughtfully arranged.”',
+  '이서윤':'Seoyun Lee','코스타 셀레네 · 7박':'Costa Selene · 7 nights',
+  '“노을이 질 때 테라스에 앉아 있던 순간을 잊을 수 없습니다.”':
+    '“I’ll never forget sitting on that terrace as the sun went down.”',
+  '박도현':'Dohyun Park','몬테 아주르 · 5박':'Monte Azur · 5 nights',
+  '“가족 여행이었는데 아이들도 저희도 모두 만족한 완벽한 일정.”':
+    '“A family trip where the kids and we were equally delighted — a perfect itinerary.”',
+  '최유나':'Yuna Choi','라군 베르데 · 4박':'Laguna Verde · 4 nights',
+  '세상에서 가장 아름다운 순간들을 찾아, 당신만을 위한 여정으로 엮습니다.':
+    'We seek out the world’s most beautiful moments and weave them into a journey made for you.',
+  '구독하기':'Subscribe','이메일 주소':'Email address',
+  '안내':'Info','예약 절차':'Booking process','자주 묻는 질문':'FAQ','고객센터':'Support',
+  '모든 권리 보유 · 데모 목적의 가상 브랜드':'All rights reserved · fictional demo brand',
+  'AZURA — 럭셔리 리조트 & 여행':'AZURA — Luxury Resorts & Travel'
+};
+let EN=new URLSearchParams(location.search).get('lang')==='en';
+const orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if(!orig.has(el)) orig.set(el,el.innerHTML);
+    const ko=orig.get(el).trim();
+    el.innerHTML=EN?(STR[ko]??orig.get(el)):orig.get(el);
+  });
+  document.documentElement.lang=EN?'en':'ko';
+}
+applyLang();
+
+/* 타이틀 + placeholder + 토글 버튼 텍스트 */
+function updateChrome(){
+  if(EN) document.title=STR['AZURA — 럭셔리 리조트 & 여행'];
+  else document.title='AZURA — 럭셔리 리조트 & 여행';
+  document.querySelectorAll('[data-i18n-ph]').forEach(el=>{
+    const ko=el.getAttribute('data-i18n-ph');
+    el.placeholder = EN ? (STR[ko]??ko) : ko;
+  });
+  document.getElementById('langToggle').textContent = EN?'KO':'EN';
+}
+updateChrome();
+document.getElementById('langToggle').addEventListener('click',()=>{ EN=!EN; applyLang(); updateChrome(); });
+
+/* ── 스크롤 리빌 ── */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting) e.target.classList.add('in');
+}),{ threshold:.18 });
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ── 내비게이션 스크롤 상태 ── */
+const navEl=document.getElementById('nav');
+function onNavScroll(){ navEl.classList.toggle('solid', window.scrollY>60); }
+addEventListener('scroll', onNavScroll, { passive:true });
+onNavScroll();
+
+/* ── 스탯 카운트업 (등장 시 1회) ── */
+let statsDone=false;
+const statsIO=new IntersectionObserver(es=>es.forEach(e=>{
+  if(!e.isIntersecting||statsDone) return;
+  statsDone=true;
+  document.querySelectorAll('#stats b').forEach(el=>{
+    const n=parseFloat(el.dataset.n), dec=+(el.dataset.dec||0);
+    const suf=(EN && el.dataset.sufEn!==undefined) ? el.dataset.sufEn : (el.dataset.suf||'');
+    const t0=performance.now();
+    (function tick(t){
+      const p=Math.min((t-t0)/1500,1), ease=1-Math.pow(1-p,3);
+      el.textContent=(n*ease).toFixed(dec)+suf;
+      if(p<1) requestAnimationFrame(tick);
+    })(t0);
+  });
+}),{ threshold:.4 });
+statsIO.observe(document.getElementById('stats'));
+
+/* ── 검색 버튼: 스타일링된 비기능 인터랙션 ── */
+const toastEl=document.getElementById('toast');
+let toastTimer=null;
+function showToast(ko,en){
+  toastEl.textContent = EN ? en : ko;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toastEl.classList.remove('show'), 2400);
+}
+document.getElementById('searchBtn').addEventListener('click', ()=>{
+  showToast('데모 화면입니다 · 실제 검색은 연결되어 있지 않아요','This is a demo · search isn’t wired up');
+});
+document.getElementById('newsletterForm').addEventListener('submit', e=>{
+  e.preventDefault();
+  showToast('구독해 주셔서 감사합니다 (데모)','Thanks for subscribing (demo)');
+  document.getElementById('ph-news').value='';
+});
+
+/* ── 패럴랙스 인용 밴드 + 메인 루프 (guarded rAF) ── */
+const parallaxImg=document.getElementById('parallaxImg');
+const quoteBand=document.querySelector('.quote-band');
+let frames=0;
+(function loop(){
+  if(window.__paused && frames>5){ setTimeout(()=>requestAnimationFrame(loop),300); return; }
+  frames++;
+  const rect=quoteBand.getBoundingClientRect();
+  const vh=innerHeight||1;
+  if(rect.bottom>0 && rect.top<vh){
+    const progress=(rect.top)/vh; /* -1..1 대략 */
+    parallaxImg.style.transform=`translateY(${progress*60}px)`;
+  }
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

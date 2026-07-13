@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>밤의 문장들 — 세로쓰기 문예지</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;900&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --paper: #f5f1e8; --ink: #1a1815; --red: #c73e2e; --faint: #8a8577; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: 'Noto Serif KR', serif; background: var(--paper); color: var(--ink);
+       -webkit-font-smoothing: antialiased; }
+::selection { background: var(--red); color: #fff; }
+
+/* ── 가로 스크롤러 (RTL — 로드 시 오른쪽 끝=표지에서 시작) ── */
+#mag { height: 100%; display: flex; overflow-x: auto; overflow-y: hidden;
+       direction: rtl; scroll-behavior: auto; }
+#mag > section { direction: ltr; flex: none; height: 100%; position: relative; }
+#mag::-webkit-scrollbar { height: 9px; }
+#mag::-webkit-scrollbar-track { background: #e6e0d2; }
+#mag::-webkit-scrollbar-thumb { background: var(--ink); border: 2px solid #e6e0d2; }
+#mag { scrollbar-color: var(--ink) #e6e0d2; scrollbar-width: thin; }
+
+/* 종이 질감 */
+#grain { position: fixed; inset: 0; z-index: 90; pointer-events: none; opacity: .05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+/* 진행 바 — 오른쪽에서 왼쪽으로 채워짐 */
+#prog { position: fixed; top: 0; right: 0; height: 3px; width: 0; z-index: 100;
+        background: var(--red); transition: width .15s linear; }
+
+/* ── 공통 세로쓰기 ── */
+.v { writing-mode: vertical-rl; text-orientation: mixed; }
+.pageno { position: absolute; bottom: 26px; left: 30px; font-size: 15px; color: var(--faint);
+          letter-spacing: 4px; writing-mode: vertical-rl; }
+.pageno::after { content: ""; display: block; width: 1px; height: 28px; margin-top: 10px;
+                 background: var(--faint); margin-left: 7px; }
+
+/* ── 표지 (가장 오른쪽) ── */
+.cover { width: max(88vw, 620px); border-left: 1px solid #d8d1bf;
+         display: flex; align-items: stretch; justify-content: center; gap: clamp(24px, 6vw, 90px);
+         padding: 7vh 6vw; }
+.cover .title { writing-mode: vertical-rl; font-weight: 900;
+                font-size: clamp(64px, 15vh, 128px); letter-spacing: .22em; line-height: 1.15; }
+.cover .sub { writing-mode: vertical-rl; align-self: flex-start; margin-top: 2vh;
+              font-size: clamp(15px, 2.2vh, 19px); letter-spacing: .5em; color: #3d3a33; }
+.cover .sub b { color: var(--red); font-weight: 600; }
+.cover .colv { display: flex; flex-direction: column; justify-content: space-between;
+               align-items: center; padding: 1vh 0; }
+.seal { width: clamp(64px, 9vh, 84px); height: clamp(64px, 9vh, 84px); background: var(--red);
+        color: var(--paper); writing-mode: vertical-rl; display: grid; place-items: center;
+        font-weight: 900; font-size: clamp(26px, 4vh, 36px); letter-spacing: .1em;
+        transform: rotate(-4deg); box-shadow: 0 1px 0 rgba(0,0,0,.15);
+        border-radius: 3px; line-height: 1; }
+.cover .edge { writing-mode: vertical-rl; font-family: 'Noto Sans KR', sans-serif;
+               font-size: 11px; letter-spacing: .45em; color: var(--faint); }
+.cover .hint { position: absolute; bottom: 30px; right: 34px; font-family: 'Noto Sans KR', sans-serif;
+               font-size: 12px; color: var(--faint); letter-spacing: 2px;
+               animation: nudge 2.6s ease-in-out infinite; }
+@keyframes nudge { 50% { transform: translateX(-7px); } }
+
+/* ── 본문 스프레드 ── */
+.spread { display: flex; flex-direction: row-reverse; align-items: stretch;
+          gap: clamp(28px, 4.5vw, 64px); padding: 8vh clamp(36px, 5vw, 84px);
+          border-left: 1px solid #d8d1bf; }
+.chap { writing-mode: vertical-rl; font-size: 15px; letter-spacing: .55em; color: var(--red);
+        border-right: 1px solid var(--red); padding-right: 14px; height: fit-content; }
+.chap .circ { font-size: 22px; letter-spacing: 0; display: block; margin-bottom: 14px; }
+h2.v { font-size: clamp(30px, 5.4vh, 44px); font-weight: 900; letter-spacing: .3em; line-height: 1.3; }
+.body.v { font-size: clamp(15px, 2.15vh, 18px); line-height: 2.35; letter-spacing: .14em;
+          max-height: 100%; font-weight: 400; }
+.body.v p { margin-left: clamp(14px, 2.2vh, 26px); }
+.body.v p:first-child { margin-left: 0; }
+rt { font-size: 9px; color: var(--faint); letter-spacing: 0; }
+.accent { color: var(--red); }
+
+/* 큰 인용 낙차 */
+.drop { writing-mode: vertical-rl; align-self: center; font-weight: 900;
+        font-size: clamp(90px, 22vh, 190px); line-height: 1; letter-spacing: .05em; }
+.drop small { font-size: 15px; font-weight: 400; letter-spacing: .4em; color: var(--faint);
+              margin-top: 22px; display: block; }
+
+/* 일러스트(그라디언트/선화) + 세로 캡션 */
+.fig { display: flex; flex-direction: row-reverse; gap: 14px; align-self: center; }
+.fig .art { width: clamp(180px, 24vh, 250px); height: clamp(260px, 52vh, 420px);
+            border: 1px solid var(--ink); position: relative; overflow: hidden;
+            background: linear-gradient(180deg, #12131f 0%, #2b2f4a 55%, #6c5a63 100%); }
+.fig .art .moon { position: absolute; top: 14%; left: 56%; width: 26%; aspect-ratio: 1;
+                  border-radius: 50%; background: var(--paper);
+                  box-shadow: 0 0 26px 8px rgba(245,241,232,.35); }
+.fig .art .city { position: absolute; bottom: 0; left: 0; right: 0; height: 38%;
+  background:
+    linear-gradient(90deg, #0b0c14 0 12%, transparent 0 16%, #0b0c14 0 30%, transparent 0 33%,
+      #0b0c14 0 46%, transparent 0 52%, #0b0c14 0 68%, transparent 0 71%, #0b0c14 0 88%, transparent 0 92%, #0b0c14 0 100%); }
+.fig .art .win { position: absolute; bottom: 8%; left: 6%; width: 3px; height: 3px;
+                 background: #ffd98a; box-shadow: 28px -22px #ffd98a, 60px -8px #ffd98a,
+                 95px -30px #ffd98a, 130px -14px #ffd98a, 160px -26px #ffd98a, 44px -40px #ffd98a; }
+.fig .art.summer { background: linear-gradient(180deg, #e8ddc4 0%, #d9c9a3 45%, #4a6b5d 100%); }
+.fig .art.summer .sun { position: absolute; top: 12%; left: 18%; width: 30%; aspect-ratio: 1;
+                        border-radius: 50%; border: 1.5px solid var(--red); }
+.fig .art.summer .line { position: absolute; left: 10%; right: 10%; height: 1px; background: var(--ink); }
+.fig figcaption { writing-mode: vertical-rl; font-family: 'Noto Sans KR', sans-serif;
+                  font-size: 11.5px; letter-spacing: .35em; color: var(--faint); }
+
+/* 가로쓰기 대비 포인트 */
+.h-note { align-self: flex-end; max-width: 250px; border-top: 2px solid var(--ink);
+          padding-top: 12px; font-family: 'Noto Sans KR', sans-serif; font-size: 12.5px;
+          line-height: 1.9; color: #3d3a33; word-break: keep-all; }
+.h-note b { color: var(--red); }
+
+/* ── 판권지 (가장 왼쪽) ── */
+.colophon { width: max(72vw, 520px); display: flex; flex-direction: row-reverse;
+            align-items: center; justify-content: center; gap: clamp(30px, 6vw, 80px);
+            background: var(--ink); color: var(--paper); }
+.colophon .v { letter-spacing: .3em; }
+.colophon h3 { font-size: clamp(26px, 4.6vh, 38px); font-weight: 900; letter-spacing: .34em; }
+.colophon .meta { font-size: 14px; line-height: 2.5; color: #cdc7b8; }
+.colophon .meta i { font-style: normal; color: var(--paper); }
+.colophon .seal { transform: rotate(3deg); }
+#toStart { writing-mode: vertical-rl; font-family: inherit; font-size: 16px; letter-spacing: .4em;
+           background: none; color: var(--paper); border: 1px solid var(--paper);
+           padding: 26px 12px; cursor: pointer; transition: .25s; }
+#toStart:hover { background: var(--red); border-color: var(--red); }
+
+@media (max-width: 700px) {
+  .cover { width: 100vw; }
+  .spread { gap: 22px; padding: 6vh 22px; }
+  .drop { font-size: 84px; }
+  .fig .art { width: 130px; height: 240px; }
+}
+</style>
+</head>
+<body>
+
+<div id="prog"></div>
+<div id="grain"></div>
+
+<div id="mag">
+
+  <!-- ── 表紙 · 표지 (가장 오른쪽) ── -->
+  <section class="cover">
+    <div class="colv">
+      <div class="seal">루나</div>
+      <div class="edge">縱書き文藝誌 · 京城麻浦發行</div>
+    </div>
+    <h1 class="title">밤의<br>문장들</h1>
+    <div class="sub">제 사십이 호 <b>· 여름</b><br>特輯 — 도시가 잠들 때 깨어나는 글</div>
+    <div class="hint">← 휠을 굴려 왼쪽으로 읽어 나가세요</div>
+  </section>
+
+  <!-- ── 一章 ── -->
+  <section class="spread">
+    <div class="chap v"><span class="circ">㊀</span>一章 · 밤의 입구</div>
+    <h2 class="v">해가 지면 도시는<br>문장을 고쳐 쓴다</h2>
+    <div class="body v">
+      <p>간판들은 제 이름을 한 글자씩 켜고, 골목은 쉼표처럼 구부러져 누군가의 귀가를 기다린다.</p>
+      <p>낮 동안 소리 내어 읽히던 도시가 이제 <span class="accent">묵독</span>의 자세로 돌아앉는 시간.</p>
+      <p>버스 정류장 불빛 아래, 하루의 <ruby>여백<rt>餘白</rt></ruby>을 접어 주머니에 넣는 사람들.</p>
+      <p>밤은 지우개가 아니라 <ruby>먹<rt>墨</rt></ruby>이다. 지우는 것이 아니라, 더 진하게 쓰는 것이다.</p>
+    </div>
+    <div class="drop">밤<small>단 한 글자의 계절</small></div>
+    <div class="pageno">一</div>
+  </section>
+
+  <!-- ── 二章 ── -->
+  <section class="spread">
+    <div class="chap v"><span class="circ">㊁</span>二章 · 도시의 각주</div>
+    <div class="body v">
+      <p>자정의 편의점은 도시의 <span class="accent">각주(脚註)</span>다. 본문에서 잠시 밀려난 사람들이 컵라면 하나의 온기로 다시 문장 속에 편입되기를 기다리는 자리.</p>
+      <p>계산대의 청년은 오늘 스물네 번째 어서오세요를 말했고, 그 인사는 한 번도 같은 문장이 아니었다.</p>
+      <p>유리문 밖으로 택시들이 <ruby>행간<rt>行間</rt></ruby>처럼 지나간다. 읽히지 않아도 거기 있는 것들이, 사실은 문단 전체를 지탱한다.</p>
+    </div>
+    <figure class="fig">
+      <div class="art"><div class="moon"></div><div class="city"></div><div class="win"></div></div>
+      <figcaption>삽화 — 자정의 스카이라인, 먹과 등불</figcaption>
+    </figure>
+    <div class="h-note">
+      편집자 주 — 이 페이지만 <b>가로로</b> 씁니다. 세로로 흐르는 밤 사이, 잠깐 몸을 눕히는
+      문장도 하나쯤 있어야 하니까요.
+    </div>
+    <div class="pageno">二</div>
+  </section>
+
+  <!-- ── 三章 ── -->
+  <section class="spread">
+    <div class="chap v"><span class="circ">㊂</span>三章 · 여름의 속도</div>
+    <h2 class="v">여름밤은<br>느리게 끓는다</h2>
+    <div class="body v">
+      <p>열대야는 도시가 하루 종일 삼킨 말들을 밤새 되새김질하는 일. 아스팔트는 낮의 온도를 천천히 발음한다.</p>
+      <p>선풍기 날개가 자꾸 같은 문장을 되풀이하고, 창밖 <ruby>매미<rt>蟬</rt></ruby>는 초고를 소리 내어 퇴고한다.</p>
+      <p>우리는 미지근한 보리차처럼 순해져서, 아무에게도 부치지 않을 편지의 첫 줄을 <span class="accent">여름</span>이라고 적는다.</p>
+    </div>
+    <figure class="fig">
+      <div class="art summer">
+        <div class="sun"></div>
+        <div class="line" style="bottom:30%"></div>
+        <div class="line" style="bottom:24%; left:22%"></div>
+        <div class="line" style="bottom:18%; right:24%"></div>
+      </div>
+      <figcaption>삽화 — 오후 다섯 시의 수평선 연습</figcaption>
+    </figure>
+    <div class="drop">熱<small>식지 않는 원고</small></div>
+    <div class="pageno">三</div>
+  </section>
+
+  <!-- ── 四章 ── -->
+  <section class="spread">
+    <div class="chap v"><span class="circ">㊃</span>四章 · 새벽의 퇴고</div>
+    <div class="body v">
+      <p>새벽 세 시는 하루의 <ruby>낙관<rt>落款</rt></ruby>이 찍히는 시간. 잘 쓴 하루든 못 쓴 하루든, 도장은 공평하게 붉다.</p>
+      <p>첫차를 기다리는 사람의 등은 아직 지워지지 않은 문장 같아서, 나는 오래 읽었다.</p>
+      <p>밤의 문장들은 아침이 오면 증발하지만, 종이는 기억한다 — 눌러 쓴 자리의 <span class="accent">오목한 흔적</span>을.</p>
+      <p>그러니 오늘 밤에도 쓴다. 지워질 것을 알면서 쓰는 일, 그것만이 밤을 건너는 유일한 문체다.</p>
+    </div>
+    <div class="drop">終<small>그리고 다시, 첫 문장</small></div>
+    <div class="pageno">四</div>
+  </section>
+
+  <!-- ── 판권지 (가장 왼쪽) ── -->
+  <section class="colophon">
+    <h3 class="v">판권지 · 奧付</h3>
+    <div class="meta v">
+      발행 — <i>밤의문장들 편집부</i><br>
+      발행인 — <i>루나</i><br>
+      인쇄 — <i>새벽인쇄소 · 마포</i><br>
+      연락 — <i>letters@night-sentence.kr</i><br>
+      제사십이호 · 여름 · 정가 구천원
+    </div>
+    <div class="seal">낙관</div>
+    <button id="toStart">처음으로 ↻</button>
+  </section>
+
+</div>
+
+<script>
+const mag = document.getElementById('mag');
+const prog = document.getElementById('prog');
+
+/* RTL 스크롤러 — 로드 시 scrollLeft 0 = 오른쪽 끝(표지). 혹시 모를 브라우저 대비 리셋 */
+mag.scrollLeft = 0;
+
+/* 휠(deltaY) → 가로 스크롤 변환. RTL이므로 -= 로 왼쪽 진행 */
+mag.addEventListener('wheel', e => {
+  if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+    e.preventDefault();
+    mag.scrollLeft -= e.deltaY;
+  }
+}, { passive: false });
+
+/* 키보드: ← 앞으로(왼쪽), → 뒤로 */
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowLeft')  mag.scrollBy({ left: -Math.min(innerWidth * .8, 600), behavior: 'smooth' });
+  if (e.key === 'ArrowRight') mag.scrollBy({ left:  Math.min(innerWidth * .8, 600), behavior: 'smooth' });
+});
+
+/* 진행 바 — 오른쪽에서 왼쪽으로 채워짐 (right:0 고정 + width 증가) */
+function updateProg(){
+  const max = mag.scrollWidth - mag.clientWidth;
+  const p = max > 0 ? Math.min(1, Math.abs(mag.scrollLeft) / max) : 0;
+  prog.style.width = (p * 100) + '%';
+}
+mag.addEventListener('scroll', updateProg, { passive: true });
+updateProg();
+
+/* 처음으로 */
+document.getElementById('toStart').addEventListener('click', () => {
+  mag.scrollTo({ left: 0, behavior: 'smooth' });
+});
+</script>
+<script>
+/* English mode: ?lang=en swaps every visible Korean string to English. Adds only — no markup/CSS/logic changed. */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "밤의 문장들 — 세로쓰기 문예지": "Sentences of the Night — A Vertical-Writing Literary Magazine",
+    "루나": "LUNA",
+    "縱書き文藝誌 · 京城麻浦發行": "Vertical Literary Journal · Published in Mapo, Gyeongseong",
+    "밤의": "Of the",
+    "문장들": "Night's Sentences",
+    "제 사십이 호": "Issue No. 42",
+    "· 여름": "· Summer",
+    "特輯 — 도시가 잠들 때 깨어나는 글": "Special Feature — Writing that Wakes as the City Sleeps",
+    "← 휠을 굴려 왼쪽으로 읽어 나가세요": "← Scroll the wheel to read leftward",
+    "一章 · 밤의 입구": "Chapter One · The Entrance of Night",
+    "해가 지면 도시는": "When the sun sets, the city",
+    "문장을 고쳐 쓴다": "rewrites its sentences",
+    "간판들은 제 이름을 한 글자씩 켜고, 골목은 쉼표처럼 구부러져 누군가의 귀가를 기다린다.": "The signs light their names one letter at a time, and the alley curves like a comma, waiting for someone to come home.",
+    "낮 동안 소리 내어 읽히던 도시가 이제": "The hour when the city, read aloud all through the day, now settles back into a posture of",
+    "묵독": "silent reading",
+    "의 자세로 돌아앉는 시간.": ".",
+    "버스 정류장 불빛 아래, 하루의": "Under the bus-stop light, the day's",
+    "여백": "blank space",
+    "餘白": "yeobaek",
+    "을 접어 주머니에 넣는 사람들.": ", folded and slipped into their pockets.",
+    "밤은 지우개가 아니라": "Night is not an eraser but",
+    "먹": "ink",
+    "墨": "meok",
+    "이다. 지우는 것이 아니라, 더 진하게 쓰는 것이다.": ". It does not erase — it writes all the darker.",
+    "밤": "Night",
+    "단 한 글자의 계절": "A season of a single word",
+    "一": "I",
+    "二章 · 도시의 각주": "Chapter Two · Footnotes of the City",
+    "자정의 편의점은 도시의": "The midnight convenience store is the city's",
+    "각주(脚註)": "footnote",
+    "다. 본문에서 잠시 밀려난 사람들이 컵라면 하나의 온기로 다시 문장 속에 편입되기를 기다리는 자리.": ". A place where those briefly pushed out of the main text wait — on the warmth of a single cup of ramen — to be written back into the sentence.",
+    "계산대의 청년은 오늘 스물네 번째 어서오세요를 말했고, 그 인사는 한 번도 같은 문장이 아니었다.": "The young man at the register said his twenty-fourth 'welcome' of the day, and not once was that greeting the same sentence.",
+    "유리문 밖으로 택시들이": "Beyond the glass door, the taxis drift past like the",
+    "행간": "space between the lines",
+    "行間": "haenggan",
+    "처럼 지나간다. 읽히지 않아도 거기 있는 것들이, 사실은 문단 전체를 지탱한다.": ". The things that stay there unread are, in truth, what hold up the whole paragraph.",
+    "삽화 — 자정의 스카이라인, 먹과 등불": "Illustration — Midnight skyline, ink and lanterns",
+    "편집자 주 — 이 페이지만": "Editor's note — This page alone is written",
+    "가로로": "horizontally",
+    "씁니다. 세로로 흐르는 밤 사이, 잠깐 몸을 눕히는 문장도 하나쯤 있어야 하니까요.": ". Amid the vertically flowing night, there ought to be at least one sentence that lies down to rest for a while.",
+    "二": "II",
+    "三章 · 여름의 속도": "Chapter Three · The Speed of Summer",
+    "여름밤은": "Summer nights",
+    "느리게 끓는다": "come to a slow boil",
+    "열대야는 도시가 하루 종일 삼킨 말들을 밤새 되새김질하는 일. 아스팔트는 낮의 온도를 천천히 발음한다.": "A tropical night is the city ruminating all night on the words it swallowed through the day. The asphalt slowly pronounces the temperature of noon.",
+    "선풍기 날개가 자꾸 같은 문장을 되풀이하고, 창밖": "The fan blades keep repeating the same sentence, and outside the window the",
+    "매미": "cicada",
+    "蟬": "maemi",
+    "는 초고를 소리 내어 퇴고한다.": " revises its first draft aloud.",
+    "우리는 미지근한 보리차처럼 순해져서, 아무에게도 부치지 않을 편지의 첫 줄을": "Grown gentle like lukewarm barley tea, we write, as the first line of a letter we will never send to anyone, the word",
+    "여름": "summer",
+    "이라고 적는다.": ".",
+    "삽화 — 오후 다섯 시의 수평선 연습": "Illustration — Practicing the horizon at five in the afternoon",
+    "熱": "Heat",
+    "식지 않는 원고": "A manuscript that never cools",
+    "三": "III",
+    "四章 · 새벽의 퇴고": "Chapter Four · The Dawn Revision",
+    "새벽 세 시는 하루의": "Three in the morning is when the day's",
+    "낙관": "seal",
+    "落款": "nakgwan",
+    "이 찍히는 시간. 잘 쓴 하루든 못 쓴 하루든, 도장은 공평하게 붉다.": " is stamped. Whether the day was well-written or badly, the stamp is impartially red.",
+    "첫차를 기다리는 사람의 등은 아직 지워지지 않은 문장 같아서, 나는 오래 읽었다.": "The back of someone waiting for the first train looked like a sentence not yet erased, so I read it a long while.",
+    "밤의 문장들은 아침이 오면 증발하지만, 종이는 기억한다 — 눌러 쓴 자리의": "The night's sentences evaporate when morning comes, but the paper remembers — the",
+    "오목한 흔적": "concave trace",
+    "을.": " where the pen once pressed down.",
+    "그러니 오늘 밤에도 쓴다. 지워질 것을 알면서 쓰는 일, 그것만이 밤을 건너는 유일한 문체다.": "So tonight I write again. To write while knowing it will be erased — that alone is the only style for crossing the night.",
+    "終": "End",
+    "그리고 다시, 첫 문장": "And again, the first sentence",
+    "四": "IV",
+    "판권지 · 奧付": "Colophon · Imprint",
+    "발행 —": "Issued by —",
+    "밤의문장들 편집부": "Sentences of the Night Editorial Board",
+    "발행인 —": "Publisher —",
+    "인쇄 —": "Printed by —",
+    "새벽인쇄소 · 마포": "Dawn Print Shop · Mapo",
+    "연락 —": "Contact —",
+    "제사십이호 · 여름 · 정가 구천원": "Issue No. 42 · Summer · Price 9,000 KRW",
+    "처음으로 ↻": "Back to Start ↻"
+  };
+  const norm = s => s.replace(/\s+/g,' ').trim();
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swapText = n => {
+    const raw = n.nodeValue, key = norm(raw);
+    if (!key || TR[key] == null) return;
+    n.nodeValue = raw.match(/^\s*/)[0] + TR[key] + raw.match(/\s*$/)[0];
+  };
+  const walk = n => {
+    if (n.nodeType === 3) { swapText(n); return; }
+    if (n.nodeType !== 1) return;
+    for (const a of ATTRS) {
+      if (n.hasAttribute && n.hasAttribute(a)) {
+        const k = norm(n.getAttribute(a));
+        if (TR[k] != null) n.setAttribute(a, TR[k]);
+      }
+    }
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = norm(document.title);
+  if (TR[dt] != null) document.title = TR[dt];
+})();
+</script>
+</body>
+</html>

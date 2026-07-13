@@ -1,0 +1,1371 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Gallery — 프론트엔드 디자인 레퍼런스 플랫폼</title>
+<meta name="description" content="웹·앱의 검증된 디자인 패턴을 라이브 데모와 복사 가능한 코드(HTML/토큰/RN/Flutter/SwiftUI)로 제공하는 디자인 레퍼런스 갤러리.">
+
+<!-- ═══ Google AdSense ═══
+  사용 방법 (README.md의 '애드센스' 섹션 참고):
+  1. https://adsense.google.com 가입 → 사이트 등록 (공개 URL 필요 — GitHub Pages 등에 먼저 배포)
+  2. 발급받은 게시자 ID(ca-pub-XXXXXXXXXXXXXXXX)로 아래 XXXX 를 교체
+  3. 루트의 ads.txt 파일에도 같은 ID 기입
+  4. 아래 주석을 해제하면 자동 광고가 활성화됩니다
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX"
+        crossorigin="anonymous"></script>
+═══════════════════════ -->
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --bg: #0d0e12; --panel: #16181f; --border: #262a35; --text: #eceef2;
+    --muted: #8b92a5; --accent: #6d8dff; --accent2: #b06dff;
+  }
+  body { font-family: Inter, "Noto Sans KR", sans-serif;
+         background: var(--bg); color: var(--text); min-height: 100vh;
+         -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  body::before { content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    background: radial-gradient(44% 34% at 50% -4%, rgba(109,141,255,.09), transparent 70%); }
+
+  header { position: relative; padding: 52px 24px 4px; text-align: center; }
+  .lang-toggle { position: absolute; top: 22px; right: 24px; z-index: 3; font-family: inherit;
+    font-size: 12px; font-weight: 700; letter-spacing: 1px; color: var(--muted); cursor: pointer;
+    background: var(--panel); border: 1px solid var(--border); border-radius: 99px; padding: 8px 14px; }
+  .lang-toggle:hover { color: var(--text); border-color: #3a4050; }
+  .lang-toggle .on { color: var(--text); }
+  .logo-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted);
+                border: 1px solid var(--border); padding: 6px 16px; border-radius: 99px; background: var(--panel); }
+  h1 { margin-top: 20px; font-size: clamp(26px, 3.4vw, 34px); letter-spacing: -.035em; font-weight: 800;
+       line-height: 1.2; word-break: keep-all; color: var(--text); }
+  h1 em { font-style: normal; background: linear-gradient(90deg, var(--accent), var(--accent2));
+          -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .lead { margin: 14px auto 0; max-width: 560px; color: var(--muted); font-size: 15.5px; line-height: 1.65; }
+  .stats-line { margin-top: 18px; font-size: 12.5px; letter-spacing: .5px; color: var(--muted);
+                font-variant-numeric: tabular-nums; }
+  .stats-line b { color: var(--accent); font-weight: 700; }
+
+  /* 컨트롤 바: 플랫폼 탭 + 검색 + 즐겨찾기, 한 줄 */
+  .controls { position: relative; display: flex; justify-content: center; align-items: center; gap: 10px;
+              flex-wrap: wrap; max-width: 1200px; margin: 30px auto 0; padding: 0 24px; }
+  .plat-tabs { display: flex; gap: 2px; background: var(--panel); border: 1px solid var(--border);
+               border-radius: 11px; padding: 3px; }
+  .plat { border: none; background: none; color: var(--muted); font-size: 13.5px; font-weight: 600;
+          padding: 8px 20px; border-radius: 8px; cursor: pointer; font-family: inherit; transition: all .15s; }
+  .plat:hover { color: var(--text); }
+  .plat.on { color: var(--text); background: var(--bg); border: 1px solid var(--border); font-weight: 700; }
+
+  .filters-row { position: relative; max-width: 1200px; margin: 12px auto 0; padding: 0 24px;
+                 display: flex; justify-content: center; }
+
+  /* 용도별 구분 칩 */
+  .use-row { position: relative; display: flex; flex-wrap: wrap; gap: 7px; justify-content: center;
+             max-width: 1200px; margin: 16px auto 0; padding: 0 24px; }
+  .use-chip { border: 1px solid var(--border); background: none; color: var(--muted); font-size: 12.5px;
+              font-weight: 600; padding: 8px 16px; border-radius: 10px; cursor: pointer;
+              font-family: inherit; transition: all .15s; }
+  .use-chip:hover { color: var(--text); border-color: #3a4050; }
+  .use-chip.on { color: var(--text); background: var(--panel); border-color: rgba(140,150,255,.5); }
+  body.res-mode .use-row, body.res-mode .filters-row, body.res-mode .search,
+  body.res-mode #favToggle { display: none; }
+
+  /* 리소스 카드 (외부 링크) */
+  .res-card { display: block; padding: 22px 22px 20px; text-decoration: none; color: var(--text); }
+  .res-card .res-ico { width: 44px; height: 44px; border-radius: 12px; display: flex; align-items: center;
+                       justify-content: center; font-size: 21px; background: var(--bg);
+                       border: 1px solid var(--border); margin-bottom: 14px; }
+  .res-card .res-cat { display: inline-block; font-size: 11px; font-weight: 700; letter-spacing: .5px;
+                       color: var(--accent); margin-bottom: 6px; }
+  .res-card h2 { font-size: 16px; font-weight: 700; }
+  .res-card h2 span { color: var(--muted); font-weight: 400; font-size: 12.5px; margin-left: 7px; }
+  .res-card .desc { margin-top: 7px; font-size: 13px; line-height: 1.65; color: var(--muted); }
+
+  /* 애드센스 슬롯 */
+  .ad-wrap { max-width: 1200px; margin: 10px auto 30px; padding: 0 24px; text-align: center; }
+  .ad-wrap:empty { display: none; }
+  .search { flex: 0 1 300px; display: flex; align-items: center; gap: 8px; background: var(--panel);
+            border: 1px solid var(--border); border-radius: 10px; padding: 9px 14px; }
+  .search input { flex: 1; background: none; border: none; outline: none; color: var(--text); font-size: 14px; }
+  .search input::placeholder { color: var(--muted); }
+  .filters { display: flex; flex-wrap: wrap; gap: 7px; justify-content: center; }
+  .chip { border: 1px solid transparent; background: none; color: var(--muted); font-size: 12.5px;
+          padding: 6px 13px; border-radius: 99px; cursor: pointer; transition: all .15s; font-family: inherit; }
+  .chip:hover { color: var(--text); background: var(--panel); }
+  .chip.on { color: var(--text); background: var(--panel); border-color: var(--border); font-weight: 700; }
+  .chip.more { color: var(--accent); }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 22px;
+          max-width: 1200px; margin: 30px auto 80px; padding: 0 24px; }
+
+  .item { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; overflow: hidden;
+          transition: border-color .2s, transform .2s; display: flex; flex-direction: column;
+          cursor: pointer; }
+  .item:hover { border-color: #3d4454; transform: translateY(-2px); }
+
+  /* 라이브 캡처: 실제 데모를 1280px로 렌더링해 1/4로 축소한 iframe */
+  .thumb { position: relative; height: 220px; overflow: hidden; background: #000; cursor: pointer; }
+  .thumb iframe { width: 1280px; height: 880px; border: 0; transform-origin: 0 0; pointer-events: none;
+                  background: #fff; }
+  .item .body { padding: 15px 18px 17px; display: flex; flex-direction: column; flex: 1; }
+  .t-row { display: flex; align-items: flex-start; gap: 10px; }
+  .item h2 { flex: 1; font-size: 15.5px; font-weight: 700; letter-spacing: -0.2px; line-height: 1.4; }
+  .item h2 .star { font-style: normal; color: #e8c56b; font-size: 13px; margin-right: 2px; }
+  .item .meta { margin-top: 5px; font-size: 12px; color: var(--muted); overflow: hidden;
+                white-space: nowrap; text-overflow: ellipsis; }
+  .item .desc { margin-top: 8px; font-size: 13px; line-height: 1.6; color: var(--muted);
+                display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .b-fav { flex-shrink: 0; width: 30px; height: 30px; margin: -4px -6px 0 0; border: none;
+           background: none; color: #4a5163; font-size: 16px; cursor: pointer; border-radius: 8px;
+           transition: color .2s, background .2s; }
+  .b-fav:hover { color: #ff6d8d; background: rgba(255,109,141,.08); }
+  .b-fav.on { color: #ff6d8d; }
+
+  .fav-chip { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--border); }
+  .fav-chip.on { color: #ff6d8d; border-color: rgba(255,109,141,.45); font-weight: 700; }
+
+  .empty { grid-column: 1 / -1; text-align: center; color: var(--muted); padding: 60px 0; font-size: 15px; }
+
+  /* ── 모달 뷰어 ── */
+  .modal { position: fixed; inset: 0; z-index: 100; display: none; align-items: center; justify-content: center;
+           background: rgba(5,6,9,0.92); padding: 24px; }
+  /* 모달이 열리면 뒤의 라이브 썸네일 렌더링을 중단해 GPU 부하를 줄인다 */
+  body.modal-open .grid, body.modal-open .toolbar, body.modal-open header { visibility: hidden; }
+  .modal.open { display: flex; }
+  .sheet { width: min(1100px, 100%); height: min(760px, 100%); background: var(--panel);
+           border: 1px solid var(--border); border-radius: 16px; display: flex; flex-direction: column;
+           overflow: hidden; }
+  .sheet-head { display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+                border-bottom: 1px solid var(--border); }
+  .sheet-head h3 { font-size: 15px; font-weight: 700; margin-right: auto; }
+  .tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--border);
+          border-radius: 9px; padding: 3px; }
+  .tab { border: none; background: none; color: var(--muted); font-size: 13px; font-weight: 600;
+         padding: 6px 16px; border-radius: 7px; cursor: pointer; }
+  .tab.on { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+  .sheet-head .open-new { font-size: 13px; color: var(--accent); text-decoration: none; }
+  .sheet-head .open-new:hover { text-decoration: underline; }
+  .close, .mnav { border: 1px solid var(--border); background: none; color: var(--muted); width: 30px; height: 30px;
+           border-radius: 8px; cursor: pointer; font-size: 14px; }
+  .close:hover, .mnav:hover { color: var(--text); border-color: #3a4050; }
+  .mnav { font-size: 17px; line-height: 1; }
+
+  /* 미리보기 뷰포트 토글 (💻 데스크톱 / 📱 모바일 390px) */
+  .vp-toggle { display: flex; gap: 3px; background: var(--bg); border: 1px solid var(--border);
+               border-radius: 9px; padding: 3px; }
+  .vp-toggle button { border: none; background: none; color: var(--muted); font-size: 13px;
+                      padding: 4px 10px; border-radius: 6px; cursor: pointer; }
+  .vp-toggle button.on { background: var(--panel); color: var(--text); border: 1px solid var(--border); }
+  .pane[data-pane="preview"].vp-mobile iframe { width: 390px; margin: 0 auto; display: block;
+    box-shadow: 0 0 0 1px var(--border), 0 0 60px rgba(0,0,0,.5); }
+
+  .sheet-body { flex: 1; position: relative; min-height: 0; }
+  .pane { position: absolute; inset: 0; display: none; }
+  .pane.on { display: block; }
+  .pane iframe { width: 100%; height: 100%; border: 0; background: #fff; }
+  .pane.code-pane { overflow: auto; background: #0b0c10; }
+  .code-tools { position: sticky; top: 0; display: flex; justify-content: flex-end; gap: 8px;
+                padding: 10px 14px; background: linear-gradient(180deg, #0b0c10 70%, transparent); z-index: 2; }
+  .copy-btn { border: 1px solid var(--border); background: var(--panel); color: var(--text); font-size: 12.5px;
+              padding: 6px 14px; border-radius: 8px; cursor: pointer; }
+  .copy-btn:hover { border-color: #3a4050; }
+  .fig-hint { margin: 0 14px 14px; padding: 13px 16px; border: 1px solid rgba(109,232,183,.3);
+              border-radius: 12px; background: rgba(109,232,183,.06); font-size: 12.5px;
+              line-height: 1.8; color: var(--muted); }
+  .fig-hint b { color: var(--text); }
+  .fig-hint u { color: #6de8b7; text-decoration: none; font-weight: 700; }
+  pre.code { padding: 0 20px 24px; font-family: "SF Mono", Consolas, "Courier New", monospace;
+             font-size: 12.5px; line-height: 1.7; color: #c8cede; tab-size: 2; white-space: pre; }
+  .tk-tag { color: #7ab4ff; } .tk-attr { color: #b8a3ff; } .tk-str { color: #8fe3ab; }
+  .tk-com { color: #5b6274; font-style: italic; }
+
+  footer { border-top: 1px solid var(--border); padding: 28px 24px; text-align: center;
+           color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 640px) {
+    h1 { font-size: 28px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <header>
+    <button class="lang-toggle" id="langToggle"><span class="on">KO</span> / <span>EN</span></button>
+    <span class="logo-badge">◈ Design Gallery</span>
+    <h1 id="heroH1">유명 디자인을 <em>코드로</em> 배우는 갤러리</h1>
+    <p class="lead" id="heroLead">웹·앱의 검증된 디자인 패턴을 라이브 데모와 복사 가능한 코드로.
+    카드를 열면 미리보기·소스·피그마 토큰·네이티브 코드가 있습니다.</p>
+    <p class="stats-line" id="statsLine"></p>
+  </header>
+
+  <div class="controls">
+    <div class="plat-tabs" id="platTabs">
+      <button class="plat on" data-plat="all">전체</button>
+      <button class="plat" data-plat="web">웹</button>
+      <button class="plat" data-plat="app">앱</button>
+      <button class="plat" data-plat="res">📚 리소스</button>
+    </div>
+    <label class="search">⌕ <input id="q" type="text" placeholder="검색  ( / )"></label>
+    <button class="fav-chip chip" id="favToggle">♥ <span id="favCount">0</span></button>
+  </div>
+  <div class="use-row" id="useRow"></div>
+  <div class="filters-row"><div class="filters" id="filters"></div></div>
+
+  <main class="grid" id="grid"></main>
+
+  <div class="modal" id="modal">
+    <div class="sheet">
+      <div class="sheet-head">
+        <button class="mnav" id="m-prev" title="이전 디자인 (←)">‹</button>
+        <button class="mnav" id="m-next" title="다음 디자인 (→)">›</button>
+        <h3 id="m-title"></h3>
+        <div class="tabs" id="m-tabs"></div>
+        <div class="vp-toggle" id="vp">
+          <button data-vp="desk" class="on" title="데스크톱 뷰">💻</button>
+          <button data-vp="mob" title="모바일 뷰 (390px)">📱</button>
+        </div>
+        <a class="open-new" id="m-open" href="#" target="_blank">새 탭 ↗</a>
+        <button class="close" id="m-close">✕</button>
+      </div>
+      <div class="sheet-body">
+        <div class="pane on" data-pane="preview"><iframe id="m-frame" title="데모 미리보기"></iframe></div>
+        <div class="pane code-pane" data-pane="code">
+          <div class="code-tools"><button class="copy-btn" id="m-copy">📋 전체 코드 복사</button></div>
+          <div class="fig-hint" id="fig-hint" style="display:none">
+            <b>🎨 피그마 적용</b> — <u>토큰 JSON</u>: 피그마에서 <b>Tokens Studio</b> 플러그인 열기 → Tools → Load from JSON에 붙여넣으면
+            색상·radius·타이포가 변수/스타일로 자동 생성됩니다.
+            화면 자체는 <b>html.to.design</b> 플러그인에 이 데모 URL을 붙여넣으면 편집 가능한 프레임으로 들어옵니다.<br>
+            <b>📱 앱 적용</b> — <u>RN</u>은 <b>Expo Snack</b>(snack.expo.dev), <u>Flutter</u>는 <b>DartPad</b>(dartpad.dev)에
+            붙여넣으면 즉시 실행, <u>SwiftUI</u>는 Xcode 새 파일에 붙여넣으면 #Preview가 바로 뜹니다.
+            전부 외부 패키지 0개. 토큰 JSON은 <b>Style Dictionary</b>로 네이티브 상수 변환도 가능합니다.
+          </div>
+          <pre class="code" id="m-code">불러오는 중...</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 애드센스 광고 슬롯: 게시자 ID 발급 후 아래 주석 해제 + data-ad-client 교체 -->
+  <div class="ad-wrap">
+    <!--
+    <ins class="adsbygoogle" style="display:block" data-ad-format="auto" data-full-width-responsive="true"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" data-ad-slot="0000000000"></ins>
+    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    -->
+  </div>
+
+  <footer>순수 HTML/CSS/JS 재현 데모 모음 · 각 원본 사이트와 무관한 학습용 레퍼런스입니다. · © 2026 hyunaeee · MIT License</footer>
+
+<script>
+const DEMOS = [
+  /* ── 🎮 인터랙티브 플레이그라운드 (만지고 노는 명작) ── */
+  {
+    file: 'demos/particle-text.html',
+    title: '파티클 타이포 · 흩어졌다 모이는 글자',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: '한글을 픽셀 샘플링해 수천 개 파티클의 목표점으로 삼습니다. 마우스 반경에서 밀려났다 스프링으로 다시 글자로 모이고, 클릭하면 폭발했다 재조립됩니다.',
+    tags: ['마우스 인터랙션', '파티클 물리', '캔버스', '타이포그래피'],
+    premium: true,
+  },
+  {
+    file: 'demos/folio-pearl.html',
+    title: 'PERLE · 실버 진주 럭셔리 포트폴리오',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: 'AI(Higgsfield)로 생성한 진주빛 실크 영상이 배경에 깔리고, 스크롤 진행도에 따라 영상이 부드럽게 스크러빙됩니다(scroll-scrub). 메탈릭 실버 샤인 타이포, 글래스 카드·라이트 스윕 프로젝트 카드 — 주얼리 브랜드 무드의 럭셔리 포트폴리오. KO/EN.',
+    tags: ['포트폴리오', '럭셔리', '비디오', '스크롤 인터랙션'],
+    premium: true,
+  },
+  {
+    file: 'demos/folio-ember.html',
+    title: 'MARGIN · 흑백 에디토리얼 포트폴리오',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: '색을 완전히 배제한 매거진형 흑백 포트폴리오. 큰 세리프 헤드라인, 점선 리더의 Index(목차), 헤어라인 2단 프로젝트 스프레드(각 프로젝트는 순수 흑선 SVG 도형), 대형 이탤릭 인용, 드롭캡 소개, 콜로폰 푸터 — 순백 위 #111, 여백의 미학. KO/EN.',
+    tags: ['포트폴리오', '타이포그래피', '미니멀', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/folio-mono.html',
+    title: 'MONO · 흑백 스위스 타이포 포트폴리오',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: '색을 완전히 배제한 순백 스위스 타이포그래피. 거대한 이름, 아웃라인 글자, 6줄 프로젝트 인덱스는 호버 시 행 전체가 반전되고 커서를 따라 프리뷰 스와치가 흐릅니다. 블랙 마퀴·베이스라인 그리드(g키) — 진짜 깔끔한 화이트. KO/EN.',
+    tags: ['포트폴리오', '타이포그래피', '미니멀', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/folio-noir.html',
+    title: 'NOIR · 흑백 미니멀 다크 포트폴리오',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: 'blend 커서 도트, 실시간 시계 HUD, 한 글자씩 등장하는 히어로. 선택 작업은 아코디언으로 펼쳐지고, 그레이스케일 비주얼 밴드와 로고 월 마퀴, 세리프 스테이트먼트까지 — 얇은 획의 미니멀 다크 포트폴리오. KO/EN.',
+    tags: ['포트폴리오', '마우스 인터랙션', '미니멀', '다크'],
+    premium: true,
+  },
+  {
+    file: 'demos/constellation.html',
+    title: '별을 잇다 · 나만의 별자리 만들기',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: 'AI 생성 성운 위에서 빛나는 별을 클릭해 선으로 잇고, 완성하면 이름을 붙여 하늘에 새깁니다. 커서까지 미리보기 선이 따라오는 인터랙티브 성도(星圖).',
+    tags: ['마우스 인터랙션', 'AI 생성', '캔버스', '제너러티브'],
+    premium: true,
+  },
+  {
+    file: 'demos/gravity-play.html',
+    title: '아이디어 인형뽑기 · MASSA 스튜디오',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: '다크 유리 케이스에 아이디어 이모지(💡🎨🚀🧠💎)가 와르르 쏟아져 쌓이고, 크레인이 내려와 집어 올립니다. 클릭으로 크레인 내리기, 더 붓기, 흔들기 — 인형뽑기 감성의 물리 랜딩.',
+    tags: ['마우스 인터랙션', '물리 시뮬레이션', '인형뽑기', '다크'],
+    premium: true,
+  },
+  {
+    file: 'demos/brick-breaker.html',
+    title: '벽돌깨기 · 진짜 플레이되는 아케이드',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: '실제로 즐기는 벽돌깨기. 벽돌이 PLAY 글자로 배열되고 점수·콤보·라이프·파티클 이펙트가 있습니다. 로드 시 AI가 자동 시연하다 마우스를 움직이면 수동 플레이로 전환.',
+    tags: ['게임', '네온 아케이드', '캔버스', '인터랙티브'],
+    premium: true,
+  },
+  {
+    file: 'demos/audio-visualizer.html',
+    title: '사운드 가든 · 소리가 그림이 되는',
+    ref: { name: 'patatap.com', url: 'https://www.patatap.com' },
+    desc: '화면의 오브를 클릭·호버하면 펜타토닉 신스 음이 울리고, 그 소리가 파문과 파티클로 그려집니다. 중앙엔 AnalyserNode 주파수로 방사형 스펙트럼이 반응합니다.',
+    tags: ['마우스 인터랙션', 'Web Audio', '오디오 비주얼', '제너러티브'],
+    premium: true,
+  },
+  {
+    file: 'demos/matrix-rain.html',
+    title: '코드의 비 · 매트릭스 레인',
+    ref: { name: 'Matrix Digital Rain', url: 'https://en.wikipedia.org/wiki/Matrix_digital_rain' },
+    desc: '카타카나·숫자·한글 자모가 섞인 디지털 레인. 마우스가 지나간 열은 가속·발광하고 클릭하면 글자가 방사형으로 터지며, 중앙엔 숨은 문구가 주기적으로 떠오릅니다.',
+    tags: ['마우스 인터랙션', '캔버스', '매트릭스', '제너러티브'],
+    premium: true,
+  },
+  {
+    file: 'demos/flow-field.html',
+    title: '바람의 결 · 플로우 필드',
+    ref: { name: 'Flow Fields (T.Hobbs)', url: 'https://tylerxhobbs.com/essays/2020/flow-fields' },
+    desc: '직접 구현한 노이즈 벡터장을 수천 개 입자가 따라 흐르며 잔상을 남깁니다. 마우스가 흐름을 휘젓고 클릭하면 소용돌이가 생기며, 속도·각도 기반 색으로 물듭니다.',
+    tags: ['마우스 인터랙션', '캔버스', '플로우 필드', '제너러티브'],
+    premium: true,
+  },
+  {
+    file: 'demos/card-tilt-3d.html',
+    title: '홀로그램 몬스터 카드 · 수집·상세뷰',
+    ref: { name: 'codepen.io (Holo Cards)', url: 'https://codepen.io/simeydotme/pen/PrQKgo' },
+    desc: 'AI 생성 몬스터 4종의 트레이딩 카드. 커서를 올리면 3D 틸트+무지개 홀로가 흐르고, 클릭하면 상세뷰로 확대돼 좌측 카드가 360° 자동 회전하며 우측에 등급·학명·스탯·스킬이 뜹니다.',
+    tags: ['마우스 인터랙션', '3D', '홀로그램', '다크'],
+    premium: true,
+  },
+  {
+    file: 'demos/kinetic-type.html',
+    title: '키네틱 타이포 · 커서에 반응하는 글자 (다크)',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com/awwwards/collections/kinetic-typography/' },
+    desc: '큰 타이포가 커서 움직임·속도에 반응하는 키네틱 타이포. 웨이브·마그네틱·흩뿌림·롱섀도 4개 모드를 순환하고, 입력이 없어도 글자가 미세하게 숨쉽니다. 스위스 그리드 감성.',
+    tags: ['마우스 인터랙션', '타이포그래피', '브루탈리즘', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/clean-template.html',
+    title: 'Northwind · 미니멀 랜딩 템플릿',
+    ref: { name: 'tailwindui.com', url: 'https://tailwindui.com' },
+    desc: '장식을 덜어낸 깔끔한 SaaS 랜딩 템플릿. 스티키 내비 · 히어로 · 대시보드 목업 · 로고 스트립 · 3열 기능 그리드 · CTA 밴드 · 다열 푸터까지, 콘텐츠만 바꿔 바로 쓰는 중립적 레이아웃 스캐폴드. 라이트 테마 · 반응형 · KO/EN.',
+    tags: ['템플릿', '랜딩', '미니멀', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/travel-lux.html',
+    title: 'AZURA · 럭셔리 여행 랜딩',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: 'AI로 생성한 황금빛 해안 절벽이 풀블리드로 깔린 럭셔리 여행 랜딩. 스크롤에 반응하는 스티키 내비, 예약 바(목적지·체크인·인원), 호버 줌 여행지 카드, 패럴랙스 인용 밴드, 카운트업 스탯 — 크림·골드 무드. KO/EN.',
+    tags: ['랜딩', 'AI 생성', '럭셔리', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/dine-noir.html',
+    title: 'NOIR TABLE · 파인다이닝 사이트',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: 'AI로 생성한 오버헤드 요리 사진 위, 근검은 다크 톤에 골드 액센트의 파인다이닝 사이트. 점선 리더 메뉴(전채·메인·디저트)와 ₩ 가격, 셰프의 철학 스플릿, 스타일링된 예약 폼(제출 시 확인 토스트). KO/EN.',
+    tags: ['콘텐츠·미디어', 'AI 생성', '다크', '에디토리얼'],
+    premium: true,
+  },
+  {
+    file: 'demos/aura-beauty.html',
+    title: 'AURA · 스킨케어 제품 랜딩',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: 'AI로 생성한 세럼 제품컷을 중심으로 한 부드러운 뷰티 랜딩. 성분 하이라이트 카드, 3단계 사용법, 별점 리뷰, 히어로를 지나면 나타나는 스티키 장바구니 바(담으면 배지 카운트 + 토스트 애니메이션). KO/EN.',
+    tags: ['커머스', 'AI 생성', '미니멀', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/wix-studio.html',
+    title: 'LUMEN STUDIO · 포토그래피 스튜디오 템플릿',
+    ref: { name: 'wix.com (Templates)', url: 'https://www.wix.com/website/templates' },
+    desc: 'Wix 템플릿급 완성도의 포토그래피·크리에이티브 스튜디오 사이트. AI 생성 에디토리얼 이미지를 쓴 풀스크린 히어로, 스크롤에 반응하는 내비, 작업 갤러리 그리드(호버 캡션), 서비스·후기·연락 폼까지. 아이보리 에디토리얼 · 모바일 햄버거 메뉴 · KO/EN.',
+    tags: ['템플릿', 'AI 생성', '에디토리얼', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/wix-cafe.html',
+    title: '카페 온도 · 카페/베이커리 템플릿',
+    ref: { name: 'wix.com (Templates)', url: 'https://www.wix.com/website/templates' },
+    desc: 'Wix 템플릿급 카페·베이커리 사이트. AI 생성 카페 인테리어 히어로, 시그니처 메뉴 카드(₩ 가격), 우리 이야기 스플릿, 갤러리, 영업시간·오시는 길, 예약 문의 폼(제출 토스트). 따뜻한 크림·모카 톤 · 모바일 메뉴 · KO/EN.',
+    tags: ['템플릿', 'AI 생성', '커머스', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/dev-terminal.html',
+    title: '이도현 · 터미널 개발자 포트폴리오',
+    ref: { name: 'github.com', url: 'https://github.com' },
+    desc: '터미널/IDE 컨셉의 개발자 포트폴리오. 명령(about·projects·skills·contact)을 입력·클릭하면 타이핑 효과로 섹션이 출력되고, 문법 강조 코드 블록·깜빡이는 커서. "PDF로 저장"을 누르면 @media print로 밝은 문서형 이력서가 깔끔하게 인쇄됩니다. KO/EN.',
+    tags: ['개발자', '터미널', 'PDF 출력', '다크'],
+    premium: true,
+  },
+  {
+    file: 'demos/dev-resume.html',
+    title: '정서윤 · 클린 개발자 이력서',
+    ref: { name: 'github.com', url: 'https://github.com' },
+    desc: '화면에서 이미 A4에 가까운, 인쇄하면 완벽한 PDF가 되는 클래식 개발자 이력서. 헤더(연락처·GitHub·LinkedIn), 요약, 경력 타임라인, 선택 프로젝트, 스킬 그룹, 학력. @page A4 여백 · break-inside 제어로 페이지가 깔끔하게 나뉩니다. KO/EN.',
+    tags: ['개발자', '이력서', 'PDF 출력', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/dev-cards.html',
+    title: '박지후 · 카드형 개발자 포트폴리오',
+    ref: { name: 'github.com', url: 'https://github.com' },
+    desc: '모던 카드형 개발자 포트폴리오. 히어로·프로젝트 카드 그리드(기술 뱃지·호버 리프트)·스킬 칩·GitHub식 기여 그래프 히트맵·경력·연락. "이력서 PDF" 버튼과 @media print로 카드가 흑백 문서로 평탄화되어 깔끔하게 출력됩니다. KO/EN.',
+    tags: ['개발자', '카드 UI', 'PDF 출력', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/ride-map.html',
+    title: 'INTERFACE PARK · 3D 놀이공원 커버',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: 'AI로 생성한 REWARD LAND 양피지 지도가 나무 테이블 위에 기울어져 있고, 배경을 제거(누끼)한 놀이기구 3D 이미지가 튀어나옵니다. 기구에 호버하면 실루엣을 따라 금빛 테두리가 맥동하고, 클릭하면 해당 어트랙션 페이지로 진입. KO/EN 지원.',
+    tags: ['마우스 인터랙션', '3D', 'AI 생성', '에디토리얼'],
+    premium: true,
+  },
+  {
+    file: 'demos/creator-room.html',
+    title: 'STUDIO HOURS · 시간이 흐르는 작업실 포트폴리오',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: 'AI로 생성한 같은 작업실의 낮·노을·밤 이미지를 전환하는 시간대 모드, 램프를 눌러 켜고 끄는 불(따뜻한 글로우), 방 안 오브젝트(모니터·책장·화분) 3개를 클릭하면 3D 캐릭터가 말풍선으로 반응하며 하단 시트가 열립니다. 커서 패럴랙스 · KO/EN.',
+    tags: ['마우스 인터랙션', 'AI 생성', '포트폴리오', '3D'],
+    premium: true,
+  },
+  {
+    file: 'demos/pixel-game.html',
+    title: 'STAR RANGER · 8비트 게임 타이틀',
+    ref: { name: 'itch.io', url: 'https://itch.io' },
+    desc: '패미컴·아케이드 감성의 가상 게임 타이틀 화면. 캔버스 픽셀아트 캐릭터·패럴랙스 별 배경·CRT 스캔라인, START → 스테이지 선택 → 로딩바 인터랙션. 방향키·클릭으로 조작.',
+    tags: ['실험적', '레트로', '픽셀아트', '게임'],
+    premium: true,
+  },
+  {
+    file: 'demos/cyberpunk-landing.html',
+    title: 'NEON DIVE · 사이버펑크 게임 런처',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: 'AI 생성 사이버펑크 도시 영상 위의 멀티페이지 게임 런처. HUD 내비로 요원 선택(능력치 바·LINKED 배지)·무기고 장착·패치노트·예고편 페이지를 오가고, 다이브를 누르면 터미널 접속 시퀀스가 재생됩니다. 글리치 타이포 · 조준경 커서.',
+    tags: ['마우스 인터랙션', '비디오', 'AI 생성', '다크'],
+    premium: true,
+  },
+
+  {
+    file: 'demos/designer-portfolio.html',
+    title: 'OBJET · 아트 디렉터 포트폴리오',
+    ref: { name: 'awwwards.com (Portfolios)', url: 'https://www.awwwards.com/websites/portfolio/' },
+    desc: 'AI 생성(Higgsfield) 시네마틱 영상이 풀블리드로 흐르는 히어로, 스크롤하면 겹겹이 쌓이는 풀스크린 프로젝트 패널 — 패션 필름·크롬 조각·브루탈리즘·네온 식물 4점도 전부 AI 생성 오리지널.',
+    tags: ['어워드급', '비디오', 'AI 생성', '포트폴리오', '다크'],
+    premium: true,
+  },
+
+  /* ── 🖱️ 마우스 인터랙션 랜딩 (AI 생성 이미지) ── */
+  {
+    file: 'demos/trail-gallery.html',
+    title: '이미지 트레일 · 커서가 뿌리는 아카이브',
+    ref: { name: 'awwwards.com (Mouse FX)', url: 'https://www.awwwards.com' },
+    desc: '마우스가 지나간 자리마다 AI 생성 이미지 8종이 흩뿌려졌다 사라지는 트레일 랜딩. 이동 거리 임계값 기반 스폰, 회전 랜덤, 스폰 카운터까지.',
+    tags: ['마우스 인터랙션', '어워드급', 'AI 생성', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/hover-reveal.html',
+    title: 'MAISON QUATRE · 호버로 바뀌는 세계',
+    ref: { name: 'awwwards.com (Mouse FX)', url: 'https://www.awwwards.com' },
+    desc: '향수 메뉴에 호버하면 배경(AI 생성 4계열)·포인트 컬러·노트 카드가 통째로 전환되는 럭셔리 브랜드 랜딩. 숲→파도→앰버→자정의 난초.',
+    tags: ['마우스 인터랙션', '어워드급', 'AI 생성', '다크', '커머스'],
+    premium: true,
+  },
+  {
+    file: 'demos/lens-landing.html',
+    title: 'COLOR IN MONO · 커서 렌즈 전시',
+    ref: { name: 'awwwards.com (Mouse FX)', url: 'https://www.awwwards.com' },
+    desc: '흑백 세상에서 커서 렌즈 안쪽만 컬러가 살아나는 전시 랜딩 — clip-path 원형 마스크 + lerp 추적, 클릭하면 렌즈 확장, 커서에 끌려오는 마그네틱 CTA.',
+    tags: ['마우스 인터랙션', '어워드급', 'AI 생성', '다크'],
+    premium: true,
+  },
+  {
+    file: 'demos/magnet-studio.html',
+    title: 'REPEL · 커서를 피하는 물리 랜딩',
+    ref: { name: 'awwwards.com (Mouse FX)', url: 'https://www.awwwards.com' },
+    desc: '키워드 칩·이미지 조각들이 스프링 물리로 커서를 밀어내며 피하고, CTA는 반대로 끌려오는 인터랙티브 랜딩. 감쇠·복원력·자전까지 구현한 커서 물리.',
+    tags: ['마우스 인터랙션', '어워드급', 'AI 생성', '다크'],
+    premium: true,
+  },
+
+  {
+    file: 'demos/scroll-story.html',
+    title: '낙하 · Three.js WebGL 다이브',
+    ref: { name: 'threejs.org', url: 'https://threejs.org' },
+    desc: 'Three.js(WebGL)로 구현한 실시간 3D 낙하. 언리얼 블룸 포스트프로세싱이 걸린 네온 링 터널, 2,600개 파티클 성단, 부유하는 발광 파편, 맥동하는 코어를 통과해 떨어집니다. 스크롤로 가속 · 마우스로 조준 · 클릭 부스트, 5막 시퀀스 · KO/EN.',
+    tags: ['Three.js', 'WebGL', '3D', '다크'],
+    premium: true,
+  },
+
+  /* ── 🧪 실험적 — 통상적인 페이지 구조를 버린 디자인 ── */
+  {
+    file: 'demos/infinite-canvas.html',
+    title: '무한 캔버스 · 드래그로 탐험하는 작업실',
+    ref: { name: 'are.na', url: 'https://www.are.na' },
+    desc: '스크롤 페이지가 아니라 공간입니다. 드래그 팬 + 관성, 휠 줌, 깊이별 패럴랙스로 흩어진 폴라로이드·스티키 노트·위젯 사이를 돌아다니고, 미니맵으로 순간 이동합니다.',
+    tags: ['실험적', '인터랙티브', '공간', '다크'],
+    premium: true,
+  },
+  {
+    file: 'demos/flashlight-gallery.html',
+    title: '어둠의 전시장 · 손전등 갤러리',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: '캄캄한 전시장에서 커서가 손전등이 됩니다. 빛을 비춰 작품 7점을 발견하면 조명이 하나씩 남고, 전부 찾으면 전시장 전체가 밝아지는 게임형 갤러리.',
+    tags: ['실험적', '인터랙티브', '게임형', '다크'],
+    premium: true,
+  },
+  {
+    file: 'demos/os-desktop.html',
+    title: 'RETRO-OS · 포트폴리오 운영체제',
+    ref: { name: 'poolsuite.net', url: 'https://poolsuite.net' },
+    desc: '웹사이트가 아니라 레트로 OS입니다. BIOS 부팅 → 드래그되는 창(진짜 그려지는 그림판, 편집되는 메모장, 비주얼라이저 플레이어), 시작 메뉴, 실시간 시계, 우클릭 메뉴까지.',
+    tags: ['실험적', '인터랙티브', '레트로', 'OS'],
+    premium: true,
+  },
+  {
+    file: 'demos/vertical-mag.html',
+    title: '밤의 문장들 · 세로쓰기 문예지',
+    ref: { name: 'brutalistwebsites.com', url: 'https://brutalistwebsites.com' },
+    desc: '웹에서 거의 쓰지 않는 writing-mode: vertical-rl 정면 승부. 오른쪽에서 왼쪽으로 읽는 한국어 세로 조판, 낙관 도장, 한자 페이지 번호, 휠을 가로 스크롤로 변환한 독서 경험.',
+    tags: ['실험적', '타이포그래피', '에디토리얼', '라이트'],
+    premium: true,
+  },
+  {
+    file: 'demos/cyworld-minihompy.html',
+    title: '추억의 미니홈피 · 2005 싸이월드',
+    ref: { name: 'cyworld (추억)', url: 'https://ko.wikipedia.org/wiki/싸이월드' },
+    desc: '돋움 11px, 베벨 보더, 파스텔 스킨의 그 시절 미니홈피. 미니룸·일촌평·도토리 충전·스킨 5종 변경이 동작하고, 방명록은 진짜 써지고, BGM 버튼은 8비트 칩튠을 재생합니다.',
+    tags: ['실험적', '레트로', 'Y2K', '인터랙티브'],
+    premium: true,
+  },
+  {
+    file: 'demos/video-hero.html',
+    title: '시네마틱 비디오 히어로 · 에이전시',
+    ref: { name: 'awwwards.com', url: 'https://www.awwwards.com' },
+    desc: '풀스크린 배경 영상, 퍼센트 프리로더, 커스텀 커서, 회전 쇼릴 버튼, 호버하면 커서를 따라오는 작품 프리뷰 — 하이엔드 에이전시 사이트의 문법 그대로.',
+    tags: ['어워드급', '비디오', '다크', '에이전시', '커스텀 커서'],
+    premium: true,
+  },
+  {
+    file: 'demos/liquid-shader.html',
+    title: 'WebGL 리퀴드 셰이더 · 유체 배경',
+    ref: { name: 'shadertoy.com', url: 'https://www.shadertoy.com' },
+    desc: '진짜 GLSL 프래그먼트 셰이더가 GPU에서 실시간 렌더링하는 일렁이는 유체. 마우스를 따라 잔물결이 퍼지고, 그 위에 프로스티드 글래스 카드가 뜹니다. 영상이 아닙니다.',
+    tags: ['어워드급', 'WebGL', '셰이더', '다크', '인터랙티브'],
+    premium: true,
+  },
+  {
+    file: 'demos/editorial-brutalist.html',
+    title: '에디토리얼 브루탈리즘 · 매거진',
+    ref: { name: 'brutalistwebsites.com', url: 'https://brutalistwebsites.com' },
+    desc: '초대형 아웃라인 타이포, 회전 스티커 뱃지, 하드섀도 폴라로이드, 호버하면 잉크가 차오르는 아티클 인덱스 — 전형성을 부수는 잡지식 레이아웃.',
+    tags: ['어워드급', '에디토리얼', '브루탈리즘', '라이트', '타이포그래피'],
+    premium: true,
+  },
+  {
+    file: 'demos/3d-parallax.html',
+    title: '3D 패럴랙스 · 깊이의 공간',
+    ref: { name: 'awwwards.com (3D)', url: 'https://www.awwwards.com/websites/3d/' },
+    desc: '마우스에 반응해 레이어별로 밀려나는 오브·유리 파편, 무한 원근 격자 바닥, 크로매틱 타이포, 진짜 3D로 기우는 틸트 카드 — CSS perspective만으로.',
+    tags: ['어워드급', '3D', '인터랙티브', '다크', '패럴랙스'],
+    premium: true,
+  },
+  {
+    file: 'demos/music-player.html',
+    title: '뮤직 플레이어 · 소리가 나는 데모',
+    ref: { name: 'spotify.com', url: 'https://open.spotify.com' },
+    desc: '오디오 파일 없이 Web Audio API(오실레이터 스텝 시퀀서 + 패드·베이스·드럼 합성)로 트랙별 BPM·스케일이 다른 루프를 실시간 재생. AnalyserNode 이퀄라이저 시각화, 볼륨은 실제 GainNode 연결.',
+    tags: ['어워드급', 'Web Audio', '인터랙티브', '다크', '플레이어'],
+    premium: true,
+  },
+  {
+    file: 'demos/ecommerce-product.html',
+    title: '이커머스 · 헤드폰 컨피규레이터',
+    ref: { name: 'apple.com (AirPods Max)', url: 'https://www.apple.com/airpods-max/' },
+    desc: '이미지 0장 — CSS 도형만으로 그린 헤드폰을 CSS 변수 팔레트 교체로 제품·배경·버튼 색 동시 전환. 3D 뷰 전환, 장바구니로 날아가는 클론 애니메이션, 동작하는 수량 스테퍼·아코디언.',
+    tags: ['어워드급', '커머스', '컨피규레이터', '라이트', '인터랙티브'],
+    premium: true,
+  },
+
+  /* ── 📱 앱 디자인 (wwit.design 분류 체계: 카테고리·패턴·컴포넌트) ── */
+  {
+    file: 'demos/travel-app.html', plat: 'app',
+    title: '여행 디스커버리 · 시네마틱 풀블리드',
+    ref: { name: 'wwit.design (여행)', url: 'https://wwit.design' },
+    desc: '화면 전체가 사진이 되는 몰입형 홈 — 세로 스냅 스와이프로 목적지를 넘기고 글래스 검색바·탭바가 사진 위에 뜹니다. 알프스 호수·교토의 밤·사하라 3점 모두 AI 생성(Higgsfield) 오리지널.',
+    tags: ['앱', 'AI 생성', '여행', '풀블리드', '스냅 캐러셀'],
+    premium: true,
+  },
+  {
+    file: 'demos/app-finance.html', plat: 'app',
+    title: '금융 홈 · 토스 스타일',
+    ref: { name: 'wwit.design (금융)', url: 'https://wwit.design' },
+    desc: '자산 리스트, 주간 소비 차트, 주식 위젯의 금융 앱 홈. 계좌를 탭하면 진짜 바텀시트가 올라오고 탭바가 전환됩니다. 카테고리: 금융 / 패턴: 홈 / 컴포넌트: 바텀시트·차트·탭바.',
+    tags: ['앱', '금융', '홈', '바텀시트', '차트'],
+    exports: { tokens: 'exports/tokens/finance.tokens.json', rn: 'exports/react-native/FinanceHome.js',
+               flutter: 'exports/flutter/finance_home.dart', swiftui: 'exports/swiftui/FinanceHome.swift' },
+  },
+  {
+    file: 'demos/app-market.html', plat: 'app',
+    title: '중고거래 피드 · 당근 스타일',
+    ref: { name: 'wwit.design (커머스)', url: 'https://wwit.design' },
+    desc: '동네 셀렉터, 칩 필터, 썸네일 리스트 셀. 스크롤하면 FAB가 접히고 멈추면 펼쳐집니다. 카테고리: 커머스 / 패턴: 홈·피드 / 컴포넌트: 칩·리스트 셀·FAB.',
+    tags: ['앱', '커머스', '피드', 'FAB', '리스트'],
+    exports: { tokens: 'exports/tokens/market.tokens.json', rn: 'exports/react-native/MarketFeed.js',
+               flutter: 'exports/flutter/market_feed.dart', swiftui: 'exports/swiftui/MarketFeed.swift' },
+  },
+  {
+    file: 'demos/app-delivery.html', plat: 'app',
+    title: '배달 홈 · 배민 스타일',
+    ref: { name: 'wwit.design (배달)', url: 'https://wwit.design' },
+    desc: '브랜드 컬러 헤더, 이모지 카테고리 그리드, 자동 순환 캐러셀, 라이브 주문 현황 플로팅 바. 카테고리: 배달 / 패턴: 홈·주문 현황 / 컴포넌트: 캐러셀·그리드·플로팅 바.',
+    tags: ['앱', '배달', '홈', '캐러셀', '커머스'],
+    exports: { tokens: 'exports/tokens/delivery.tokens.json', rn: 'exports/react-native/DeliveryHome.js',
+               flutter: 'exports/flutter/delivery_home.dart', swiftui: 'exports/swiftui/DeliveryHome.swift' },
+  },
+  {
+    file: 'demos/app-chat.html', plat: 'app',
+    title: '채팅 UI · 메신저 스타일',
+    ref: { name: 'wwit.design (커뮤니케이션)', url: 'https://wwit.design' },
+    desc: '말풍선·읽음 뱃지·타이핑 인디케이터·입력바 — 실제로 메시지를 보내면 상대가 타이핑하다 답장합니다. 패턴: 채팅 / 컴포넌트: 말풍선·입력바·타이핑 인디케이터.',
+    tags: ['앱', '채팅', '인터랙티브', '입력'],
+    exports: { tokens: 'exports/tokens/chat.tokens.json', rn: 'exports/react-native/ChatRoom.js',
+               flutter: 'exports/flutter/chat_room.dart', swiftui: 'exports/swiftui/ChatRoom.swift' },
+  },
+  {
+    file: 'demos/app-sound.html', plat: 'app',
+    title: '오르빗 · 뮤직 스트리밍 앱',
+    ref: { name: 'wwit.design (뮤직)', url: 'https://wwit.design' },
+    desc: 'AI 생성 앨범아트로 채운 뮤직 앱. 실시간으로 차오르는 재생 바, 회전하는 바이닐, 캔버스 웨이브폼, 재생/일시정지·좋아요 토글, 미니 플레이어에서 풀 플레이어로 확장. 홈/검색/보관함 탭 전환. KO/EN.',
+    tags: ['앱', '뮤직', 'AI 생성', '인터랙티브'],
+  },
+  {
+    file: 'demos/app-runner.html', plat: 'app',
+    title: '스트라이드 · 러닝 트래커 앱',
+    ref: { name: 'wwit.design (피트니스)', url: 'https://wwit.design' },
+    desc: 'AI 생성 새벽 러닝 히어로 위의 피트니스 앱. SVG 원형 진행 링이 목표를 향해 차오르고, "러닝 시작"을 누르면 타이머·페이스·칼로리가 실시간으로 tick. 주간 바 차트, 활동/기록/프로필 탭. KO/EN.',
+    tags: ['앱', '피트니스', 'AI 생성', '데이터 시각화'],
+  },
+  {
+    file: 'demos/app-plant.html', plat: 'app',
+    title: '이파리 · 식물 케어 앱',
+    ref: { name: 'wwit.design (라이프스타일)', url: 'https://wwit.design' },
+    desc: 'AI 생성 식물 사진으로 채운 케어 앱. 물 레벨 링이 달린 내 식물 그리드, 탭하면 슬라이드되는 상세(광량·습도 게이지·물주기 D-day), "물 주기"로 진행바가 차고 물방울 애니메이션 + D-day 리셋. 내 식물/도감/알림 탭. KO/EN.',
+    tags: ['앱', '라이프스타일', 'AI 생성', '인터랙티브'],
+  },
+  {
+    file: 'demos/app-onboarding.html', plat: 'app',
+    title: '온보딩 → 로그인 플로우',
+    ref: { name: 'wwit.design (패턴)', url: 'https://wwit.design' },
+    desc: 'scroll-snap 캐러셀 온보딩 3장 → 소셜 로그인 화면 전환까지 첫 진입 플로우 전체. "마지막 로그인" 뱃지 디테일 포함. 패턴: 온보딩·로그인 / 컴포넌트: 캐러셀·소셜 버튼.',
+    tags: ['앱', '온보딩', '로그인', '캐러셀'],
+    exports: { tokens: 'exports/tokens/onboarding.tokens.json', rn: 'exports/react-native/Onboarding.js',
+               flutter: 'exports/flutter/onboarding.dart', swiftui: 'exports/swiftui/Onboarding.swift' },
+  },
+  {
+    file: 'demos/sneaker-360.html',
+    title: '스니커 쇼케이스 · 드래그로 돌리는 제품',
+    ref: { name: 'nike.com', url: 'https://www.nike.com' },
+    desc: 'AI 생성 스니커를 마우스로 드래그해 3D로 기울이고, 컬러웨이 스와치로 제품·배경·포인트 색이 동시에 전환되는 프리미엄 제품 쇼케이스. 사이즈·찜·장바구니까지.',
+    tags: ['마우스 인터랙션', 'AI 생성', '커머스', '제품 페이지'],
+    premium: true,
+  },
+  {
+    file: 'demos/app-search.html', plat: 'app',
+    title: '검색 · 자동완성 & 스켈레톤 패턴',
+    ref: { name: 'wwit.design (검색)', url: 'https://wwit.design' },
+    desc: '검색바 포커스, 최근/인기 검색어, 실시간 자동완성 하이라이트, 스켈레톤 셔머 로딩까지 동작하는 커머스 검색 플로우. 카테고리: 커머스 / 패턴: 검색 / 컴포넌트: 검색바·자동완성·스켈레톤.',
+    tags: ['앱', '검색', '커머스', '자동완성', '스켈레톤'],
+    exports: { tokens: 'exports/tokens/search.tokens.json', rn: 'exports/react-native/SearchHome.js' },
+  },
+  {
+    file: 'demos/app-payment.html', plat: 'app',
+    title: '주문/결제 · 원페이지 체크아웃',
+    ref: { name: 'wwit.design (주문·결제)', url: 'https://wwit.design' },
+    desc: '라디오 카드 결제수단, 쿠폰 바텀시트의 실시간 금액 재계산, 전체 동의 일괄 토글, 스피너 후 SVG 체크마크 완료 화면까지 이어지는 결제 플로우. 패턴: 주문·결제 / 컴포넌트: 라디오 카드·바텀시트·체크박스.',
+    tags: ['앱', '결제', '커머스', '바텀시트', '체크아웃'],
+    exports: { tokens: 'exports/tokens/payment.tokens.json', rn: 'exports/react-native/PaymentFlow.js' },
+  },
+  {
+    file: 'demos/app-settings.html', plat: 'app',
+    title: '프로필/설정 · 다크 모드 전환',
+    ref: { name: 'wwit.design (마이페이지)', url: 'https://wwit.design' },
+    desc: 'iOS 스타일 그룹 리스트와 순수 CSS 스위치 — 다크 모드 스위치가 CSS 변수 교체로 화면 전체를 부드럽게 전환하고, 로그아웃 확인 다이얼로그와 토스트까지 동작. 패턴: 마이페이지·설정 / 컴포넌트: 스위치·리스트 그룹·다이얼로그.',
+    tags: ['앱', '설정', '다크모드', '스위치', '다이얼로그'],
+    exports: { tokens: 'exports/tokens/settings.tokens.json', rn: 'exports/react-native/SettingsScreen.js' },
+  },
+
+  /* ── 💻 웹 디자인 ── */
+  {
+    file: 'demos/stripe-hero.html',
+    title: 'Stripe 스타일 · 그라디언트 히어로',
+    ref: { name: 'stripe.com', url: 'https://stripe.com' },
+    desc: '회전하는 메시 그라디언트 + 노이즈 히어로, 라이브 대시보드·결제 폰 목업, 로고 마퀴, 스크롤 카운트업 — Stripe 랜딩의 시그니처를 그대로.',
+    tags: ['랜딩', '그라디언트', '애니메이션', '라이트'],
+  },
+  {
+    file: 'demos/linear-dark.html',
+    title: 'Linear 스타일 · 다크 글로우 랜딩',
+    ref: { name: 'linear.app', url: 'https://linear.app' },
+    desc: '별밭 배경 위 보라 글로우, 쉬머 헤드라인, 사이드바·커맨드 팔레트(⌘K) 앱 목업, 마우스를 따라오는 스포트라이트 카드 — 다크 SaaS의 교과서.',
+    tags: ['랜딩', '다크', 'SaaS', '글로우'],
+  },
+  {
+    file: 'demos/vercel-landing.html',
+    title: 'Vercel 스타일 · 흑백 미니멀',
+    ref: { name: 'vercel.com', url: 'https://vercel.com' },
+    desc: '3색 그라디언트 타이포, 그리드 위를 흐르는 빔, 실시간 타이핑되는 배포 터미널, 순환하는 파이프라인 — 개발자 도구 랜딩의 정석.',
+    tags: ['랜딩', '다크', '타이포그래피', '미니멀'],
+  },
+  {
+    file: 'demos/apple-product.html',
+    title: 'Apple 스타일 · 프로덕트 쇼케이스',
+    ref: { name: 'apple.com', url: 'https://apple.com' },
+    desc: '거대 타이포와 여백, 반사광이 흐르는 CSS 디바이스, 메탈릭 티타늄 텍스트, 스펙 카운트업, 컬러 스와치 — 제품 상세 페이지의 문법.',
+    tags: ['제품 페이지', '타이포그래피', '라이트', '애니메이션'],
+  },
+  {
+    file: 'demos/glassmorphism.html',
+    title: '글래스모피즘 · 대시보드',
+    ref: { name: 'dribbble.com (Glassmorphism)', url: 'https://dribbble.com/tags/glassmorphism' },
+    desc: '컬러 블롭 + 노이즈 위 프로스티드 글래스 대시보드. 사이드바, 글로우 영역 차트, conic 도넛 차트, 숫자 카운트업까지 풀 구성.',
+    tags: ['대시보드', '글래스', '다크', '애니메이션'],
+  },
+  {
+    file: 'demos/bento-grid.html',
+    title: '벤토 그리드 · 피처 쇼케이스',
+    ref: { name: 'bentogrids.com', url: 'https://bentogrids.com' },
+    desc: '마우스를 따라오는 스포트라이트 보더, 협업 커서·코드 타이핑 목업, 궤도 애니메이션 — 다크 벤토 그리드의 대유행 패턴을 풀 디테일로.',
+    tags: ['그리드', '레이아웃', '라이트', 'SaaS'],
+  },
+  {
+    file: 'demos/airbnb-cards.html',
+    title: 'Airbnb 스타일 · 카드 그리드',
+    ref: { name: 'airbnb.co.kr', url: 'https://airbnb.co.kr' },
+    desc: '실사 이미지 카드 12장, 필 검색바, 카테고리 바, 하트 위시리스트 토글, 스켈레톤 셔머 — 리스팅 UI의 대표작. 오프라인이면 그라디언트로 폴백.',
+    tags: ['카드', '그리드', '라이트', '커머스'],
+  },
+];
+
+/* ── 📚 큐레이션 리소스: 디자인 레퍼런스 & 폰트 사이트 ── */
+const RESOURCES = [
+  { ico: '🏆', cat: '디자인 레퍼런스', name: 'Awwwards', en: 'awwwards.com', url: 'https://www.awwwards.com',
+    desc: '세계 최고 권위의 웹 어워드. SOTD(오늘의 사이트)만 훑어도 트렌드가 보입니다.' },
+  { ico: '⛪', cat: '디자인 레퍼런스', name: 'Godly', en: 'godly.website', url: 'https://godly.website',
+    desc: '"신급" 웹디자인만 엄선한 갤러리. 미니멀하고 밀도 높은 큐레이션.' },
+  { ico: '📐', cat: '디자인 레퍼런스', name: 'Land-book', en: 'land-book.com', url: 'https://land-book.com',
+    desc: '랜딩 페이지 특화 갤러리. 산업/스타일별 필터가 실무에 유용합니다.' },
+  { ico: '📱', cat: '앱 레퍼런스', name: 'Mobbin', en: 'mobbin.com', url: 'https://mobbin.com',
+    desc: '실제 앱들의 화면을 플로우·패턴별로 아카이빙. 모바일 UI의 표준 사전.' },
+  { ico: '🇰🇷', cat: '앱 레퍼런스', name: 'WWIT', en: 'wwit.design', url: 'https://wwit.design',
+    desc: '국내 서비스 UI/UX 레퍼런스. 이 갤러리 앱 섹션의 분류 체계가 여기서 왔습니다.' },
+  { ico: '🏀', cat: '디자인 커뮤니티', name: 'Dribbble', en: 'dribbble.com', url: 'https://dribbble.com',
+    desc: '디자이너들의 쇼케이스 커뮤니티. 비주얼 탐색과 무드보드 수집에 최적.' },
+  { ico: '🎨', cat: '디자인 커뮤니티', name: 'Behance', en: 'behance.net', url: 'https://www.behance.net',
+    desc: '어도비의 포트폴리오 플랫폼. 브랜딩·에디토리얼 프로젝트가 깊이 있게 올라옵니다.' },
+  { ico: '✒️', cat: '폰트', name: '눈누', en: 'noonnu.cc', url: 'https://noonnu.cc',
+    desc: '상업용 무료 한글 폰트 모음. 라이선스 정리가 잘 되어 있어 실무 필수.' },
+  { ico: '🔤', cat: '폰트', name: 'Google Fonts', en: 'fonts.google.com', url: 'https://fonts.google.com',
+    desc: '웹폰트의 표준. 이 갤러리의 모든 데모도 여기 폰트를 씁니다.' },
+  { ico: '☁️', cat: '폰트', name: '산돌구름', en: 'sandollcloud.com', url: 'https://www.sandollcloud.com',
+    desc: '국내 대표 폰트 구독 서비스. 고품질 한글 서체가 필요할 때.' },
+  { ico: '🅵', cat: '폰트', name: 'Fontshare', en: 'fontshare.com', url: 'https://www.fontshare.com',
+    desc: 'ITF의 무료 고품질 영문 폰트. Satoshi, Clash Display 등 힙한 서체들.' },
+  { ico: '🌈', cat: '컬러', name: 'Coolors', en: 'coolors.co', url: 'https://coolors.co',
+    desc: '스페이스바 연타로 만드는 컬러 팔레트 생성기. 배색 고민 단축기.' },
+  { ico: '🎯', cat: '컬러', name: 'Color Hunt', en: 'colorhunt.co', url: 'https://colorhunt.co',
+    desc: '큐레이션된 4색 팔레트 아카이브. 트렌디한 조합을 바로 집어올 수 있습니다.' },
+  { ico: '🎬', cat: '모션·에셋', name: 'LottieFiles', en: 'lottiefiles.com', url: 'https://lottiefiles.com',
+    desc: '가벼운 벡터 모션 에셋의 표준. 마이크로 인터랙션에 바로 얹기 좋습니다.' },
+];
+
+const grid = document.getElementById('grid');
+const filtersEl = document.getElementById('filters');
+const q = document.getElementById('q');
+let activeTag = '전체';
+let activePlat = 'all';                          /* all | web | app */
+let favOnly = false;
+let currentList = [];                            /* 현재 그리드에 표시된 목록 (모달 ‹› 탐색용) */
+
+/* 즐겨찾기 — localStorage 영속 */
+const favs = new Set(JSON.parse(localStorage.getItem('dg-favs') || '[]'));
+const saveFavs = () => {
+  localStorage.setItem('dg-favs', JSON.stringify([...favs]));
+  document.getElementById('favCount').textContent = favs.size;
+};
+
+const platOf = d => d.plat || 'web';
+
+/* ── 용도별 분류 (포트폴리오/랜딩/커머스/콘텐츠/프로덕트 — 각 5개 이상) ── */
+let activeUse = 'all';
+const USE_LABELS = {
+  all: '전체 용도', portfolio: '🎨 포트폴리오·개인', landing: '🚀 랜딩·브랜드',
+  commerce: '🛍️ 커머스', content: '📰 콘텐츠·미디어', product: '⚙️ 프로덕트·대시보드',
+};
+const USE_MAP = {
+  'demos/designer-portfolio.html': 'portfolio', 'demos/video-hero.html': 'portfolio',
+  'demos/infinite-canvas.html': 'portfolio', 'demos/os-desktop.html': 'portfolio',
+  'demos/flashlight-gallery.html': 'portfolio', 'demos/cyworld-minihompy.html': 'portfolio',
+  'demos/pixel-game.html': 'portfolio',
+  'demos/ride-map.html': 'portfolio',
+  'demos/creator-room.html': 'portfolio',
+  'demos/folio-pearl.html': 'portfolio',
+  'demos/folio-ember.html': 'portfolio',
+  'demos/folio-mono.html': 'portfolio',
+  'demos/folio-noir.html': 'portfolio',
+  'demos/clean-template.html': 'landing',
+  'demos/travel-lux.html': 'landing',
+  'demos/dine-noir.html': 'content',
+  'demos/aura-beauty.html': 'commerce',
+  'demos/wix-studio.html': 'portfolio',
+  'demos/wix-cafe.html': 'landing',
+  'demos/dev-terminal.html': 'portfolio',
+  'demos/dev-resume.html': 'portfolio',
+  'demos/dev-cards.html': 'portfolio',
+  'demos/trail-gallery.html': 'landing', 'demos/hover-reveal.html': 'landing',
+  'demos/lens-landing.html': 'landing', 'demos/magnet-studio.html': 'landing',
+  'demos/cyberpunk-landing.html': 'landing', 'demos/gravity-play.html': 'landing',
+  'demos/brick-breaker.html': 'landing',
+  'demos/particle-text.html': 'portfolio', 'demos/constellation.html': 'portfolio',
+  'demos/card-tilt-3d.html': 'portfolio', 'demos/kinetic-type.html': 'portfolio',
+  'demos/audio-visualizer.html': 'content', 'demos/matrix-rain.html': 'content',
+  'demos/flow-field.html': 'content', 'demos/scroll-story.html': 'content',
+  'demos/sneaker-360.html': 'commerce',
+  'demos/stripe-hero.html': 'landing', 'demos/linear-dark.html': 'landing',
+  'demos/vercel-landing.html': 'landing', 'demos/apple-product.html': 'landing',
+  'demos/liquid-shader.html': 'landing', 'demos/bento-grid.html': 'landing',
+  'demos/ecommerce-product.html': 'commerce', 'demos/airbnb-cards.html': 'commerce',
+  'demos/app-market.html': 'commerce', 'demos/app-delivery.html': 'commerce',
+  'demos/app-payment.html': 'commerce', 'demos/app-search.html': 'commerce',
+  'demos/editorial-brutalist.html': 'content', 'demos/vertical-mag.html': 'content',
+  'demos/music-player.html': 'content', 'demos/3d-parallax.html': 'content',
+  'demos/travel-app.html': 'content',
+  'demos/glassmorphism.html': 'product', 'demos/app-finance.html': 'product',
+  'demos/app-chat.html': 'product', 'demos/app-onboarding.html': 'product',
+  'demos/app-settings.html': 'product',
+};
+const useOf = d => USE_MAP[d.file] || 'landing';
+
+/* ═══════════════ 한국어 / 영어 번역 ═══════════════ */
+let lang = localStorage.getItem('dg-lang') || 'ko';
+const isEn = () => lang === 'en';
+/* 영어모드면 데모 URL에 ?lang=en 을 붙여 데모 내부 텍스트도 영어로 로드 */
+const withLang = f => isEn() ? f + '?lang=en' : f;
+
+const UI_EN = {
+  heroH1: 'Learn famous designs <em>through code</em>',
+  heroLead: 'Proven web & app design patterns as live demos and copy-paste code. Open a card for preview, source, Figma tokens and native code.',
+  all: 'All', web: 'Web', app: 'App', res: '📚 Resources',
+  search: 'Search  ( / )', allTag: 'All', more: 'More +', less: 'Less −',
+  empty: 'No designs match your filters 🙈',
+  footer: 'A collection of hand-built reproductions · reference-only, unaffiliated with the original sites. · © 2026 hyunaeee · MIT License',
+  preview: 'Preview', code: 'Code', htmlcss: 'HTML/CSS', tokens: '🎨 Tokens', rn: '📱 RN',
+  flutter: '🐦 Flutter', swiftui: '🍎 SwiftUI', openNew: 'Open ↗',
+  stats: (n,w,a,f) => `${n} designs · ${w} web · ${a} app · ${f} code formats`,
+  figHint: '<b>🎨 Figma</b> — paste the token JSON into the <b>Tokens Studio</b> plugin. ' +
+    '<b>📱 App</b> — <u>RN</u> runs on <b>Expo Snack</b>, <u>Flutter</u> on <b>DartPad</b>, <u>SwiftUI</u> in Xcode. All zero-dependency.',
+};
+const USE_EN = { all:'All uses', portfolio:'🎨 Portfolio', landing:'🚀 Landing · Brand',
+  commerce:'🛍️ Commerce', content:'📰 Content · Media', product:'⚙️ Product · Dashboard' };
+
+/* 태그 번역 (없으면 원문 유지) */
+const TAG_EN = {
+  '마우스 인터랙션':'Mouse FX','파티클 물리':'Particle Physics','캔버스':'Canvas','타이포그래피':'Typography',
+  'AI 생성':'AI-Generated','제너러티브':'Generative','제너러티브 아트':'Generative Art','물리 시뮬레이션':'Physics Sim',
+  '인형뽑기':'Claw Machine','다크':'Dark','라이트':'Light','게임':'Game','게임형':'Game-like','네온 아케이드':'Neon Arcade',
+  '인터랙티브':'Interactive','Web Audio':'Web Audio','오디오 비주얼':'Audio-Visual','매트릭스':'Matrix','플로우 필드':'Flow Field',
+  '컴포넌트':'Component','로딩':'Loading','UI':'UI','비디오':'Video','3D':'3D','홀로그램':'Holographic',
+  '스크롤 인터랙션':'Scroll FX','시네마틱':'Cinematic','패럴랙스':'Parallax','실험적':'Experimental','공간':'Spatial',
+  '레트로':'Retro','OS':'OS','Y2K':'Y2K','에디토리얼':'Editorial','브루탈리즘':'Brutalism','어워드급':'Award-tier',
+  '포트폴리오':'Portfolio','커머스':'Commerce','컨피규레이터':'Configurator','CSS 변수':'CSS Vars','셰이더':'Shader',
+  'WebGL':'WebGL','랜딩':'Landing','SaaS':'SaaS','글로우':'Glow','미니멀':'Minimal','제품 페이지':'Product Page',
+  '애니메이션':'Animation','그라디언트':'Gradient','대시보드':'Dashboard','글래스':'Glass','그리드':'Grid','레이아웃':'Layout',
+  '카드':'Cards','앱':'App','금융':'Finance','홈':'Home','바텀시트':'Bottom Sheet','차트':'Charts','피드':'Feed',
+  'FAB':'FAB','리스트':'List','배달':'Delivery','캐러셀':'Carousel','채팅':'Chat','입력':'Input','온보딩':'Onboarding',
+  '로그인':'Login','검색':'Search','자동완성':'Autocomplete','스켈레톤':'Skeleton','결제':'Checkout','체크아웃':'Checkout',
+  '설정':'Settings','다크모드':'Dark Mode','스위치':'Switch','다이얼로그':'Dialog','여행':'Travel','풀블리드':'Full-bleed',
+  '스냅 캐러셀':'Snap Carousel','에이전시':'Agency','플레이어':'Player','플레이풀':'Playful','충돌 처리':'Collision',
+  '스페이스':'Space','커뮤니케이션':'Comms','타이포':'Type',
+};
+const tagEn = t => TAG_EN[t] || t;
+
+/* 리소스 카드 영어 */
+const RES_EN = {
+  'Awwwards': ['Design Reference','The most prestigious web awards. Skim the Site of the Day feed to feel the trend.'],
+  'Godly': ['Design Reference','A curated gallery of "godly" web design — minimal, dense curation.'],
+  'Land-book': ['Design Reference','Landing-page focused gallery with handy industry/style filters.'],
+  'Mobbin': ['App Reference','Real app screens archived by flow & pattern. The mobile-UI dictionary.'],
+  'WWIT': ['App Reference','Korean service UI/UX reference. This gallery\'s app taxonomy came from here.'],
+  'Dribbble': ['Community','The designer showcase community. Best for visual exploration & moodboards.'],
+  'Behance': ['Community','Adobe\'s portfolio platform. Deep branding & editorial projects.'],
+  '눈누': ['Fonts','Free commercial Korean fonts with clear licensing. A must for real work.'],
+  'Google Fonts': ['Fonts','The web-font standard. Every demo here uses these too.'],
+  '산돌구름': ['Fonts','Korea\'s leading font subscription. For high-quality Hangul type.'],
+  'Fontshare': ['Fonts','ITF\'s free quality Latin fonts — Satoshi, Clash Display and more.'],
+  'Coolors': ['Color','Palette generator — hit spacebar to shuffle. A shortcut for color.'],
+  'Color Hunt': ['Color','Curated 4-color palette archive. Grab trendy combos instantly.'],
+  'LottieFiles': ['Motion','The standard for lightweight vector motion assets.'],
+};
+
+/* 데모 제목·설명 영어 (파일 키) */
+const DEMO_EN = {
+  'demos/particle-text.html':['Particle Typography · scatter & reform','Korean text sampled into thousands of particles. They scatter from your cursor and spring back into letters; click to explode and reassemble.'],
+  'demos/constellation.html':['Connect the Stars · make your own constellation','Click glowing stars over an AI-generated nebula to link them, then name your constellation. Shooting stars, sparkles and a flowing light trace it.'],
+  'demos/gravity-play.html':['Idea Claw Machine · MASSA Studio','Idea emojis (💡🎨🚀🧠💎) pour into a dark glass cabinet and pile up; a crane drops to grab one. Click to drop the claw, pour more, or shake — a claw-machine physics landing.'],
+  'demos/brick-breaker.html':['Breakout · a real playable arcade','A real brick-breaker where the bricks spell PLAY, with score, combo, lives and particle FX. An AI paddle auto-plays until you move your mouse.'],
+  'demos/audio-visualizer.html':['Sound Garden · sound becomes image','Click orbs to play pentatonic synth notes drawn as ripples and particles. A radial spectrum reacts to AnalyserNode frequency data.'],
+  'demos/matrix-rain.html':['Rain of Code · interactive Matrix rain','Katakana, digits and Hangul jamo fall as digital rain. Your cursor speeds up columns; clicks burst letters; a hidden message rises periodically.'],
+  'demos/flow-field.html':['Grain of Wind · flow field','Thousands of particles follow a hand-built noise vector field, leaving trails. The cursor stirs the flow, clicks spawn vortices, color by speed & angle.'],
+  'demos/cyberpunk-landing.html':['NEON DIVE · cyberpunk game launcher','A multi-page game launcher over an AI-generated cyberpunk city film. HUD nav moves between agent select (stat bars · LINKED badge), armory equipping, patch notes and trailer pages; hitting DIVE plays a terminal jack-in sequence. Glitch type · crosshair cursor.'],
+  'demos/card-tilt-3d.html':['Holographic Monster Cards · collect & detail','AI full-art cards deal in like a pack. Cursor gives a poke-holo foil shine; click to pop the card up (spring) with a spinning 360° view and stats panel.'],
+  'demos/kinetic-type.html':['Kinetic Type · letters that react (dark)','Big type reacts to cursor speed with wave, magnetic, scatter and long-shadow modes on a neon-cyan dark theme; the letters breathe even when idle.'],
+  'demos/trail-gallery.html':['Image Trail · the cursor scatters an archive','AI-generated images scatter and fade along the cursor\'s path, with a spawn counter — a hero landing driven purely by mouse movement.'],
+  'demos/hover-reveal.html':['MAISON QUATRE · worlds that change on hover','Hovering a perfume menu swaps the whole background (4 AI-generated scenes), accent color and note card — a luxury brand landing.'],
+  'demos/lens-landing.html':['COLOR IN MONO · cursor-lens exhibition','A monochrome world where only the cursor lens brings color back (clip-path + lerp). Click to expand the lens; a magnetic CTA is pulled to the cursor.'],
+  'demos/magnet-studio.html':['REPEL · a landing that dodges your cursor','Keyword chips and image shards repel the cursor with spring physics while the CTA is pulled toward it — cursor-physics interaction throughout.'],
+  'demos/scroll-story.html':['FALL · a three.js WebGL dive','A real-time 3D fall built with three.js (WebGL). Dive through a neon ring tunnel with Unreal-Bloom post-processing, a 2,600-particle starfield, floating glowing debris and a pulsing core. Scroll to accelerate, steer with the mouse, click to boost — a 5-act sequence. KO/EN.'],
+  'demos/infinite-canvas.html':['Infinite Canvas · a studio you drag through','Not a scroll page but a space. Drag-pan with inertia, wheel-zoom, depth parallax over scattered polaroids and sticky notes; jump via minimap. Add & drag your own notes.'],
+  'demos/flashlight-gallery.html':['Gallery in the Dark · flashlight','In a pitch-black gallery the cursor becomes a flashlight. Find 7 artworks with the beam; each stays lit, and finding all lights the whole room — a game-like exhibit.'],
+  'demos/os-desktop.html':['RETRO-OS · portfolio as an operating system','Not a website but a retro OS. BIOS boot → draggable windows (a real paint app, editable notepad, visualizer player), start menu, live clock and right-click menu.'],
+  'demos/vertical-mag.html':['Night Sentences · vertical-writing literary zine','A frontal use of writing-mode: vertical-rl — right-to-left Korean vertical typesetting, a seal stamp, Chinese-numeral page numbers, wheel mapped to horizontal reading.'],
+  'demos/folio-pearl.html':['PERLE · Silver-pearl luxury portfolio','An AI-generated pearlescent silk video fills the background and scrubs smoothly with scroll progress (scroll-scrub). Metallic silver shine type, glass cards and light-sweep project cards — a jewelry-brand luxury portfolio. KO/EN.'],
+  'demos/folio-ember.html':['MARGIN · Black & white editorial portfolio','A magazine-style black-and-white portfolio with zero color: a large serif headline, a dotted-leader Index, a hairline two-column project spread (each project drawn as a pure black-stroke SVG figure), a big italic pull-quote, a drop-cap About and a colophon footer — #111 on pure white. KO/EN.'],
+  'demos/folio-mono.html':['MONO · Black & white Swiss-type portfolio','A pure-white Swiss typography portfolio with zero color. A massive name, an outlined word, and a 6-row project index whose rows invert on hover while a preview swatch trails the cursor. Black marquee and a baseline-grid overlay (press g) — truly clean white. KO/EN.'],
+  'demos/folio-noir.html':['NOIR · Black & white minimal dark portfolio','A blend-mode cursor dot, a live clock HUD and a letter-by-letter hero. Selected work expands as accordions with grayscale visual bands, a logo-wall marquee and a serif statement — a thin-weight minimal dark portfolio. KO/EN.'],
+  'demos/travel-lux.html':['AZURA · Luxury travel landing','A luxury travel landing over an AI-generated golden-hour coastal cliff. A sticky nav that solidifies on scroll, a booking bar (destination · check-in · guests), hover-zoom destination cards, a parallax quote band and count-up stats — a cream-and-gold mood. KO/EN.'],
+  'demos/dine-noir.html':['NOIR TABLE · Fine-dining site','A fine-dining site in near-black with gold accents over an AI-generated overhead dish. Dotted-leader menus (starters · mains · desserts) with ₩ prices, a chef’s-philosophy split, and a styled reservation form with a confirmation toast on submit. KO/EN.'],
+  'demos/aura-beauty.html':['AURA · Skincare product landing','A soft beauty landing built around an AI-generated serum product shot. Ingredient highlight cards, a 3-step how-to, star-rated reviews and a sticky add-to-cart bar that appears past the hero (adding animates a badge count + toast). KO/EN.'],
+  'demos/dev-terminal.html':['Terminal dev portfolio','A terminal/IDE-concept developer portfolio: type or click commands (about·projects·skills·contact) and sections print out with a typing effect, with syntax-highlighted code and a blinking cursor. Hit "Save as PDF" and an @media print stylesheet renders a clean light resume document. KO/EN.'],
+  'demos/dev-resume.html':['Clean developer résumé','A classic developer résumé that already looks A4 on screen and prints to an immaculate PDF: header with contact/GitHub/LinkedIn, summary, experience timeline, selected projects, skill groups, education. @page A4 margins and break-inside control paginate it cleanly. KO/EN.'],
+  'demos/dev-cards.html':['Card-grid developer portfolio','A modern card-based developer portfolio: hero, a project card grid (tech badges, hover lift), skill chips, a GitHub-style contribution heatmap, experience and contact. A "Résumé PDF" button + @media print flatten the cards into a clean black-on-white document. KO/EN.'],
+  'demos/wix-studio.html':['LUMEN STUDIO · Photography-studio template','A Wix-template-grade photography & creative studio site: a full-screen Ken-Burns hero using AI editorial imagery, a nav that solidifies on scroll, a portfolio grid with hover captions, plus services, testimonial, and a contact form. Ivory editorial · mobile menu · KO/EN.'],
+  'demos/wix-cafe.html':['Café Ondo · Cafe / bakery template','A Wix-template-grade cafe & bakery site: an AI cafe-interior hero with animated steam, signature-menu cards with ₩ prices, an our-story split, a gallery, hours & directions, and a reservation form with a toast. Warm cream-mocha tones · mobile menu · KO/EN.'],
+  'demos/clean-template.html':['Northwind · Minimal landing template','A clean, decoration-light SaaS landing template: sticky nav, hero, dashboard mockup, logo strip, 3-column feature grid, CTA band and a multi-column footer — a neutral layout scaffold you drop your own content into. Light theme · responsive · KO/EN.'],
+  'demos/creator-room.html':['STUDIO HOURS · a studio portfolio through the hours','Switch the same AI-generated studio between day, sunset and night, tap the lamp to toggle the lights (warm glow), and click the objects in the room (monitor, bookshelf, plant) — a 3D character reacts with a speech bubble as a bottom sheet slides up. Cursor parallax · KO/EN.'],
+  'demos/ride-map.html':['INTERFACE PARK · 3D amusement-park cover','An AI-generated REWARD LAND parchment map lies tilted on a dark wooden table, with background-removed 3D ride cutouts popping out of it. Hover a ride and a golden edge glow traces its silhouette; click to enter that attraction’s page. KO/EN.'],
+  'demos/pixel-game.html':['STAR RANGER · 8-bit game title','A fictional Famicom/arcade game title screen. Canvas pixel-art character, parallax star background, CRT scanlines, and a START → stage-select → loading-bar flow, controlled with arrow keys and clicks.'],
+  'demos/cyworld-minihompy.html':['Nostalgic Minihompy · 2005 Cyworld','That-era minihompy with Dotum 11px, bevel borders and pastel skins. Pixel-art minimi dress-up, acorn top-ups, 5 skins, a real guestbook and an 8-bit chiptune BGM.'],
+  'demos/designer-portfolio.html':['OBJET · art director portfolio','A cinematic AI-generated film flows full-bleed in the hero; scrolling stacks full-screen project panels — fashion film, chrome sculpture, brutalism, neon botany, all AI originals.'],
+  'demos/video-hero.html':['Cinematic Video Hero · agency','Full-screen background video, a percent preloader, custom cursor, spinning showreel button and a work preview that follows the cursor — high-end agency grammar.'],
+  'demos/liquid-shader.html':['WebGL Liquid Shader · fluid background','A real GLSL fragment shader renders undulating fluid on the GPU in real time. Ripples spread from the cursor with frosted-glass cards on top — not a video.'],
+  'demos/editorial-brutalist.html':['Editorial Brutalism · magazine','Oversized outline type, a rotating sticker badge, hard-shadow polaroids and an article index that fills with ink on hover — a zine layout that breaks the mold.'],
+  'demos/3d-parallax.html':['3D Parallax · space of depth','Orbs and glass shards push back per depth layer as you move the mouse, over an infinite perspective grid, chromatic type and truly 3D-tilting cards — CSS perspective only.'],
+  'demos/music-player.html':['Music Player · a demo that makes sound','No audio files — the Web Audio API synthesizes loops with different BPM/scale per track (step sequencer + pad/bass/drums). AnalyserNode EQ, real GainNode volume.'],
+  'demos/ecommerce-product.html':['E-commerce · headphone configurator','Zero images — a CSS-drawn headphone whose product, background and button colors swap via CSS variables. 3D view switch, fly-to-cart clone, working quantity stepper & accordion.'],
+  'demos/stripe-hero.html':['Stripe-style · mesh gradient hero','A rotating mesh gradient + noise hero, a live dashboard & payment-phone mockup, a logo marquee and scroll count-up — Stripe\'s landing signature, faithfully.'],
+  'demos/linear-dark.html':['Linear-style · dark glow landing','A purple glow over a starfield, a shimmering headline, an app mockup with a ⌘K command palette and spotlight feature cards that follow the cursor — the dark-SaaS textbook.'],
+  'demos/vercel-landing.html':['Vercel-style · black & white minimal','3-color gradient type, beams flowing over a grid, a live-typing deploy terminal and a cycling pipeline — the developer-tool landing standard.'],
+  'demos/apple-product.html':['Apple-style · product showcase','Huge type and whitespace, a CSS device with sweeping reflections, metallic titanium text, spec count-ups and a color-swatch lineup — the product-page grammar.'],
+  'demos/glassmorphism.html':['Glassmorphism · dashboard','A frosted-glass dashboard over color blobs + noise. Sidebar, glowing area chart, conic donut chart and number count-ups — a full build.'],
+  'demos/bento-grid.html':['Bento Grid · feature showcase','A cursor-following spotlight border, a collab-cursor & code-typing mockup and an orbit animation — the trending dark bento grid, in full detail.'],
+  'demos/airbnb-cards.html':['Airbnb-style · card grid','12 photo cards, a pill search bar, category bar, heart wishlist toggle and skeleton shimmer — the listing-UI classic. Falls back to gradients when offline.'],
+  'demos/app-finance.html':['Finance Home · Toss style','An asset list, weekly-spend chart and stock widget. Tapping an account raises a real bottom sheet; the tab bar switches state. Category: Finance / Pattern: Home.'],
+  'demos/app-market.html':['Marketplace Feed · Karrot style','A neighborhood selector, chip filters and thumbnail list cells. Scrolling collapses the FAB, stopping expands it. Pattern: Home·Feed / Components: chip·cell·FAB.'],
+  'demos/app-delivery.html':['Delivery Home · Baemin style','A brand-color header + search, emoji category grid, auto-cycling carousel and a live order-status floating bar. Pattern: Home·Order status.'],
+  'demos/app-chat.html':['Chat UI · messenger style','Bubbles, read badges, typing indicator, input bar — send a message and the other side actually types back. Pattern: Chat / Components: bubble·input·typing.'],
+  'demos/app-sound.html':['Orbit · music streaming app','A music app built around AI-generated album art. A live-advancing progress bar, a spinning vinyl, a canvas waveform, play/pause and like toggles, and a mini-player that expands to the full player. Home/Search/Library tabs. KO/EN.'],
+  'demos/app-runner.html':['Stride · running tracker app','A fitness app over an AI-generated dawn-run hero. An SVG progress ring fills toward the goal; hit Start and the timer, pace and calories tick live. A weekly bar chart and Activity/History/Profile tabs. KO/EN.'],
+  'demos/app-plant.html':['Ipari · plant-care app','A plant-care app filled with AI-generated plant photos. A grid of my-plant cards with water-level rings; tap for a sliding detail (light·humidity gauges, watering D-day); Water it fills a bar with a droplet animation and resets the D-day. My Plants/Guide/Alerts tabs. KO/EN.'],
+  'demos/app-onboarding.html':['Onboarding → Login flow','A scroll-snap carousel of 3 onboarding cards transitioning to a social login screen, "last login" badge included. Pattern: Onboarding·Login.'],
+  'demos/sneaker-360.html':['Sneaker Showcase · drag to rotate','Drag an AI-generated sneaker to tilt it in 3D while colorways swap product, background and accent together — a premium product showcase with size, wishlist and cart.'],
+  'demos/travel-app.html':['Travel Discovery · cinematic full-bleed','An immersive home where the whole screen is a photo — vertical snap-swipe between destinations with glassy search & tab bar over the image. Three AI-generated scenes.'],
+  'demos/app-search.html':['Search · autocomplete & skeleton','Search focus, recent/popular queries, live autocomplete highlight and skeleton shimmer loading. Pattern: Search / Components: search bar·autocomplete·skeleton.'],
+  'demos/app-payment.html':['Checkout · one-page pay flow','Radio-card payment methods, real-time recalculation from a coupon bottom sheet, an agree-all toggle and a spinner → SVG checkmark done screen. Pattern: Order·Pay.'],
+  'demos/app-settings.html':['Profile/Settings · dark-mode toggle','An iOS-style grouped list with pure-CSS switches — the dark-mode switch smoothly recolors the whole screen via CSS variables, plus a logout dialog and toast.'],
+};
+
+/* 로케일 헬퍼 */
+const dTitle = d => isEn() ? (DEMO_EN[d.file]?.[0] || d.title) : d.title;
+const dDesc  = d => isEn() ? (DEMO_EN[d.file]?.[1] || d.desc) : d.desc;
+const dTags  = d => isEn() ? d.tags.map(tagEn) : d.tags;
+
+const byPlat = () => DEMOS.filter(d =>
+  (activePlat === 'all' || platOf(d) === activePlat) &&
+  (activeUse === 'all' || useOf(d) === activeUse));
+
+let tagsExpanded = false;
+function renderFilters() {
+  /* 2개 이상의 디자인이 공유하는 태그만 칩으로 — 빈도순 정렬, 기본 9개까지 노출
+     (한 번만 쓰인 태그는 검색으로 찾을 수 있다) */
+  const freq = {};
+  byPlat().forEach(d => d.tags.forEach(t => freq[t] = (freq[t] || 0) + 1));
+  const tags = ['전체', ...Object.keys(freq).filter(t => freq[t] >= 2 && t !== '앱')
+                                            .sort((a, b) => freq[b] - freq[a])];
+  const MAX = 9;
+  const visible = (tagsExpanded || tags.indexOf(activeTag) >= MAX) ? tags : tags.slice(0, MAX);
+  /* data-tag은 한국어 원본 유지(필터 로직용), 표시만 로케일 */
+  const label = t => t === '전체' ? (isEn() ? UI_EN.allTag : '전체') : (isEn() ? tagEn(t) : t);
+  let html = visible.map(t =>
+    `<button class="chip ${t === activeTag ? 'on' : ''}" data-tag="${t}">${label(t)}</button>`).join('');
+  if (tags.length > MAX)
+    html += `<button class="chip more" data-more>${visible.length === tags.length
+      ? (isEn()?UI_EN.less:'접기 −') : (isEn()?UI_EN.more:'더보기 +')}</button>`;
+  filtersEl.innerHTML = html;
+}
+
+function renderUses() {
+  document.getElementById('useRow').innerHTML = Object.keys(USE_LABELS).map(k => {
+    const label = isEn() ? (USE_EN[k] || USE_LABELS[k]) : USE_LABELS[k];
+    return `<button class="use-chip ${k === activeUse ? 'on' : ''}" data-use="${k}">${label}</button>`;
+  }).join('');
+}
+
+/* 리소스 탭: 외부 레퍼런스/폰트 사이트 카드 */
+function renderResources() {
+  grid.innerHTML = RESOURCES.map(r => {
+    const en = RES_EN[r.name];
+    const cat = isEn() && en ? en[0] : r.cat;
+    const desc = isEn() && en ? en[1] : r.desc;
+    return `
+    <a class="item res-card" href="${r.url}" target="_blank" rel="noopener">
+      <div class="res-ico">${r.ico}</div>
+      <span class="res-cat">${cat}</span>
+      <h2>${r.name}<span>${r.en} ↗</span></h2>
+      <p class="desc">${desc}</p>
+    </a>`; }).join('');
+}
+
+function renderGrid() {
+  if (activePlat === 'res') { renderResources(); return; }
+  const kw = q.value.trim().toLowerCase();
+  const list = byPlat().filter(d => {
+    const tagOk = activeTag === '전체' || d.tags.includes(activeTag);
+    const en = DEMO_EN[d.file];
+    const hay = (d.title + d.desc + d.tags.join(' ') + d.ref.name +
+                 (en ? en[0]+en[1] : '') + d.tags.map(tagEn).join(' ')).toLowerCase();
+    const kwOk = !kw || hay.includes(kw);
+    const favOk = !favOnly || favs.has(d.file);
+    return tagOk && kwOk && favOk;
+  });
+  currentList = list;
+  if (!list.length) {
+    grid.innerHTML = `<div class="empty">${isEn() ? UI_EN.empty : '조건에 맞는 디자인이 없습니다 🙈'}</div>`;
+    return;
+  }
+  grid.innerHTML = list.map(d => `
+    <article class="item" data-open="${d.file}" data-title="${dTitle(d).replace(/"/g,'&quot;')}">
+      <div class="thumb">
+        <iframe data-src="${withLang(d.file)}" scrolling="no" tabindex="-1" title="${dTitle(d).replace(/"/g,'&quot;')}"></iframe>
+      </div>
+      <div class="body">
+        <div class="t-row">
+          <h2>${d.premium ? '<i class="star">★</i>' : ''}${dTitle(d)}</h2>
+          <button class="b-fav ${favs.has(d.file) ? 'on' : ''}" data-fav="${d.file}"
+                  title="즐겨찾기">${favs.has(d.file) ? '♥' : '♡'}</button>
+        </div>
+        <div class="meta">${d.ref.name} · ${dTags(d).slice(0, 3).join(' · ')}</div>
+        <p class="desc">${dDesc(d)}</p>
+      </div>
+    </article>`).join('');
+  fitThumbs();
+  wireThumbPause();
+  document.querySelectorAll('.thumb').forEach(t => thumbIO.observe(t));
+  /* 첫 화면 4개는 즉시 로드 (IO는 나머지 스크롤 구간 담당) */
+  [...document.querySelectorAll('.thumb iframe[data-src]')].slice(0, 4).forEach(f => {
+    f.src = f.dataset.src; f.removeAttribute('data-src');
+  });
+}
+
+/* 썸네일 iframe을 카드 폭에 맞춰 축소 (1280px 기준 렌더링 → scale) */
+function fitThumbs() {
+  document.querySelectorAll('.thumb').forEach(t => {
+    const s = t.clientWidth / 1280;
+    const f = t.querySelector('iframe');
+    if (f) f.style.transform = `scale(${s})`;
+  });
+}
+window.addEventListener('resize', fitThumbs);
+
+/* 썸네일 지연 로드: 뷰포트 600px 근처에 오면 그때 iframe을 로드 */
+const thumbIO = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  const f = e.target.querySelector('iframe[data-src]');
+  if (f) { f.src = f.dataset.src; f.removeAttribute('data-src'); }
+  thumbIO.unobserve(e.target);
+}), { rootMargin: '600px' });
+
+/* 썸네일 7개가 동시에 애니메이션되면 GPU 부하가 크다 —
+   기본은 정지된 프리뷰, 카드에 호버한 동안만 라이브로 재생 */
+const PAUSE_CSS = '*,*::before,*::after{animation-play-state:paused!important}';
+function setThumbPaused(iframe, paused) {
+  try {
+    const doc = iframe.contentDocument;
+    /* rAF 루프(WebGL·캔버스·패럴랙스)를 쓰는 데모는 이 플래그를 보고 스스로 멈춘다 */
+    iframe.contentWindow.__paused = paused;
+    doc.querySelectorAll('video').forEach(v => paused ? v.pause() : v.play().catch(() => {}));
+    let s = doc.getElementById('thumb-pause');
+    if (paused && !s) {
+      s = doc.createElement('style'); s.id = 'thumb-pause'; s.textContent = PAUSE_CSS;
+      doc.head.appendChild(s);
+    } else if (!paused && s) s.remove();
+  } catch {}
+}
+function wireThumbPause() {
+  document.querySelectorAll('.item').forEach(item => {
+    const f = item.querySelector('.thumb iframe');
+    if (!f || f.dataset.wired) return;
+    f.dataset.wired = 1;
+    f.addEventListener('load', () => setThumbPaused(f, true));
+    if (f.contentDocument?.readyState === 'complete') setThumbPaused(f, true);
+    item.addEventListener('mouseenter', () => setThumbPaused(f, false));
+    item.addEventListener('mouseleave', () => setThumbPaused(f, true));
+  });
+}
+
+/* ── 모달 ── */
+const modal = document.getElementById('modal');
+const mTitle = document.getElementById('m-title');
+const mFrame = document.getElementById('m-frame');
+const mCode = document.getElementById('m-code');
+const mOpen = document.getElementById('m-open');
+const mCopy = document.getElementById('m-copy');
+let currentSource = '';
+
+function escapeHtml(s) {
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+function highlight(src) {
+  /* 단일 패스 치환 — 다중 패스로 하면 앞에서 주입한 span 마크업이 다시 치환돼 깨진다 */
+  return escapeHtml(src).replace(
+    /(&lt;!--[\s\S]*?--&gt;|\/\*[\s\S]*?\*\/)|(&quot;[^&\n]*?&quot;|'[^'\n]*?')|(&lt;\/?[a-zA-Z][a-zA-Z0-9-]*|\/?&gt;)|([a-zA-Z-]+)(?=[=:])/g,
+    (m, com, str, tag, attr) => {
+      if (com) return `<span class="tk-com">${m}</span>`;
+      if (str) return `<span class="tk-str">${m}</span>`;
+      if (tag) return `<span class="tk-tag">${m}</span>`;
+      if (attr) return `<span class="tk-attr">${m}</span>`;
+      return m;
+    });
+}
+
+/* 소스 탭: code(HTML) 외에 앱 데모는 tokens(피그마용 JSON)·rn(React Native) 추가 */
+let sources = {};       // key -> { url, text }
+let currentKey = 'code';
+
+function switchTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.pane === name));
+  const isPreview = name === 'preview';
+  document.querySelectorAll('.pane').forEach(p =>
+    p.classList.toggle('on', p.dataset.pane === (isPreview ? 'preview' : 'code')));
+  document.getElementById('fig-hint').style.display =
+    (name !== 'preview' && name !== 'code') ? 'block' : 'none';
+  if (!isPreview) loadSource(name);
+}
+
+async function loadSource(key) {
+  currentKey = key;
+  const src = sources[key];
+  if (!src) return;
+  if (src.text == null) {
+    mCode.textContent = '불러오는 중...';
+    try { src.text = await (await fetch(src.url)).text(); }
+    catch (e) { mCode.textContent = '불러오지 못했습니다: ' + e.message; return; }
+  }
+  if (currentKey === key) mCode.innerHTML = highlight(src.text);
+}
+
+async function openModal(file, title, tab = 'preview') {
+  const demo = DEMOS.find(d => d.file === file);
+  mTitle.textContent = demo ? dTitle(demo) : title;
+  mFrame.src = withLang(file);
+  mOpen.href = withLang(file);
+  mCode.textContent = isEn() ? 'Loading...' : '불러오는 중...';
+
+  sources = { code: { url: file } };
+  const tabs = [
+    { key: 'preview', label: isEn()?UI_EN.preview:'미리보기' },
+    { key: 'code', label: demo?.exports ? (isEn()?UI_EN.htmlcss:'HTML/CSS') : (isEn()?UI_EN.code:'코드') },
+  ];
+  const EXPORT_TABS = isEn()
+    ? { tokens: UI_EN.tokens, rn: UI_EN.rn, flutter: UI_EN.flutter, swiftui: UI_EN.swiftui }
+    : { tokens: '🎨 토큰', rn: '📱 RN', flutter: '🐦 Flutter', swiftui: '🍎 SwiftUI' };
+  for (const [key, label] of Object.entries(EXPORT_TABS)) {
+    if (demo?.exports?.[key]) {
+      sources[key] = { url: demo.exports[key] };
+      tabs.push({ key, label });
+    }
+  }
+  setViewport('desk');   /* 열 때마다 데스크톱 뷰로 초기화 */
+  document.getElementById('m-tabs').innerHTML = tabs.map(t =>
+    `<button class="tab" data-pane="${t.key}">${t.label}</button>`).join('');
+
+  modal.classList.add('open');
+  document.body.classList.add('modal-open');
+  document.body.style.overflow = 'hidden';
+  switchTab(tab);
+  loadSource('code');   // 기본 소스는 미리 받아둔다
+}
+
+function closeModal() {
+  modal.classList.remove('open');
+  mFrame.src = 'about:blank';
+  document.body.classList.remove('modal-open');
+  document.body.style.overflow = '';
+}
+
+document.addEventListener('click', e => {
+  /* 즐겨찾기 토글 (카드 하트) */
+  const fav = e.target.closest('[data-fav]');
+  if (fav) {
+    const f = fav.dataset.fav;
+    favs.has(f) ? favs.delete(f) : favs.add(f);
+    saveFavs();
+    fav.classList.toggle('on', favs.has(f));
+    fav.textContent = favs.has(f) ? '♥' : '♡';
+    if (favOnly) renderGrid();
+    return;
+  }
+  /* 태그 더보기/접기 */
+  if (e.target.closest('[data-more]')) { tagsExpanded = !tagsExpanded; renderFilters(); return; }
+  /* 즐겨찾기만 보기 */
+  if (e.target.closest('#favToggle')) {
+    favOnly = !favOnly;
+    document.getElementById('favToggle').classList.toggle('on', favOnly);
+    renderGrid(); return;
+  }
+  /* 모달 ‹ › 탐색 */
+  if (e.target.closest('#m-prev')) { navModal(-1); return; }
+  if (e.target.closest('#m-next')) { navModal(1); return; }
+  /* 뷰포트 토글 */
+  const vpBtn = e.target.closest('.vp-toggle button');
+  if (vpBtn) { setViewport(vpBtn.dataset.vp); return; }
+
+  const opener = e.target.closest('[data-open]');
+  if (opener) { openModal(opener.dataset.open, opener.dataset.title, opener.dataset.tab || 'preview'); return; }
+  if (e.target.closest('.tab')) { switchTab(e.target.closest('.tab').dataset.pane); return; }
+  const chip = e.target.closest('.chip');
+  if (chip && chip.dataset.tag) { activeTag = chip.dataset.tag; renderFilters(); renderGrid(); return; }
+  const useChip = e.target.closest('.use-chip');
+  if (useChip) {
+    activeUse = useChip.dataset.use; activeTag = '전체';
+    renderUses(); renderFilters(); renderGrid(); return;
+  }
+  const plat = e.target.closest('.plat');
+  if (plat) {
+    activePlat = plat.dataset.plat; activeTag = '전체';
+    document.querySelectorAll('.plat').forEach(p => p.classList.toggle('on', p === plat));
+    document.body.classList.toggle('res-mode', activePlat === 'res');
+    renderFilters(); renderGrid(); return;
+  }
+  if (e.target === modal || e.target.closest('#m-close')) closeModal();
+});
+
+/* 모달 안에서 현재 필터 목록 기준 이전/다음 데모로 이동 */
+function navModal(dir) {
+  const file = mOpen.getAttribute('href');
+  const i = currentList.findIndex(d => d.file === file);
+  if (i === -1 || !currentList.length) return;
+  const nx = currentList[(i + dir + currentList.length) % currentList.length];
+  openModal(nx.file, nx.title, 'preview');
+}
+
+function setViewport(mode) {
+  document.querySelectorAll('.vp-toggle button').forEach(b => b.classList.toggle('on', b.dataset.vp === mode));
+  document.querySelector('.pane[data-pane="preview"]').classList.toggle('vp-mobile', mode === 'mob');
+}
+
+/* 키보드: Esc 닫기 · ←/→ 모달 탐색 · / 검색 포커스 */
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); return; }
+  const modalOpen = modal.classList.contains('open');
+  if (modalOpen && e.key === 'ArrowLeft') { navModal(-1); return; }
+  if (modalOpen && e.key === 'ArrowRight') { navModal(1); return; }
+  if (!modalOpen && e.key === '/' && document.activeElement !== q) {
+    e.preventDefault(); q.focus();
+  }
+});
+q.addEventListener('input', renderGrid);
+
+mCopy.addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(sources[currentKey]?.text || '');
+    mCopy.textContent = '✓ 복사됨!';
+  } catch {
+    mCopy.textContent = '복사 실패 (직접 선택해주세요)';
+  }
+  setTimeout(() => (mCopy.textContent = '📋 전체 코드 복사'), 1800);
+});
+
+/* 히어로 스탯 라인 */
+function renderStats() {
+  const web = DEMOS.filter(d => platOf(d) === 'web').length;
+  const app = DEMOS.filter(d => platOf(d) === 'app').length;
+  const formats = new Set(DEMOS.flatMap(d => ['html', ...Object.keys(d.exports || {})])).size;
+  document.getElementById('statsLine').textContent = isEn()
+    ? UI_EN.stats(DEMOS.length, web, app, formats)
+    : `${DEMOS.length}개 디자인 · 웹 ${web} · 앱 ${app} · 코드 ${formats}종 포맷`;
+}
+
+/* ── 언어 적용: 정적 텍스트 교체 + 동적 렌더 재실행 ── */
+function applyLang() {
+  document.documentElement.lang = lang;
+  const $ = id => document.getElementById(id);
+  if (isEn()) {
+    $('heroH1').innerHTML = UI_EN.heroH1;
+    $('heroLead').textContent = UI_EN.heroLead;
+    $('q').placeholder = UI_EN.search;
+    document.querySelector('.plat[data-plat="all"]').textContent = UI_EN.all;
+    document.querySelector('.plat[data-plat="web"]').textContent = UI_EN.web;
+    document.querySelector('.plat[data-plat="app"]').textContent = UI_EN.app;
+    document.querySelector('.plat[data-plat="res"]').textContent = UI_EN.res;
+    document.querySelector('.open-new').textContent = UI_EN.openNew;
+    const fh = $('fig-hint'); if (fh) fh.innerHTML = UI_EN.figHint;
+    document.querySelector('footer').textContent = UI_EN.footer;
+  } else {
+    $('heroH1').innerHTML = '유명 디자인을 <em>코드로</em> 배우는 갤러리';
+    $('heroLead').textContent = '웹·앱의 검증된 디자인 패턴을 라이브 데모와 복사 가능한 코드로. 카드를 열면 미리보기·소스·피그마 토큰·네이티브 코드가 있습니다.';
+    $('q').placeholder = '검색  ( / )';
+    document.querySelector('.plat[data-plat="all"]').textContent = '전체';
+    document.querySelector('.plat[data-plat="web"]').textContent = '웹';
+    document.querySelector('.plat[data-plat="app"]').textContent = '앱';
+    document.querySelector('.plat[data-plat="res"]').textContent = '📚 리소스';
+    document.querySelector('.open-new').textContent = '새 탭 ↗';
+    document.querySelector('footer').textContent = '순수 HTML/CSS/JS 재현 데모 모음 · 각 원본 사이트와 무관한 학습용 레퍼런스입니다. · © 2026 hyunaeee · MIT License';
+  }
+  document.querySelectorAll('#langToggle span').forEach((s,i) =>
+    s.classList.toggle('on', (i===0) === (lang==='ko')));
+  renderUses(); renderFilters(); renderGrid(); renderStats();
+}
+document.getElementById('langToggle').addEventListener('click', () => {
+  lang = isEn() ? 'ko' : 'en';
+  localStorage.setItem('dg-lang', lang);
+  applyLang();
+});
+
+renderUses();
+renderFilters();
+renderGrid();
+renderStats();
+saveFavs();
+applyLang();   // 저장된 언어 반영
+</script>
+</body>
+</html>

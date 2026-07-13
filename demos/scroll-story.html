@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+  This demo loads three.js (r128, MIT) and its postprocessing passes from a CDN.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>낙하 — Three.js WebGL 다이브</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;1,500&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Serif+KR:wght@300;600;900&display=swap');
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+html,body{ height:100%; overflow:hidden; background:#03020a; }
+body{ font-family:'Space Grotesk','Noto Serif KR',sans-serif; color:#eef1ff;
+  -webkit-font-smoothing:antialiased; cursor:crosshair; }
+#gl{ position:fixed; inset:0; z-index:0; display:block; }
+
+/* 오버레이 */
+.ui{ position:fixed; inset:0; z-index:5; pointer-events:none; }
+.top{ display:flex; justify-content:space-between; align-items:center; padding:24px 30px;
+  font-family:'Space Grotesk',sans-serif; }
+.mark{ font-weight:700; letter-spacing:4px; font-size:14px;
+  text-shadow:0 0 18px rgba(120,180,255,.6); }
+.mark b{ color:#7fd0ff; }
+.readout{ font-size:11px; letter-spacing:2px; color:#8ea3d6; text-align:right; line-height:1.7; }
+.readout b{ color:#c9b6ff; font-weight:600; }
+
+/* 중앙 시(詩) */
+.verse{ position:absolute; left:0; right:0; top:44%; transform:translateY(-50%);
+  text-align:center; padding:0 8vw; }
+.verse .act{ font-family:'Playfair Display',serif; font-style:italic; font-size:13px;
+  letter-spacing:4px; color:#9fb6ee; opacity:.8; }
+.verse h1{ font-family:'Playfair Display','Noto Serif KR',serif; font-weight:600;
+  font-size:clamp(40px,8vw,110px); line-height:1; letter-spacing:-.01em; margin-top:14px;
+  text-shadow:0 6px 50px rgba(60,40,120,.7); }
+.verse p{ margin-top:20px; font-weight:300; font-size:clamp(14px,2vw,18px); color:#c3cdf0;
+  opacity:.9; word-break:keep-all; }
+.verse .line{ display:inline-block; opacity:0; transform:translateY(24px);
+  transition:opacity .8s ease, transform 1s cubic-bezier(.2,.7,.2,1); }
+.verse.show .line{ opacity:1; transform:translateY(0); }
+
+/* 진행 바 */
+.prog{ position:fixed; right:26px; top:50%; transform:translateY(-50%); z-index:6;
+  width:3px; height:38vh; background:rgba(160,180,255,.16); border-radius:99px; }
+.prog i{ position:absolute; left:0; top:0; width:100%; height:0%; border-radius:99px;
+  background:linear-gradient(#7fd0ff,#c9b6ff); box-shadow:0 0 12px rgba(160,180,255,.7); }
+.cue{ position:fixed; left:50%; bottom:30px; transform:translateX(-50%); z-index:6;
+  font-family:'Playfair Display',serif; font-style:italic; font-size:13px; letter-spacing:2px;
+  color:#aebbe6; opacity:.75; animation:bob 2.2s ease-in-out infinite; transition:opacity .5s; }
+@keyframes bob{ 50%{ transform:translate(-50%,8px);} }
+.hintboost{ position:fixed; left:50%; bottom:64px; transform:translateX(-50%); z-index:6;
+  font-size:11px; letter-spacing:2px; color:#7f8fc0; opacity:.7; }
+
+.lang{ position:fixed; right:20px; bottom:22px; z-index:8; pointer-events:auto;
+  font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:12px; letter-spacing:.1em;
+  background:rgba(20,20,45,.5); color:#dfe6ff; border:1px solid rgba(160,180,255,.35);
+  border-radius:20px; padding:7px 14px; cursor:pointer; backdrop-filter:blur(5px); }
+
+.fallback{ position:fixed; inset:0; z-index:9; display:none; place-items:center; text-align:center;
+  padding:0 10vw; background:radial-gradient(circle at 50% 40%, #1a1140, #03020a 70%); }
+.fallback.on{ display:grid; }
+.fallback h2{ font-family:'Playfair Display',serif; font-style:italic; font-size:clamp(30px,6vw,64px); }
+.fallback p{ margin-top:16px; color:#9fb0e0; }
+</style>
+</head>
+<body>
+<canvas id="gl"></canvas>
+
+<div class="ui">
+  <div class="top">
+    <div class="mark">FALL<b>//</b>THREE</div>
+    <div class="readout">
+      <div><span data-i18n>깊이</span> <b id="depth">0</b> m</div>
+      <div><span data-i18n>속도</span> <b id="vel">0</b></div>
+    </div>
+  </div>
+
+  <div class="verse" id="verse">
+    <div class="act line" id="vAct" data-i18n>SEQUENCE 01</div>
+    <h1 class="line" id="vTitle" data-i18n>떨어진다</h1>
+    <p class="line" id="vText" data-i18n>발밑이 사라진 순간, 별들이 위로 흘러가기 시작했다.</p>
+  </div>
+</div>
+
+<div class="prog"><i id="progBar"></i></div>
+<div class="cue" id="cue" data-i18n>스크롤 · 마우스로 조준 · 클릭 부스트</div>
+<div class="hintboost" data-i18n></div>
+
+<button class="lang" id="lang">EN</button>
+
+<div class="fallback" id="fallback">
+  <div>
+    <h2 data-i18n>WebGL을 켤 수 없습니다</h2>
+    <p data-i18n>이 데모는 3D 그래픽(WebGL)을 사용합니다. 지원되는 브라우저에서 다시 열어보세요.</p>
+  </div>
+</div>
+
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script src="https://unpkg.com/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script>
+(function(){
+"use strict";
+if (typeof THREE === 'undefined' || !window.WebGLRenderingContext) {
+  document.getElementById('fallback').classList.add('on'); return;
+}
+
+/* ── 렌더러 / 씬 / 카메라 ── */
+var canvas = document.getElementById('gl');
+var renderer;
+try {
+  renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+} catch (e) { document.getElementById('fallback').classList.add('on'); return; }
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setSize(innerWidth, innerHeight);
+
+var scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x05030f, 0.018);
+
+var camera = new THREE.PerspectiveCamera(72, innerWidth/innerHeight, 0.1, 1400);
+camera.position.set(0, 0, 0);
+
+/* ── 조명 ── */
+scene.add(new THREE.AmbientLight(0x3a2f66, 0.8));
+var lightA = new THREE.PointLight(0x00eaff, 2.2, 260); scene.add(lightA);
+var lightB = new THREE.PointLight(0xff3ca6, 2.0, 260); scene.add(lightB);
+var lightC = new THREE.PointLight(0x8a5cff, 1.6, 300); scene.add(lightC);
+
+/* ── 색 팔레트 ── */
+var HUES = [0x7fd0ff, 0xff5ca8, 0xc9b6ff, 0x5cffd0, 0xffd36b];
+
+/* ── 성단(파티클) ── */
+var STAR_N = 2600, SPAN = 900;
+var starGeo = new THREE.BufferGeometry();
+var starPos = new Float32Array(STAR_N * 3);
+for (var i = 0; i < STAR_N; i++) {
+  starPos[i*3]   = (Math.random()-0.5) * 260;
+  starPos[i*3+1] = (Math.random()-0.5) * 260;
+  starPos[i*3+2] = -Math.random() * SPAN;
+}
+starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3));
+var starMat = new THREE.PointsMaterial({ color: 0xbcd4ff, size: 1.5, transparent: true,
+  opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+var stars = new THREE.Points(starGeo, starMat);
+scene.add(stars);
+
+/* ── 링 터널 ── */
+var RINGS = 26, RING_GAP = 34;
+var rings = [];
+for (var r = 0; r < RINGS; r++) {
+  var geo = new THREE.TorusGeometry(14 + Math.random()*5, 0.5 + Math.random()*0.5, 10, 60);
+  var col = HUES[r % HUES.length];
+  var mat = new THREE.MeshStandardMaterial({ color: 0x0a0a1a, emissive: col,
+    emissiveIntensity: 1.5, metalness: 0.8, roughness: 0.3 });
+  var m = new THREE.Mesh(geo, mat);
+  m.position.z = -r * RING_GAP - 30;
+  m.position.x = (Math.random()-0.5) * 8;
+  m.position.y = (Math.random()-0.5) * 8;
+  m.rotation.z = Math.random() * Math.PI;
+  m.userData.spin = (Math.random()-0.5) * 0.02;
+  scene.add(m); rings.push(m);
+}
+
+/* ── 부유 파편 ── */
+var SHARDS = 46;
+var shards = [];
+var shardGeos = [ new THREE.IcosahedronGeometry(1.4, 0), new THREE.OctahedronGeometry(1.5, 0),
+  new THREE.TetrahedronGeometry(1.7, 0), new THREE.TorusKnotGeometry(0.9, 0.34, 60, 8) ];
+for (var s = 0; s < SHARDS; s++) {
+  var col2 = HUES[s % HUES.length];
+  var gm = shardGeos[s % shardGeos.length];
+  var mt = new THREE.MeshStandardMaterial({ color: 0x111124, emissive: col2,
+    emissiveIntensity: 1.1, metalness: 0.7, roughness: 0.25, flatShading: true });
+  var sh = new THREE.Mesh(gm, mt);
+  sh.position.set((Math.random()-0.5)*70, (Math.random()-0.5)*70, -Math.random()*SPAN);
+  var sc = 0.6 + Math.random()*2.2; sh.scale.setScalar(sc);
+  sh.userData.rot = new THREE.Vector3((Math.random()-0.5)*0.03,(Math.random()-0.5)*0.03,(Math.random()-0.5)*0.03);
+  scene.add(sh); shards.push(sh);
+}
+
+/* ── 중심 코어 ── */
+var coreGeo = new THREE.IcosahedronGeometry(9, 1);
+var coreMat = new THREE.MeshStandardMaterial({ color: 0x1a1140, emissive: 0xc9b6ff,
+  emissiveIntensity: 1.4, metalness: 0.9, roughness: 0.15, wireframe: false });
+var core = new THREE.Mesh(coreGeo, coreMat);
+core.position.z = -SPAN;
+scene.add(core);
+var coreWire = new THREE.Mesh(new THREE.IcosahedronGeometry(11, 1),
+  new THREE.MeshBasicMaterial({ color: 0x7fd0ff, wireframe: true, transparent: true, opacity: 0.35 }));
+core.add(coreWire);
+
+/* ── 포스트프로세싱(블룸, 가능 시) ── */
+var composer = null, bloom = null;
+if (THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass) {
+  try {
+    composer = new THREE.EffectComposer(renderer);
+    composer.addPass(new THREE.RenderPass(scene, camera));
+    bloom = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 1.1, 0.7, 0.15);
+    composer.addPass(bloom);
+  } catch (e) { composer = null; }
+}
+
+/* ── 상태 ── */
+var depth = 0;          // 진행(0~1 상대는 depth/MAXD)
+var MAXD = SPAN;        // 코어까지 거리
+var vel = 0.35;         // 기본 낙하 속도
+var boost = 0;          // 클릭 부스트
+var targetMX = 0, targetMY = 0, mx = 0, my = 0;
+
+/* 스크롤 → 목표 속도 가산 */
+var scrollVel = 0;
+addEventListener('wheel', function(e){ scrollVel += e.deltaY * 0.0016; }, { passive: true });
+addEventListener('touchmove', function(){ scrollVel += 0.25; }, { passive: true });
+
+/* 마우스 조준 */
+addEventListener('mousemove', function(e){
+  targetMX = (e.clientX / innerWidth - 0.5);
+  targetMY = (e.clientY / innerHeight - 0.5);
+});
+/* 클릭 부스트 + 색 플래시 */
+addEventListener('click', function(e){
+  if (e.target.closest('.lang')) return;
+  boost = 5.5;
+});
+
+addEventListener('resize', function(){
+  camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
+  renderer.setSize(innerWidth, innerHeight);
+  if (composer) composer.setSize(innerWidth, innerHeight);
+});
+
+/* ── 시(詩) 시퀀스 ── */
+var verse = document.getElementById('verse');
+var vAct = document.getElementById('vAct'), vTitle = document.getElementById('vTitle'), vText = document.getElementById('vText');
+var ACTS = [];
+function buildActs(){
+  ACTS = EN ? [
+    ['SEQUENCE 01','FALLING','The instant the ground vanished, the stars began streaming upward.'],
+    ['SEQUENCE 02','THROUGH THE RINGS','Gate after gate of light rushed past — and still I fell.'],
+    ['SEQUENCE 03','THE DEBRIS FIELD','Fragments drifted by like slow, glowing thoughts.'],
+    ['SEQUENCE 04','THE CORE','Something was waiting at the bottom of the dark, and it was shining.'],
+    ['SEQUENCE 05','IT WAS FLIGHT','I was not falling. I was diving through the stars, on purpose.']
+  ] : [
+    ['SEQUENCE 01','떨어진다','발밑이 사라진 순간, 별들이 위로 흘러가기 시작했다.'],
+    ['SEQUENCE 02','빛의 고리를 지나','빛의 관문이 잇달아 스쳐 지나가고, 나는 여전히 떨어지고 있었다.'],
+    ['SEQUENCE 03','파편의 바다','파편들이 느리게 빛나는 생각처럼 곁을 흘러갔다.'],
+    ['SEQUENCE 04','코어','어둠의 바닥에서 무언가 나를 기다리며 빛나고 있었다.'],
+    ['SEQUENCE 05','그건 비행이었다','떨어지는 게 아니었다. 나는 별들 사이로, 스스로 뛰어들고 있었다.']
+  ];
+}
+var actIdx = -1;
+function setAct(i){
+  if (i === actIdx) return; actIdx = i;
+  var a = ACTS[i]; if (!a) return;
+  verse.classList.remove('show'); void verse.offsetWidth;
+  vAct.textContent = a[0]; vTitle.textContent = a[1]; vText.textContent = a[2];
+  requestAnimationFrame(function(){ verse.classList.add('show'); });
+}
+
+var depthEl = document.getElementById('depth'), velEl = document.getElementById('vel');
+var progBar = document.getElementById('progBar'), cue = document.getElementById('cue');
+
+/* ── 메인 루프 ── */
+var frames = 0, tmp = new THREE.Vector3();
+function loop(){
+  if (window.__paused && frames > 5) { setTimeout(function(){ requestAnimationFrame(loop); }, 300); return; }
+  requestAnimationFrame(loop);
+  frames++;
+  var t = frames * 0.016;
+
+  /* 속도: 기본 + 스크롤 + 부스트, 감쇠 */
+  scrollVel *= 0.94; if (scrollVel < 0) scrollVel = 0;
+  boost *= 0.92;
+  var speed = vel + scrollVel + boost;
+  depth += speed;
+  if (depth > MAXD) depth -= MAXD;      // 무한 루프
+
+  /* 카메라 마우스 조준(부드럽게) */
+  mx += (targetMX - mx) * 0.05; my += (targetMY - my) * 0.05;
+  camera.rotation.y = -mx * 0.5;
+  camera.rotation.x = my * 0.4;
+  camera.position.x = mx * 6;
+  camera.position.y = -my * 6;
+
+  /* 성단: 카메라로 다가오게(+z), 지나가면 재활용 */
+  var sp = starGeo.attributes.position.array;
+  for (var i = 0; i < STAR_N; i++) {
+    sp[i*3+2] += speed;
+    if (sp[i*3+2] > 8) {
+      sp[i*3]   = (Math.random()-0.5) * 260;
+      sp[i*3+1] = (Math.random()-0.5) * 260;
+      sp[i*3+2] -= SPAN;
+    }
+  }
+  starGeo.attributes.position.needsUpdate = true;
+
+  /* 링: 다가오며 회전, 지나가면 뒤로 재배치 */
+  for (var r = 0; r < rings.length; r++) {
+    var m = rings[r];
+    m.position.z += speed;
+    m.rotation.z += m.userData.spin;
+    m.material.emissiveIntensity = 1.2 + Math.sin(t*2 + r) * 0.5;
+    if (m.position.z > 12) {
+      m.position.z -= RINGS * RING_GAP;
+      m.position.x = (Math.random()-0.5) * 8;
+      m.position.y = (Math.random()-0.5) * 8;
+    }
+  }
+
+  /* 파편: 다가오며 자전, 재활용 */
+  for (var s = 0; s < shards.length; s++) {
+    var sh = shards[s];
+    sh.position.z += speed;
+    sh.rotation.x += sh.userData.rot.x; sh.rotation.y += sh.userData.rot.y; sh.rotation.z += sh.userData.rot.z;
+    if (sh.position.z > 10) {
+      sh.position.set((Math.random()-0.5)*70, (Math.random()-0.5)*70, sh.position.z - SPAN);
+    }
+  }
+
+  /* 코어: 다가오며 회전/맥동, 지나가면 재활용 */
+  core.position.z += speed;
+  core.rotation.x += 0.004; core.rotation.y += 0.006;
+  coreWire.rotation.x -= 0.006; coreWire.rotation.y -= 0.004;
+  var pulse = 1 + Math.sin(t*2) * 0.06; core.scale.setScalar(pulse);
+  if (core.position.z > 20) core.position.z -= SPAN;
+
+  /* 궤도 조명 */
+  lightA.position.set(Math.sin(t)*30, Math.cos(t*0.8)*30, 10);
+  lightB.position.set(Math.cos(t*1.1)*30, Math.sin(t)*30, 10);
+  lightC.position.set(0, 0, -40);
+
+  /* 부스트 시 블룸 강화 */
+  if (bloom) bloom.strength = 1.05 + boost * 0.14 + scrollVel * 0.5;
+
+  /* HUD */
+  var prog = (MAXD - ((core.position.z * -1) % MAXD)) / MAXD;
+  depthEl.textContent = Math.round(depth);
+  velEl.textContent = speed.toFixed(1);
+  progBar.style.height = (Math.min(1, (depth / MAXD)) * 100) + '%';
+  cue.style.opacity = speed > 0.6 ? 0 : 0.75;
+
+  /* 시퀀스: 속도(몰입)와 프레임으로 5막 순환 */
+  setAct(Math.floor((t * 0.08) % ACTS.length));
+
+  if (composer) composer.render(); else renderer.render(scene, camera);
+}
+
+/* ── 언어 ── */
+var EN = new URLSearchParams(location.search).get('lang') === 'en';
+var I18N = {
+  '낙하 — Three.js WebGL 다이브':'FALL — a three.js WebGL dive',
+  '깊이':'DEPTH', '속도':'VELOCITY',
+  '스크롤 · 마우스로 조준 · 클릭 부스트':'SCROLL · steer with mouse · click to boost',
+  'WebGL을 켤 수 없습니다':'WebGL is unavailable',
+  '이 데모는 3D 그래픽(WebGL)을 사용합니다. 지원되는 브라우저에서 다시 열어보세요.':
+    'This demo uses 3D graphics (WebGL). Please reopen it in a supported browser.'
+};
+var origT = new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    if (!origT.has(el)) origT.set(el, el.innerHTML);
+    var ko = origT.get(el).trim();
+    if (I18N[ko] != null) el.innerHTML = EN ? I18N[ko] : origT.get(el);
+  });
+  document.getElementById('lang').textContent = EN ? 'KO' : 'EN';
+  document.documentElement.lang = EN ? 'en' : 'ko';
+  if (EN) document.title = I18N['낙하 — Three.js WebGL 다이브'];
+  buildActs(); actIdx = -1;   // 현재 막 갱신되도록
+}
+document.getElementById('lang').addEventListener('click', function(){ EN = !EN; applyLang(); });
+
+buildActs();
+applyLang();
+loop();
+
+})();
+</script>
+</body>
+</html>

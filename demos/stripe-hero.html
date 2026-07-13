@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Stripe 스타일 — 메시 그라디언트 히어로</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; color: #0a2540; background: #fff;
+       -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+/* ── 메시 그라디언트: 레이어드 radial + 회전 conic + 노이즈 ── */
+.hero { position: relative; padding-bottom: 140px; }
+.mesh { position: absolute; inset: 0; height: 760px; overflow: hidden;
+        clip-path: polygon(0 0, 100% 0, 100% 78%, 0 100%); }
+.mesh::before {
+  content: ""; position: absolute; inset: -40%;
+  background:
+    radial-gradient(38% 42% at 18% 28%, #ffd4e1 0%, transparent 60%),
+    radial-gradient(42% 46% at 78% 18%, #a960ee 0%, transparent 62%),
+    radial-gradient(36% 40% at 62% 62%, #ff333d 0%, transparent 58%),
+    radial-gradient(44% 48% at 30% 78%, #90e0ff 0%, transparent 60%),
+    radial-gradient(40% 44% at 88% 72%, #ffcb57 0%, transparent 62%),
+    linear-gradient(160deg, #7dd4fc, #a960ee 45%, #ff5f7e 80%);
+  animation: meshSpin 26s linear infinite;
+}
+@keyframes meshSpin { to { transform: rotate(360deg); } }
+.mesh::after {
+  content: ""; position: absolute; inset: 0; opacity: .5; mix-blend-mode: soft-light;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>');
+}
+
+nav { position: relative; z-index: 5; display: flex; align-items: center; gap: 34px;
+      max-width: 1120px; margin: 0 auto; padding: 22px 28px; }
+.logo { font-size: 23px; font-weight: 800; color: #fff; letter-spacing: -0.8px; }
+nav a { color: rgba(255,255,255,.92); text-decoration: none; font-size: 15px; font-weight: 600;
+        transition: opacity .2s; }
+nav a:hover { opacity: .7; }
+.nav-cta { margin-left: auto; display: inline-flex; align-items: center; gap: 6px;
+           background: rgba(255,255,255,.22); color: #fff; padding: 9px 18px; border-radius: 99px;
+           font-size: 15px; font-weight: 700; text-decoration: none; backdrop-filter: blur(8px);
+           transition: background .2s, gap .2s; }
+.nav-cta:hover { background: rgba(255,255,255,.38); gap: 10px; opacity: 1; }
+
+.hero-inner { position: relative; z-index: 4; max-width: 1120px; margin: 0 auto;
+              padding: 64px 28px 0; display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; }
+.eyebrow-pill { display: inline-flex; align-items: center; gap: 8px; background: rgba(10,37,64,.55);
+                color: #fff; font-size: 13px; font-weight: 600; padding: 7px 16px; border-radius: 99px;
+                backdrop-filter: blur(8px); }
+.eyebrow-pill b { color: #7ee8b2; font-weight: 700; }
+h1 { margin-top: 26px; font-size: clamp(42px, 5.4vw, 66px); line-height: 1.04; letter-spacing: -2.5px;
+     font-weight: 800; color: #fff; text-shadow: 0 2px 40px rgba(10,37,64,.25); word-break: keep-all; }
+.hero-desc { margin-top: 24px; font-size: 18px; line-height: 1.7; color: rgba(255,255,255,.95);
+             max-width: 470px; font-weight: 500; word-break: keep-all; }
+.hero-actions { margin-top: 34px; display: flex; gap: 14px; align-items: center; }
+.btn-dark { display: inline-flex; align-items: center; gap: 8px; background: #0a2540; color: #fff;
+            padding: 14px 26px; border-radius: 99px; font-size: 15px; font-weight: 700;
+            text-decoration: none; transition: transform .2s, box-shadow .2s, gap .2s; }
+.btn-dark:hover { transform: translateY(-2px); box-shadow: 0 14px 34px rgba(10,37,64,.4); gap: 12px; }
+.btn-line { color: #fff; font-size: 15px; font-weight: 700; text-decoration: none; }
+.btn-line::after { content: "→"; margin-left: 7px; display: inline-block; transition: transform .2s; }
+.btn-line:hover::after { transform: translateX(4px); }
+
+/* ── 대시보드 + 플로팅 폰 목업 ── */
+.mock-stage { position: relative; align-self: start; }
+.dash { background: #fff; border-radius: 14px; overflow: hidden;
+        box-shadow: 0 50px 100px -20px rgba(50,50,93,.35), 0 30px 60px -30px rgba(0,0,0,.35);
+        animation: rise 1s cubic-bezier(.2,.7,.2,1) both .2s; }
+@keyframes rise { from { opacity: 0; transform: translateY(40px); } }
+.dash-head { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid #f0f2f7; }
+.dash-head .avatar { width: 26px; height: 26px; border-radius: 50%;
+                     background: linear-gradient(135deg, #a960ee, #ff5f7e); }
+.dash-head b { font-size: 13px; }
+.dash-head span { margin-left: auto; font-size: 11px; color: #8898aa; font-weight: 600;
+                  background: #f6f9fc; padding: 4px 10px; border-radius: 99px; }
+.dash-body { padding: 18px; }
+.kpis { display: flex; gap: 22px; }
+.kpi small { display: block; font-size: 11px; color: #8898aa; font-weight: 600; }
+.kpi b { font-size: 20px; letter-spacing: -.5px; }
+.kpi em { font-style: normal; font-size: 11px; color: #24b47e; font-weight: 700; margin-left: 5px; }
+.chart { margin-top: 14px; }
+.chart svg { width: 100%; height: 110px; display: block; }
+.chart .line { fill: none; stroke: #635bff; stroke-width: 2.5; stroke-linecap: round;
+               stroke-dasharray: 600; stroke-dashoffset: 600; animation: draw 2.2s ease-out forwards .7s; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.rows { margin-top: 12px; border-top: 1px solid #f0f2f7; }
+.rowi { display: flex; align-items: center; gap: 10px; padding: 9px 2px; font-size: 12px;
+        border-bottom: 1px solid #f6f8fb; color: #425466; }
+.rowi .st { font-size: 10px; font-weight: 700; padding: 2px 8px; border-radius: 99px;
+            background: #d6ecff; color: #067ab8; }
+.rowi .st.ok { background: #cbf4c9; color: #0e6245; }
+.rowi b { margin-left: auto; color: #0a2540; }
+
+.phone { position: absolute; right: -26px; bottom: -64px; width: 200px; background: #fff;
+         border-radius: 28px; padding: 12px; box-shadow: 0 50px 100px -20px rgba(50,50,93,.4);
+         animation: rise 1s cubic-bezier(.2,.7,.2,1) both .5s, bob 5s ease-in-out infinite 1.6s; }
+@keyframes bob { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+.phone .cam { width: 54px; height: 15px; background: #0a2540; border-radius: 99px; margin: 4px auto 14px; }
+.phone .p-title { font-size: 11px; color: #8898aa; text-align: center; font-weight: 600; }
+.phone .p-amount { font-size: 26px; font-weight: 800; text-align: center; letter-spacing: -1px; margin-top: 4px; }
+.paybtn { margin: 16px 6px 8px; background: #635bff; color: #fff; text-align: center; font-size: 13px;
+          font-weight: 700; padding: 11px; border-radius: 10px; position: relative; overflow: hidden; }
+.paybtn::after { content: ""; position: absolute; top: 0; left: -70%; width: 45%; height: 100%;
+                 background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
+                 animation: shine 3s ease-in-out infinite 2s; }
+@keyframes shine { 0% { left: -70%; } 45%,100% { left: 130%; } }
+.p-note { text-align: center; font-size: 9.5px; color: #aab7c4; padding-bottom: 6px; }
+
+/* ── 로고 마퀴 ── */
+.trust { position: relative; z-index: 3; max-width: 1120px; margin: 120px auto 0; padding: 0 28px; }
+.trust p { text-align: center; font-size: 13px; color: #6b7c93; font-weight: 600; letter-spacing: .4px; }
+.marquee { margin-top: 26px; overflow: hidden; -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+           mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent); }
+.marquee-track { display: flex; gap: 72px; width: max-content; animation: scrollX 26s linear infinite; }
+.marquee-track span { font-size: 21px; font-weight: 800; color: #adbdcc; letter-spacing: -.5px;
+                      white-space: nowrap; font-family: Inter, sans-serif; }
+@keyframes scrollX { to { transform: translateX(-50%); } }
+
+/* ── 피처 섹션 ── */
+.section { max-width: 1120px; margin: 110px auto 0; padding: 0 28px; }
+.eyebrow { color: #635bff; font-weight: 800; font-size: 15px; }
+.section h2 { font-size: clamp(30px, 3.6vw, 42px); letter-spacing: -1.5px; margin-top: 12px;
+              max-width: 620px; line-height: 1.15; word-break: keep-all; }
+.section .lead { margin-top: 16px; color: #425466; font-size: 17px; line-height: 1.7; max-width: 560px; }
+.cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; margin-top: 54px; padding-bottom: 40px; }
+.card { position: relative; padding: 28px 26px; border-radius: 16px; background: #fff;
+        border: 1px solid #e6ebf1; transition: transform .3s, box-shadow .3s; }
+.card:hover { transform: translateY(-6px); box-shadow: 0 30px 60px -18px rgba(50,50,93,.22); }
+.card .icon { width: 42px; height: 42px; border-radius: 11px; display: flex; align-items: center;
+              justify-content: center; color: #fff; font-size: 18px; margin-bottom: 18px;
+              box-shadow: 0 8px 18px -6px rgba(50,50,93,.4); }
+.card h3 { font-size: 17px; letter-spacing: -.3px; }
+.card p { margin-top: 10px; color: #425466; font-size: 14.5px; line-height: 1.65; }
+.card a { display: inline-block; margin-top: 16px; color: #635bff; font-weight: 700; font-size: 14.5px;
+          text-decoration: none; }
+.card a::after { content: "→"; margin-left: 6px; display: inline-block; transition: transform .2s; }
+.card a:hover::after { transform: translateX(4px); }
+
+/* ── 스탯 밴드 ── */
+.stats { background: #0a2540; margin-top: 110px; padding: 90px 28px; position: relative; overflow: hidden; }
+.stats::before { content: ""; position: absolute; right: -180px; top: -180px; width: 520px; height: 520px;
+                 border-radius: 50%; background: radial-gradient(circle, rgba(99,91,255,.4), transparent 65%); }
+.stats-in { max-width: 1120px; margin: 0 auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px;
+            position: relative; }
+.stat b { display: block; font-size: 44px; font-weight: 800; letter-spacing: -1.5px; color: #fff; }
+.stat b i { font-style: normal; color: #7ee8b2; }
+.stat span { display: block; margin-top: 8px; color: #8898aa; font-size: 14px; line-height: 1.5; }
+
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity .9s cubic-bezier(.2,.6,.2,1), transform .9s cubic-bezier(.2,.6,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 860px) {
+  .hero-inner { grid-template-columns: 1fr; }
+  .phone { right: 6px; }
+  .cards { grid-template-columns: 1fr; }
+  .stats-in { grid-template-columns: repeat(2, 1fr); }
+  nav a:not(.nav-cta) { display: none; }
+}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="mesh"></div>
+  <nav>
+    <span class="logo">payline</span>
+    <a href="#">제품</a><a href="#">솔루션</a><a href="#">개발자</a><a href="#">리소스</a><a href="#">가격</a>
+    <a class="nav-cta" href="#">영업팀 문의 <span>→</span></a>
+  </nav>
+  <div class="hero-inner">
+    <div>
+      <span class="eyebrow-pill">✦ <b>NEW</b> Payline Sessions 2026 — 키노트 다시보기</span>
+      <h1>인터넷 비즈니스를 위한<br>금융 인프라</h1>
+      <p class="hero-desc">수백만 기업이 payline으로 결제를 받고, 정산하고, 새로운 수익 모델을
+      만듭니다. 스타트업부터 글로벌 엔터프라이즈까지 — 단 몇 줄의 코드로.</p>
+      <div class="hero-actions">
+        <a class="btn-dark" href="#">지금 시작하기 <span>→</span></a>
+        <a class="btn-line" href="#">문서 살펴보기</a>
+      </div>
+    </div>
+
+    <div class="mock-stage">
+      <div class="dash">
+        <div class="dash-head">
+          <span class="avatar"></span><b>루나 스토어</b><span>오늘 실시간</span>
+        </div>
+        <div class="dash-body">
+          <div class="kpis">
+            <div class="kpi"><small>순 매출</small><b>₩42,180,000</b><em>+18.2%</em></div>
+            <div class="kpi"><small>결제 성공률</small><b>99.4%</b><em>+0.3%p</em></div>
+            <div class="kpi"><small>신규 고객</small><b>1,204</b><em>+9.1%</em></div>
+          </div>
+          <div class="chart">
+            <svg viewBox="0 0 480 110" preserveAspectRatio="none">
+              <defs>
+                <linearGradient id="fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stop-color="#635bff" stop-opacity=".18"/>
+                  <stop offset="100%" stop-color="#635bff" stop-opacity="0"/>
+                </linearGradient>
+              </defs>
+              <path fill="url(#fill)" d="M0,86 C40,80 60,62 95,64 C130,66 150,40 190,44 C230,48 250,30 290,34 C330,38 350,20 390,16 C420,13 450,22 480,12 L480,110 L0,110 Z"/>
+              <path class="line" d="M0,86 C40,80 60,62 95,64 C130,66 150,40 190,44 C230,48 250,30 290,34 C330,38 350,20 390,16 C420,13 450,22 480,12"/>
+            </svg>
+          </div>
+          <div class="rows">
+            <div class="rowi"><span class="st ok">성공</span> 프로 구독 · 카드 **** 4242 <b>₩29,000</b></div>
+            <div class="rowi"><span class="st ok">성공</span> 연간 플랜 · 계좌이체 <b>₩290,000</b></div>
+            <div class="rowi"><span class="st">처리중</span> 팀 시트 5석 · 카드 **** 8210 <b>₩145,000</b></div>
+          </div>
+        </div>
+      </div>
+      <div class="phone">
+        <div class="cam"></div>
+        <div class="p-title">루나 스토어</div>
+        <div class="p-amount">₩58,000</div>
+        <div class="paybtn">간편하게 결제하기</div>
+        <div class="p-note">🔒 payline이 안전하게 처리합니다</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trust reveal">
+    <p>전 세계 수백만 기업이 payline과 함께합니다</p>
+    <div class="marquee">
+      <div class="marquee-track">
+        <span>AMAZON</span><span>Google</span><span>SHOPIFY</span><span>Salesforce</span>
+        <span>MARRIOTT</span><span>ZOOM</span><span>Notion</span><span>OpenAI</span>
+        <span>AMAZON</span><span>Google</span><span>SHOPIFY</span><span>Salesforce</span>
+        <span>MARRIOTT</span><span>ZOOM</span><span>Notion</span><span>OpenAI</span>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main>
+  <section class="section reveal">
+    <div class="eyebrow">모듈형 솔루션</div>
+    <h2>하나의 플랫폼에서 필요한 만큼 조합하세요</h2>
+    <p class="lead">결제 수납부터 구독 빌링, 마켓플레이스 정산까지 — 각 제품은 단독으로도,
+    함께 조합해도 강력하게 작동합니다.</p>
+    <div class="cards">
+      <div class="card">
+        <div class="icon" style="background:linear-gradient(135deg,#635bff,#8f7dff)">▤</div>
+        <h3>Payments</h3>
+        <p>글로벌 온라인 결제를 위한 완전한 플랫폼. 135개 이상의 통화와 국가별 간편결제를 기본 지원합니다.</p>
+        <a href="#">자세히 보기</a>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:linear-gradient(135deg,#00d4ff,#0090f7)">◈</div>
+        <h3>Billing</h3>
+        <p>구독·사용량 기반 과금을 위한 빌링 엔진. 스마트 재시도로 실패한 결제의 57%를 회수합니다.</p>
+        <a href="#">자세히 보기</a>
+      </div>
+      <div class="card">
+        <div class="icon" style="background:linear-gradient(135deg,#ff5f7e,#ff8a5c)">⬢</div>
+        <h3>Connect</h3>
+        <p>플랫폼과 마켓플레이스를 위한 자금 흐름 설계. 판매자 온보딩부터 분할 정산까지 몇 주 만에.</p>
+        <a href="#">자세히 보기</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="stats">
+    <div class="stats-in reveal">
+      <div class="stat"><b data-count="99.999" data-suffix="%">0</b><span>역대 최고 가동률<br>월간 다운타임 26초 미만</span></div>
+      <div class="stat"><b data-count="1350" data-suffix="억+">0</b><span>연간 API 요청 처리<br>피크 시 초당 13,000건</span></div>
+      <div class="stat"><b data-count="135" data-suffix="+">0</b><span>지원 통화 및 결제 수단<br>현지 결제까지 한 번에</span></div>
+      <div class="stat"><b data-count="47" data-suffix="개국">0</b><span>진출 국가<br>어디서든 같은 API로</span></div>
+    </div>
+  </section>
+</main>
+
+<script>
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('in');
+  e.target.querySelectorAll('[data-count]').forEach(el => {
+    if (el.dataset.done) return; el.dataset.done = 1;
+    const target = parseFloat(el.dataset.count), sfx = el.dataset.suffix || '';
+    const dec = el.dataset.count.includes('.') ? 3 : 0;
+    const t0 = performance.now();
+    (function tick(t) {
+      const p = Math.min((t - t0) / 1600, 1), ease = 1 - Math.pow(1 - p, 3);
+      el.innerHTML = (target * ease).toFixed(dec).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + `<i>${sfx}</i>`;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+}), { threshold: 0.2 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+<script>
+/* English mode: ?lang=en swaps every visible Korean string to English. Adds only — no markup/CSS/logic changed. */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "Stripe 스타일 — 메시 그라디언트 히어로": "Stripe Style — Mesh Gradient Hero",
+    "제품": "Products",
+    "솔루션": "Solutions",
+    "개발자": "Developers",
+    "리소스": "Resources",
+    "가격": "Pricing",
+    "영업팀 문의": "Contact Sales",
+    "Payline Sessions 2026 — 키노트 다시보기": "Payline Sessions 2026 — Rewatch the Keynote",
+    "인터넷 비즈니스를 위한": "Financial infrastructure for",
+    "금융 인프라": "internet business",
+    "수백만 기업이 payline으로 결제를 받고, 정산하고, 새로운 수익 모델을 만듭니다. 스타트업부터 글로벌 엔터프라이즈까지 — 단 몇 줄의 코드로.": "Millions of companies use payline to accept payments, settle funds, and build new revenue models. From startups to global enterprises — in just a few lines of code.",
+    "지금 시작하기": "Get Started",
+    "문서 살펴보기": "Explore the Docs",
+    "루나 스토어": "Luna Store",
+    "오늘 실시간": "Live Today",
+    "순 매출": "Net Revenue",
+    "결제 성공률": "Payment Success Rate",
+    "신규 고객": "New Customers",
+    "성공": "Success",
+    "프로 구독 · 카드 **** 4242": "Pro Subscription · Card **** 4242",
+    "연간 플랜 · 계좌이체": "Annual Plan · Bank Transfer",
+    "처리중": "Processing",
+    "팀 시트 5석 · 카드 **** 8210": "5 Team Seats · Card **** 8210",
+    "간편하게 결제하기": "Pay Now",
+    "🔒 payline이 안전하게 처리합니다": "🔒 Secured by payline",
+    "전 세계 수백만 기업이 payline과 함께합니다": "Millions of companies worldwide trust payline",
+    "모듈형 솔루션": "Modular Solutions",
+    "하나의 플랫폼에서 필요한 만큼 조합하세요": "Combine exactly what you need on a single platform",
+    "결제 수납부터 구독 빌링, 마켓플레이스 정산까지 — 각 제품은 단독으로도, 함께 조합해도 강력하게 작동합니다.": "From payment collection to subscription billing to marketplace payouts — each product is powerful on its own, and even stronger combined.",
+    "글로벌 온라인 결제를 위한 완전한 플랫폼. 135개 이상의 통화와 국가별 간편결제를 기본 지원합니다.": "A complete platform for global online payments. 135+ currencies and local payment methods supported out of the box.",
+    "자세히 보기": "Learn more",
+    "구독·사용량 기반 과금을 위한 빌링 엔진. 스마트 재시도로 실패한 결제의 57%를 회수합니다.": "A billing engine for subscription and usage-based pricing. Smart retries recover 57% of failed payments.",
+    "플랫폼과 마켓플레이스를 위한 자금 흐름 설계. 판매자 온보딩부터 분할 정산까지 몇 주 만에.": "Money movement designed for platforms and marketplaces. From seller onboarding to split payouts in just weeks.",
+    "역대 최고 가동률": "Best-ever uptime",
+    "월간 다운타임 26초 미만": "Under 26 seconds of downtime per month",
+    "연간 API 요청 처리": "API requests handled per year",
+    "피크 시 초당 13,000건": "13,000 per second at peak",
+    "지원 통화 및 결제 수단": "Supported currencies & payment methods",
+    "현지 결제까지 한 번에": "Local payments, all at once",
+    "진출 국가": "Countries served",
+    "어디서든 같은 API로": "The same API everywhere",
+    "억+": " hundred million+",
+    "개국": " countries"
+  };
+  const norm = s => s.replace(/\s+/g,' ').trim();
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swapText = n => {
+    const raw = n.nodeValue, key = norm(raw);
+    if (!key || TR[key] == null) return;
+    n.nodeValue = raw.match(/^\s*/)[0] + TR[key] + raw.match(/\s*$/)[0];
+  };
+  const walk = n => {
+    if (n.nodeType === 3) { swapText(n); return; }
+    if (n.nodeType !== 1) return;
+    for (const a of ATTRS) {
+      if (n.hasAttribute && n.hasAttribute(a)) {
+        const k = norm(n.getAttribute(a));
+        if (TR[k] != null) n.setAttribute(a, TR[k]);
+      }
+    }
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = norm(document.title);
+  if (TR[dt] != null) document.title = TR[dt];
+})();
+</script>
+</body>
+</html>

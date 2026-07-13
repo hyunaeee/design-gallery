@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RETRO-OS — 포트폴리오 운영체제</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Galmuri11&family=JetBrains+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: 'Galmuri11', 'Noto Sans KR', sans-serif; font-size: 13px; color: #111;
+       user-select: none; -webkit-user-select: none; cursor: default; }
+
+/* ── 부팅 화면 ── */
+#boot { position: fixed; inset: 0; background: #000; color: #b8f5c0; z-index: 9999;
+        font-family: 'JetBrains Mono', monospace; font-size: 14px; line-height: 1.9;
+        padding: 34px 40px; transition: opacity .45s; }
+#boot.out { opacity: 0; pointer-events: none; }
+#boot .bl { white-space: pre-wrap; }
+#boot .cur { display: inline-block; width: 9px; height: 15px; background: #b8f5c0;
+             vertical-align: -2px; animation: blink .6s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── 데스크톱 ── */
+#desk { position: fixed; inset: 0 0 42px 0; overflow: hidden;
+        background: linear-gradient(135deg, #46295e 0%, #245f74 55%, #1d7a6e 100%); }
+#desk.wp1 { background: #1a7a74; }
+#desk.wp2 { background: linear-gradient(160deg, #5e2942 0%, #8a3f2b 60%, #c8862e 100%); }
+#desk.wp3 { background: linear-gradient(180deg, #14213d 0%, #3a2f63 70%, #7a3b6e 100%); }
+#desk::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,.07) 0 1px, transparent 1px 3px); }
+
+/* 아이콘 */
+#icons { position: absolute; top: 18px; left: 16px; display: flex; flex-direction: column;
+         gap: 16px; z-index: 1; }
+.dicon { width: 86px; text-align: center; padding: 6px 2px; border: 1px dotted transparent; }
+.dicon:hover { border-color: rgba(255,255,255,.55); background: rgba(255,255,255,.08); }
+.dicon.sel { background: rgba(10,30,120,.45); border-color: #fff; }
+.dicon .pic { width: 46px; height: 46px; margin: 0 auto 5px; font-size: 26px; line-height: 42px;
+              background: rgba(255,255,255,.14); border: 2px solid;
+              border-color: #ffffffb0 #00000070 #00000070 #ffffffb0; }
+.dicon .lbl { color: #fff; font-size: 12px; text-shadow: 1px 1px 0 #000; line-height: 1.35;
+              word-break: keep-all; }
+#icons.shake .dicon { animation: shk .35s; }
+@keyframes shk { 25% { transform: translateX(-3px); } 75% { transform: translateX(3px); } }
+
+/* ── 창 ── */
+.win { position: absolute; min-width: 230px; background: #c8c4bc; padding: 3px;
+       border: 1px solid #0a0a0a;
+       box-shadow: inset 1px 1px 0 #fdfdfa, inset -1px -1px 0 #6f6a60, 5px 5px 0 rgba(0,0,0,.35);
+       display: flex; flex-direction: column; }
+.win.min { display: none; }
+.tbar { display: flex; align-items: center; gap: 7px; padding: 4px 5px 4px 8px;
+        background: linear-gradient(90deg, #56565e, #8a8a92); color: #e8e8e8; cursor: default; }
+.win.on .tbar { background: linear-gradient(90deg, #0b2a8c, #2a6ad4); color: #fff; }
+.tbar .ttl { flex: 1; font-size: 12.5px; white-space: nowrap; overflow: hidden;
+             text-overflow: ellipsis; letter-spacing: .5px; }
+.tbar b { width: 20px; height: 18px; font-weight: 400; font-size: 11px; line-height: 16px;
+          text-align: center; color: #111; background: #c8c4bc; cursor: pointer;
+          border: 2px solid; border-color: #fdfdfa #6f6a60 #6f6a60 #fdfdfa; }
+.tbar b:active { border-color: #6f6a60 #fdfdfa #fdfdfa #6f6a60; }
+.wbody { background: #f4f2ec; border: 2px solid; border-color: #6f6a60 #fdfdfa #fdfdfa #6f6a60;
+         margin-top: 3px; overflow: auto; flex: 1; }
+
+/* 내 작업.exe */
+.lv { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+.lv th { text-align: left; padding: 6px 10px; background: #c8c4bc; font-weight: 400;
+         border: 1px solid; border-color: #fdfdfa #6f6a60 #6f6a60 #fdfdfa; position: sticky; top: 0; }
+.lv td { padding: 7px 10px; border-bottom: 1px dotted #cfcabf; white-space: nowrap; }
+.lv tbody tr:hover { background: #0b2a8c; color: #fff; cursor: pointer; }
+.lv .ic { margin-right: 6px; }
+.statusbar { font-size: 11px; padding: 3px 8px; margin-top: 3px; background: #c8c4bc;
+             border: 2px solid; border-color: #6f6a60 #fdfdfa #fdfdfa #6f6a60; color: #333; }
+
+/* 프로필.txt */
+.note { padding: 12px 14px; font-family: 'Galmuri11', monospace; font-size: 13px;
+        line-height: 1.95; outline: none; white-space: pre-wrap; min-height: 100%;
+        user-select: text; cursor: text; }
+
+/* 뮤직플레이어 */
+.amp { background: #23252e; color: #9ff29a; padding: 10px; font-family: 'JetBrains Mono', monospace;
+       min-height: 100%; }
+.amp .lcd { background: #0b120a; border: 2px solid; border-color: #000 #3a3d48 #3a3d48 #000;
+            padding: 8px 10px; margin-bottom: 8px; }
+.amp .song { font-size: 12px; white-space: nowrap; overflow: hidden; }
+.amp .song span { display: inline-block; padding-left: 100%; animation: mq 9s linear infinite; }
+@keyframes mq { to { transform: translateX(-100%); } }
+.amp .time { font-size: 20px; letter-spacing: 2px; margin-top: 4px; }
+.amp canvas { display: block; width: 100%; height: 48px; background: #0b120a;
+              border: 2px solid; border-color: #000 #3a3d48 #3a3d48 #000; margin-bottom: 8px; }
+.amp .ctl { display: flex; gap: 5px; }
+.amp .ctl button { flex: 1; height: 28px; font-family: inherit; font-size: 12px; color: #ddd;
+                   background: #3a3d48; border: 2px solid; cursor: pointer;
+                   border-color: #5c6070 #14161c #14161c #5c6070; }
+.amp .ctl button:active { border-color: #14161c #5c6070 #5c6070 #14161c; }
+.amp .ctl .play { color: #9ff29a; }
+
+/* 방명록 */
+.guest { display: flex; flex-direction: column; height: 100%; }
+.gl { flex: 1; overflow: auto; padding: 10px 12px; }
+.gl .ent { margin-bottom: 10px; padding-bottom: 8px; border-bottom: 1px dotted #b9b3a6; }
+.gl .who { font-size: 11px; color: #0b2a8c; margin-bottom: 2px; }
+.gform { display: flex; gap: 5px; padding: 8px; background: #c8c4bc;
+         border-top: 2px solid #fdfdfa; }
+.gform input { flex: 1; font-family: inherit; font-size: 12.5px; padding: 5px 7px;
+               border: 2px solid; border-color: #6f6a60 #fdfdfa #fdfdfa #6f6a60;
+               background: #fff; outline: none; user-select: text; }
+.gform button, .wbtn { font-family: inherit; font-size: 12px; padding: 5px 12px; cursor: pointer;
+        background: #c8c4bc; border: 2px solid; border-color: #fdfdfa #6f6a60 #6f6a60 #fdfdfa; }
+.gform button:active, .wbtn:active { border-color: #6f6a60 #fdfdfa #fdfdfa #6f6a60; }
+
+/* 그림판 */
+.paint { display: flex; flex-direction: column; height: 100%; background: #c8c4bc; }
+.ptool { display: flex; gap: 6px; align-items: center; padding: 6px 8px; }
+.swatch { width: 22px; height: 22px; border: 2px solid; cursor: pointer;
+          border-color: #fdfdfa #6f6a60 #6f6a60 #fdfdfa; }
+.swatch.on { outline: 2px solid #0b2a8c; }
+.paint canvas { flex: 1; background: #fff; border: 2px solid; margin: 0 8px 8px;
+                border-color: #6f6a60 #fdfdfa #fdfdfa #6f6a60; cursor: crosshair;
+                touch-action: none; }
+
+/* 휴지통 */
+.trash { padding: 12px 14px; line-height: 2; }
+.trash .titem { color: #555; }
+.trash .titem s { color: #999; }
+
+/* ── 작업표시줄 ── */
+#bar { position: fixed; left: 0; right: 0; bottom: 0; height: 42px; z-index: 5000;
+       background: #c8c4bc; display: flex; align-items: center; gap: 6px; padding: 4px 6px;
+       border-top: 2px solid #fdfdfa; box-shadow: 0 -1px 0 #6f6a60; }
+#startBtn { display: flex; align-items: center; gap: 6px; padding: 4px 12px; font-family: inherit;
+            font-size: 13px; font-weight: 700; cursor: pointer; background: #c8c4bc;
+            border: 2px solid; border-color: #fdfdfa #6f6a60 #6f6a60 #fdfdfa; height: 32px; }
+#startBtn:active, #startBtn.open { border-color: #6f6a60 #fdfdfa #fdfdfa #6f6a60; }
+#tasks { flex: 1; display: flex; gap: 5px; overflow: hidden; }
+.tbtn { max-width: 170px; min-width: 0; height: 32px; padding: 0 10px; font-family: inherit;
+        font-size: 12px; text-align: left; white-space: nowrap; overflow: hidden;
+        text-overflow: ellipsis; cursor: pointer; background: #c8c4bc;
+        border: 2px solid; border-color: #fdfdfa #6f6a60 #6f6a60 #fdfdfa; }
+.tbtn.on { border-color: #6f6a60 #fdfdfa #fdfdfa #6f6a60; background: #d9d5cd; font-weight: 700; }
+#clock { height: 32px; display: flex; align-items: center; padding: 0 12px;
+         font-family: 'JetBrains Mono', monospace; font-size: 13px;
+         border: 2px solid; border-color: #6f6a60 #fdfdfa #fdfdfa #6f6a60; }
+
+/* 시작 메뉴 */
+#smenu { position: fixed; left: 6px; bottom: 46px; width: 232px; z-index: 6000; display: none;
+         background: #c8c4bc; padding: 3px; border: 1px solid #0a0a0a;
+         box-shadow: inset 1px 1px 0 #fdfdfa, inset -1px -1px 0 #6f6a60, 5px 5px 0 rgba(0,0,0,.35); }
+#smenu.show { display: flex; }
+#smenu .side { width: 30px; background: linear-gradient(0deg, #0b2a8c, #2a6ad4); color: #fff;
+               writing-mode: vertical-rl; transform: rotate(180deg); text-align: left;
+               padding: 10px 0; font-size: 14px; letter-spacing: 3px; }
+#smenu ul { list-style: none; flex: 1; }
+#smenu li { display: flex; align-items: center; gap: 10px; padding: 9px 12px; font-size: 13px;
+            cursor: pointer; }
+#smenu li:hover { background: #0b2a8c; color: #fff; }
+#smenu li.sep { border-top: 1px solid #6f6a60; border-bottom: 1px solid #fdfdfa; padding: 0;
+                margin: 2px 0; }
+
+/* 컨텍스트 메뉴 */
+#cmenu { position: fixed; z-index: 7000; display: none; min-width: 168px;
+         background: #c8c4bc; padding: 3px; border: 1px solid #0a0a0a;
+         box-shadow: inset 1px 1px 0 #fdfdfa, inset -1px -1px 0 #6f6a60, 4px 4px 0 rgba(0,0,0,.3); }
+#cmenu div { padding: 7px 14px; font-size: 12.5px; cursor: pointer; }
+#cmenu div:hover { background: #0b2a8c; color: #fff; }
+
+/* 종료 화면 */
+#off { position: fixed; inset: 0; z-index: 9998; display: none; background: #000;
+       color: #ff9a2e; font-family: 'Galmuri11', monospace; font-size: clamp(18px, 3.5vw, 34px);
+       text-align: center; align-content: center; cursor: pointer; line-height: 2; }
+#off.show { display: grid; }
+#off small { display: block; font-size: 13px; color: #777; }
+
+@media (max-width: 700px) {
+  .win { max-width: calc(100vw - 12px) !important; }
+  #icons { gap: 8px; }
+}
+</style>
+</head>
+<body oncontextmenu="return false">
+
+<div id="boot"><div id="bootTxt"></div><span class="cur"></span></div>
+
+<div id="desk">
+  <div id="icons">
+    <div class="dicon" data-app="work"><div class="pic">💾</div><div class="lbl">내 작업.exe</div></div>
+    <div class="dicon" data-app="profile"><div class="pic">📄</div><div class="lbl">프로필.txt</div></div>
+    <div class="dicon" data-app="music"><div class="pic">📻</div><div class="lbl">뮤직플레이어</div></div>
+    <div class="dicon" data-app="guest"><div class="pic">📮</div><div class="lbl">방명록</div></div>
+    <div class="dicon" data-app="paint"><div class="pic">🎨</div><div class="lbl">그림판</div></div>
+    <div class="dicon" data-app="trash"><div class="pic">🗑️</div><div class="lbl">휴지통</div></div>
+  </div>
+</div>
+
+<div id="bar">
+  <button id="startBtn">▞ 시작</button>
+  <div id="tasks"></div>
+  <div id="clock">--:--</div>
+</div>
+
+<div id="smenu">
+  <div class="side">RETRO-OS 98</div>
+  <ul>
+    <li data-app="work">💾 내 작업.exe</li>
+    <li data-app="profile">📄 프로필.txt</li>
+    <li data-app="music">📻 뮤직플레이어</li>
+    <li data-app="guest">📮 방명록</li>
+    <li data-app="paint">🎨 그림판</li>
+    <li data-app="trash">🗑️ 휴지통</li>
+    <li class="sep"></li>
+    <li id="shut">⏻ 시스템 종료...</li>
+  </ul>
+</div>
+
+<div id="cmenu">
+  <div data-act="refresh">↻ 새로고침</div>
+  <div data-act="sort">▤ 아이콘 정렬</div>
+  <div data-act="wall">▨ 배경 바꾸기</div>
+</div>
+
+<div id="off">이제 레트로-OS를<br>꺼도 안전합니다.<br><small>(아무 곳이나 클릭하면 다시 켜집니다)</small></div>
+
+<script>
+/* ───────── 부팅 (setTimeout 기반 — __paused여도 완료) ───────── */
+const bootLines = [
+  'RETRO BIOS v4.2  (C) 1998-2026 RETRO SYSTEMS, SEOUL',
+  'CPU : NEURO-CORE 86 @ 24MHz .............. 감지됨',
+  'MEMORY TEST : 65536K ..................... OK',
+  'C:\\PORTFOLIO 디스크 검사 ................. OK',
+  '장치 로드 : 마우스, 낭만, 새벽감성 ....... OK',
+  'RETRO-OS 를 시작합니다...'
+];
+(function boot(){
+  const box = document.getElementById('bootTxt');
+  let i = 0;
+  (function step(){
+    if (i < bootLines.length) {
+      const d = document.createElement('div');
+      d.className = 'bl'; d.textContent = bootLines[i++];
+      box.appendChild(d);
+      setTimeout(step, 170);
+    } else {
+      setTimeout(() => {
+        const b = document.getElementById('boot');
+        b.classList.add('out');
+        setTimeout(() => b.remove(), 500);
+      }, 260);
+    }
+  })();
+})();
+
+/* ───────── 창 시스템 ───────── */
+const desk = document.getElementById('desk');
+const tasks = document.getElementById('tasks');
+let zTop = 20, winCount = 0;
+const openWins = {};   // appId -> element
+
+const APPS = {
+  work:    { title: '내 작업.exe',  icon: '💾', w: 480, h: 340 },
+  profile: { title: '프로필.txt — 메모장', icon: '📄', w: 380, h: 360 },
+  music:   { title: '레트로앰프 v0.98', icon: '📻', w: 300, h: 252 },
+  guest:   { title: '방명록', icon: '📮', w: 360, h: 330 },
+  paint:   { title: '그림판', icon: '🎨', w: 440, h: 350 },
+  trash:   { title: '휴지통', icon: '🗑️', w: 340, h: 260 }
+};
+
+function buildBody(id, body){
+  if (id === 'work') {
+    body.innerHTML = `
+      <table class="lv">
+        <thead><tr><th>이름</th><th>종류</th><th>수정한 날짜</th></tr></thead>
+        <tbody>
+          <tr><td><span class="ic">🧠</span>뉴로-비전.ai</td><td>AI 모델</td><td>2026-06-30</td></tr>
+          <tr><td><span class="ic">🌱</span>픽셀 정원</td><td>웹 토이</td><td>2026-05-14</td></tr>
+          <tr><td><span class="ic">📖</span>밤의 문장들.hwp</td><td>문예지</td><td>2026-04-02</td></tr>
+          <tr><td><span class="ic">〰️</span>웨이브폼 실험실</td><td>오디오 비주얼</td><td>2026-02-21</td></tr>
+          <tr><td><span class="ic">🗂️</span>갤러리_최종_진짜최종.psd</td><td>영원한 미완성</td><td>1999-12-31</td></tr>
+        </tbody>
+      </table>`;
+  }
+  if (id === 'profile') {
+    body.innerHTML = `<div class="note" contenteditable="true" spellcheck="false">=== 프로필.txt ===
+
+이름   : 루나 (luna)
+직업   : 만드는 사람
+
+픽셀과 코드 사이 어딘가에서
+화면 속 세계를 만듭니다.
+
+좋아하는 것 :
+ · 새벽의 키보드 소리
+ · 도트 그래픽
+ · 식어버린 커피 (두 번째 잔)
+
+연락 : hello@retro-os.dev
+
+(이 메모장은 진짜로 수정할 수 있어요)</div>`;
+  }
+  if (id === 'music') {
+    body.innerHTML = `
+      <div class="amp">
+        <div class="lcd">
+          <div class="song"><span>♪ 루나 — 새벽 두 시의 루프 (4:04) *** RETRO-AMP *** 비트레이트 128kbps 스테레오 ***</span></div>
+          <div class="time" id="ampTime">00:00</div>
+        </div>
+        <canvas id="viz" width="256" height="48"></canvas>
+        <div class="ctl">
+          <button data-c="prev">|◀</button>
+          <button data-c="play" class="play">▶ 재생</button>
+          <button data-c="stop">■</button>
+          <button data-c="next">▶|</button>
+        </div>
+      </div>`;
+    initAmp(body);
+  }
+  if (id === 'guest') {
+    body.innerHTML = `
+      <div class="guest">
+        <div class="gl" id="glist">
+          <div class="ent"><div class="who">방문자_1024 · 03:12</div>이 사이트... 제 어린 시절 컴퓨터 같아요.</div>
+          <div class="ent"><div class="who">지나가던 고양이 · 04:44</div>ㅁㄴㅇㄹㅁㄴㅇㄹ (키보드 위를 걸어감)</div>
+          <div class="ent"><div class="who">루나 · 05:00</div>와주셔서 고마워요. 방명록 남겨주세요!</div>
+        </div>
+        <form class="gform" id="gform">
+          <input id="gin" maxlength="80" placeholder="한 마디 남기기..." autocomplete="off">
+          <button type="submit">등록</button>
+        </form>
+      </div>`;
+    body.querySelector('#gform').addEventListener('submit', e => {
+      e.preventDefault();
+      const inp = body.querySelector('#gin');
+      const t = inp.value.trim(); if (!t) return;
+      const d = document.createElement('div');
+      d.className = 'ent';
+      const now = new Date();
+      const hh = String(now.getHours()).padStart(2,'0'), mm = String(now.getMinutes()).padStart(2,'0');
+      d.innerHTML = `<div class="who">익명의 방문자 · ${hh}:${mm}</div>`;
+      d.appendChild(document.createTextNode(t));
+      const list = body.querySelector('#glist');
+      list.appendChild(d); list.scrollTop = list.scrollHeight;
+      inp.value = '';
+    });
+  }
+  if (id === 'paint') {
+    body.innerHTML = `
+      <div class="paint">
+        <div class="ptool">
+          <div class="swatch on" data-col="#1a1a1a" style="background:#1a1a1a"></div>
+          <div class="swatch" data-col="#d43a2e" style="background:#d43a2e"></div>
+          <div class="swatch" data-col="#2a6ad4" style="background:#2a6ad4"></div>
+          <button class="wbtn" data-clear>지우기</button>
+        </div>
+        <canvas id="pcv"></canvas>
+      </div>`;
+    initPaint(body);
+  }
+  if (id === 'trash') {
+    body.innerHTML = `
+      <div class="trash">
+        <div class="titem">🗎 <s>완벽주의.tmp</s> — 삭제됨</div>
+        <div class="titem">🗎 <s>미루기.bat</s> — 삭제됨</div>
+        <div class="titem">🗎 <s>첫_시안_v1.psd</s> — 삭제됨</div>
+        <br>
+        <button class="wbtn" data-empty>휴지통 비우기</button>
+      </div>`;
+    body.querySelector('[data-empty]').addEventListener('click', () => {
+      body.querySelector('.trash').innerHTML = '<div class="titem">텅 비었습니다. 마음도 가볍게.</div>';
+    });
+  }
+}
+
+function openWindow(id){
+  if (openWins[id]) { const w = openWins[id]; w.classList.remove('min'); focusWin(w); return; }
+  const app = APPS[id];
+  const w = document.createElement('div');
+  w.className = 'win'; w.dataset.app = id;
+  const dw = desk.clientWidth, dh = desk.clientHeight;
+  const ww = Math.min(app.w, dw - 20), wh = Math.min(app.h, dh - 20);
+  w.style.width = ww + 'px'; w.style.height = wh + 'px';
+  w.style.left = Math.max(6, Math.min(dw - ww - 10, 120 + winCount * 34)) + 'px';
+  w.style.top  = Math.max(6, Math.min(dh - wh - 10, 40 + winCount * 26)) + 'px';
+  winCount++;
+  w.innerHTML = `
+    <div class="tbar"><span>${app.icon}</span><span class="ttl">${app.title}</span>
+      <b data-a="min">_</b><b data-a="max">□</b><b data-a="close">✕</b></div>
+    <div class="wbody"></div>`;
+  if (id === 'work') {
+    // 리스트뷰 + 상태표시줄
+    w.insertAdjacentHTML('beforeend', '<div class="statusbar">개체 5개 · 여유 공간: 넉넉함</div>');
+  }
+  buildBody(id, w.querySelector('.wbody'));
+  desk.appendChild(w);
+  openWins[id] = w;
+
+  w.addEventListener('pointerdown', () => focusWin(w));
+  w.querySelectorAll('.tbar b').forEach(b => b.addEventListener('click', e => {
+    e.stopPropagation();
+    const a = b.dataset.a;
+    if (a === 'close') closeWindow(id);
+    if (a === 'min') { w.classList.add('min'); refreshTasks(); }
+    if (a === 'max') toggleMax(w);
+  }));
+  makeDraggable(w);
+  focusWin(w);
+}
+
+function closeWindow(id){
+  const w = openWins[id]; if (!w) return;
+  if (id === 'music') stopAmp();
+  w.remove(); delete openWins[id]; refreshTasks();
+}
+
+function focusWin(w){
+  w.style.zIndex = ++zTop;
+  document.querySelectorAll('.win').forEach(x => x.classList.toggle('on', x === w));
+  refreshTasks();
+}
+
+function toggleMax(w){
+  if (w.dataset.max) {
+    const r = JSON.parse(w.dataset.max);
+    Object.assign(w.style, r); delete w.dataset.max;
+  } else {
+    w.dataset.max = JSON.stringify({ left: w.style.left, top: w.style.top, width: w.style.width, height: w.style.height });
+    Object.assign(w.style, { left: '0px', top: '0px', width: desk.clientWidth + 'px', height: desk.clientHeight + 'px' });
+  }
+}
+
+function makeDraggable(w){
+  const bar = w.querySelector('.tbar');
+  bar.addEventListener('pointerdown', e => {
+    if (e.target.tagName === 'B') return;
+    e.preventDefault();
+    focusWin(w);
+    const sx = e.clientX - w.offsetLeft, sy = e.clientY - w.offsetTop;
+    const move = ev => {
+      w.style.left = Math.max(-w.offsetWidth + 60, Math.min(desk.clientWidth - 40, ev.clientX - sx)) + 'px';
+      w.style.top  = Math.max(0, Math.min(desk.clientHeight - 24, ev.clientY - sy)) + 'px';
+    };
+    const up = () => { document.removeEventListener('pointermove', move); document.removeEventListener('pointerup', up); };
+    document.addEventListener('pointermove', move);
+    document.addEventListener('pointerup', up);
+  });
+}
+
+function refreshTasks(){
+  tasks.innerHTML = '';
+  Object.entries(openWins).forEach(([id, w]) => {
+    const b = document.createElement('button');
+    b.className = 'tbtn' + (w.classList.contains('on') && !w.classList.contains('min') ? ' on' : '');
+    b.textContent = APPS[id].icon + ' ' + APPS[id].title;
+    b.addEventListener('click', () => {
+      if (w.classList.contains('min')) { w.classList.remove('min'); focusWin(w); }
+      else if (w.classList.contains('on')) { w.classList.add('min'); refreshTasks(); }
+      else focusWin(w);
+    });
+    tasks.appendChild(b);
+  });
+}
+
+/* ───────── 아이콘: 더블클릭(데스크톱) / 탭(모바일) ───────── */
+const coarse = matchMedia('(pointer: coarse)').matches;
+document.querySelectorAll('.dicon').forEach(ic => {
+  ic.addEventListener('click', () => {
+    document.querySelectorAll('.dicon').forEach(x => x.classList.remove('sel'));
+    ic.classList.add('sel');
+    if (coarse) openWindow(ic.dataset.app);
+  });
+  ic.addEventListener('dblclick', () => { if (!coarse) openWindow(ic.dataset.app); });
+});
+desk.addEventListener('click', e => {
+  if (e.target === desk) document.querySelectorAll('.dicon').forEach(x => x.classList.remove('sel'));
+});
+
+/* ───────── 시작 메뉴 ───────── */
+const smenu = document.getElementById('smenu');
+const startBtn = document.getElementById('startBtn');
+startBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  smenu.classList.toggle('show');
+  startBtn.classList.toggle('open', smenu.classList.contains('show'));
+});
+smenu.querySelectorAll('li[data-app]').forEach(li => li.addEventListener('click', () => {
+  openWindow(li.dataset.app);
+  smenu.classList.remove('show'); startBtn.classList.remove('open');
+}));
+document.getElementById('shut').addEventListener('click', () => {
+  smenu.classList.remove('show'); startBtn.classList.remove('open');
+  document.getElementById('off').classList.add('show');
+});
+document.getElementById('off').addEventListener('click', function(){ this.classList.remove('show'); });
+document.addEventListener('click', e => {
+  if (!smenu.contains(e.target) && e.target !== startBtn) {
+    smenu.classList.remove('show'); startBtn.classList.remove('open');
+  }
+});
+
+/* ───────── 컨텍스트 메뉴 ───────── */
+const cmenu = document.getElementById('cmenu');
+const wallpapers = ['', 'wp1', 'wp2', 'wp3'];
+let wpIdx = 0;
+document.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  cmenu.style.display = 'block';
+  cmenu.style.left = Math.min(e.clientX, innerWidth - 180) + 'px';
+  cmenu.style.top  = Math.min(e.clientY, innerHeight - 130) + 'px';
+});
+document.addEventListener('click', () => cmenu.style.display = 'none');
+cmenu.querySelectorAll('div').forEach(d => d.addEventListener('click', () => {
+  const act = d.dataset.act;
+  if (act === 'refresh') location.reload();
+  if (act === 'sort') {
+    const ig = document.getElementById('icons');
+    ig.classList.remove('shake'); void ig.offsetWidth; ig.classList.add('shake');
+  }
+  if (act === 'wall') {
+    wpIdx = (wpIdx + 1) % wallpapers.length;
+    desk.className = wallpapers[wpIdx];
+  }
+}));
+
+/* ───────── 시계 (1초 간격, __paused 가드) ───────── */
+function tickClock(){
+  const n = new Date();
+  document.getElementById('clock').textContent =
+    String(n.getHours()).padStart(2,'0') + ':' + String(n.getMinutes()).padStart(2,'0');
+}
+tickClock();
+setInterval(() => { if (window.__paused) return; tickClock(); }, 1000);
+
+/* ───────── 뮤직플레이어 ───────── */
+let ampPlaying = false, ampSec = 0, ampTimer = null, ampCtx = null, ampEl = null;
+function initAmp(body){
+  ampEl = body;
+  ampCtx = body.querySelector('#viz').getContext('2d');
+  drawBars(0);
+  body.querySelectorAll('.ctl button').forEach(b => b.addEventListener('click', () => {
+    const c = b.dataset.c;
+    if (c === 'play') {
+      ampPlaying = !ampPlaying;
+      b.textContent = ampPlaying ? '❚❚ 정지' : '▶ 재생';
+      if (ampPlaying) startViz();
+    }
+    if (c === 'stop') {
+      ampPlaying = false; ampSec = 0;
+      body.querySelector('[data-c="play"]').textContent = '▶ 재생';
+      body.querySelector('#ampTime').textContent = '00:00';
+      drawBars(0);
+    }
+    if (c === 'prev' || c === 'next') { ampSec = 0; }
+  }));
+  if (!ampTimer) ampTimer = setInterval(() => {
+    if (window.__paused) return;
+    if (!ampPlaying || !ampEl || !ampEl.isConnected) return;
+    ampSec = (ampSec + 1) % 244;
+    const t = ampEl.querySelector('#ampTime');
+    if (t) t.textContent = String(Math.floor(ampSec/60)).padStart(2,'0') + ':' + String(ampSec%60).padStart(2,'0');
+  }, 1000);
+}
+function stopAmp(){ ampPlaying = false; ampEl = null; ampCtx = null; }
+function drawBars(level){
+  if (!ampCtx) return;
+  ampCtx.clearRect(0, 0, 256, 48);
+  for (let i = 0; i < 16; i++) {
+    const h = level ? 6 + Math.random() * 40 * level * (0.4 + 0.6 * Math.sin(i * .7 + performance.now() / 300) ** 2) : 3;
+    ampCtx.fillStyle = h > 34 ? '#ff6b4a' : '#9ff29a';
+    ampCtx.fillRect(i * 16 + 3, 48 - h, 10, h);
+  }
+}
+let frames = 0;
+function startViz(){
+  (function loop(){
+    if (!ampPlaying || !ampCtx) return;
+    if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+    frames++;
+    drawBars(1);
+    requestAnimationFrame(loop);
+  })();
+}
+
+/* ───────── 그림판 ───────── */
+function initPaint(body){
+  const cv = body.querySelector('#pcv');
+  const ctx = cv.getContext('2d');
+  let col = '#1a1a1a', drawing = false, lx = 0, ly = 0;
+  function fit(){
+    const r = cv.getBoundingClientRect();
+    const img = ctx.getImageData(0, 0, cv.width || 1, cv.height || 1);
+    cv.width = Math.max(50, r.width); cv.height = Math.max(50, r.height);
+    ctx.putImageData(img, 0, 0);
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = 3;
+  }
+  requestAnimationFrame(fit);
+  body.querySelectorAll('.swatch').forEach(s => s.addEventListener('click', () => {
+    body.querySelectorAll('.swatch').forEach(x => x.classList.remove('on'));
+    s.classList.add('on'); col = s.dataset.col;
+  }));
+  body.querySelector('[data-clear]').addEventListener('click', () => ctx.clearRect(0, 0, cv.width, cv.height));
+  cv.addEventListener('pointerdown', e => {
+    drawing = true; cv.setPointerCapture(e.pointerId);
+    const r = cv.getBoundingClientRect(); lx = e.clientX - r.left; ly = e.clientY - r.top;
+    ctx.fillStyle = col; ctx.fillRect(lx - 1.5, ly - 1.5, 3, 3);
+  });
+  cv.addEventListener('pointermove', e => {
+    if (!drawing) return;
+    const r = cv.getBoundingClientRect();
+    const x = e.clientX - r.left, y = e.clientY - r.top;
+    ctx.strokeStyle = col; ctx.beginPath(); ctx.moveTo(lx, ly); ctx.lineTo(x, y); ctx.stroke();
+    lx = x; ly = y;
+  });
+  cv.addEventListener('pointerup', () => drawing = false);
+}
+
+/* ───────── 초기 상태: 프로필.txt 열림 (썸네일용) ───────── */
+openWindow('profile');
+</script>
+<script>
+/* ── English mode (?lang=en) — non-destructive DOM text swap ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "RETRO-OS — 포트폴리오 운영체제": "RETRO-OS — A Portfolio Operating System",
+    "내 작업.exe": "My Work.exe",
+    "프로필.txt": "Profile.txt",
+    "프로필.txt — 메모장": "Profile.txt — Notepad",
+    "뮤직플레이어": "Music Player",
+    "레트로앰프 v0.98": "RetroAmp v0.98",
+    "방명록": "Guestbook",
+    "그림판": "Paint",
+    "휴지통": "Recycle Bin",
+    "▞ 시작": "▞ Start",
+    "💾 내 작업.exe": "💾 My Work.exe",
+    "📄 프로필.txt": "📄 Profile.txt",
+    "📄 프로필.txt — 메모장": "📄 Profile.txt — Notepad",
+    "📻 뮤직플레이어": "📻 Music Player",
+    "📻 레트로앰프 v0.98": "📻 RetroAmp v0.98",
+    "📮 방명록": "📮 Guestbook",
+    "🎨 그림판": "🎨 Paint",
+    "🗑️ 휴지통": "🗑️ Recycle Bin",
+    "⏻ 시스템 종료...": "⏻ Shut Down...",
+    "↻ 새로고침": "↻ Refresh",
+    "▤ 아이콘 정렬": "▤ Arrange Icons",
+    "▨ 배경 바꾸기": "▨ Change Wallpaper",
+    "이제 레트로-OS를": "You can now safely",
+    "꺼도 안전합니다.": "turn off Retro-OS.",
+    "(아무 곳이나 클릭하면 다시 켜집니다)": "(Click anywhere to turn it back on)",
+    "CPU : NEURO-CORE 86 @ 24MHz .............. 감지됨": "CPU : NEURO-CORE 86 @ 24MHz .............. DETECTED",
+    "C:\\PORTFOLIO 디스크 검사 ................. OK": "C:\\PORTFOLIO DISK CHECK ................. OK",
+    "장치 로드 : 마우스, 낭만, 새벽감성 ....... OK": "LOADING DEVICES : mouse, romance, dawn-feels ....... OK",
+    "RETRO-OS 를 시작합니다...": "Starting RETRO-OS...",
+    "개체 5개 · 여유 공간: 넉넉함": "5 items · Free space: plenty",
+    "이름": "Name",
+    "종류": "Type",
+    "수정한 날짜": "Date Modified",
+    "뉴로-비전.ai": "neuro-vision.ai",
+    "AI 모델": "AI Model",
+    "픽셀 정원": "Pixel Garden",
+    "웹 토이": "Web Toy",
+    "밤의 문장들.hwp": "Sentences of the Night.hwp",
+    "문예지": "Literary Zine",
+    "웨이브폼 실험실": "Waveform Lab",
+    "오디오 비주얼": "Audio Visual",
+    "갤러리_최종_진짜최종.psd": "gallery_final_reallyfinal.psd",
+    "영원한 미완성": "Forever Unfinished",
+    [`=== 프로필.txt ===
+
+이름   : 루나 (luna)
+직업   : 만드는 사람
+
+픽셀과 코드 사이 어딘가에서
+화면 속 세계를 만듭니다.
+
+좋아하는 것 :
+ · 새벽의 키보드 소리
+ · 도트 그래픽
+ · 식어버린 커피 (두 번째 잔)
+
+연락 : hello@retro-os.dev
+
+(이 메모장은 진짜로 수정할 수 있어요)`]: `=== Profile.txt ===
+
+Name   : Luna (luna)
+Role   : Maker
+
+Somewhere between pixels and code,
+I build worlds inside the screen.
+
+Things I love :
+ · the sound of a keyboard at dawn
+ · dot-matrix graphics
+ · coffee gone cold (the second cup)
+
+Contact : hello@retro-os.dev
+
+(You really can edit this notepad)`,
+    "♪ 루나 — 새벽 두 시의 루프 (4:04) *** RETRO-AMP *** 비트레이트 128kbps 스테레오 ***":
+      "♪ Luna — Two A.M. Loop (4:04) *** RETRO-AMP *** BITRATE 128kbps STEREO ***",
+    "▶ 재생": "▶ Play",
+    "❚❚ 정지": "❚❚ Pause",
+    "이 사이트... 제 어린 시절 컴퓨터 같아요.": "This site... feels just like the computer from my childhood.",
+    "방문자_1024 · 03:12": "visitor_1024 · 03:12",
+    "ㅁㄴㅇㄹㅁㄴㅇㄹ (키보드 위를 걸어감)": "asdfasdf (walked across the keyboard)",
+    "지나가던 고양이 · 04:44": "a passing cat · 04:44",
+    "와주셔서 고마워요. 방명록 남겨주세요!": "Thanks for coming by. Please leave a note!",
+    "루나 · 05:00": "Luna · 05:00",
+    "한 마디 남기기...": "Leave a message...",
+    "등록": "Post",
+    "완벽주의.tmp": "perfectionism.tmp",
+    "미루기.bat": "procrastinate.bat",
+    "첫_시안_v1.psd": "first_draft_v1.psd",
+    "— 삭제됨": "— deleted",
+    "휴지통 비우기": "Empty Recycle Bin",
+    "텅 비었습니다. 마음도 가볍게.": "All empty now. A lighter heart, too."
+  };
+  /* dynamic guestbook entries carry a live timestamp, so translate the label as a substring */
+  const PARTIAL = { "익명의 방문자": "Anonymous visitor" };
+  const swap = s => { const t = s.trim(); return TR[t] != null ? s.replace(t, TR[t]) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) {
+      if (TR[n.nodeValue.trim()] != null) { n.nodeValue = swap(n.nodeValue); return; }
+      for (const k in PARTIAL) if (n.nodeValue.indexOf(k) !== -1) n.nodeValue = n.nodeValue.replace(k, PARTIAL[k]);
+      return;
+    }
+    if (n.nodeType !== 1) return;
+    ['placeholder','title','alt','aria-label'].forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && TR[n.getAttribute(a).trim()] != null) n.setAttribute(a, TR[n.getAttribute(a).trim()]); });
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  if (TR[document.title.trim()]) document.title = TR[document.title.trim()];
+})();
+</script>
+</body>
+</html>

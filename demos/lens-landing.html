@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COLOR IN MONO — 커서 렌즈가 색을 되찾는 전시</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* 마우스 인터랙션: 흑백 세상에서 커서 렌즈 안쪽만 컬러가 살아나는 히어로 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; height: 100vh; overflow: hidden;
+       background: #101012; color: #fff; cursor: none; }
+a, button { cursor: none; }
+
+/* 흑백 베이스 레이어 */
+.mono, .color { position: fixed; inset: 0; background: url('../assets/gen/lens-hero.png') center/cover,
+                linear-gradient(120deg, #2a2a30, #101014); }
+.mono { filter: grayscale(1) brightness(.5) contrast(1.05); }
+/* 컬러 레이어: 커서 중심 원형 클립 */
+.color { clip-path: circle(var(--r, 150px) at var(--x, 50vw) var(--y, 50vh));
+         transition: clip-path .08s linear; }
+/* 렌즈 테두리 링 */
+.ring { position: fixed; z-index: 8; width: calc(var(--r, 150px) * 2); height: calc(var(--r, 150px) * 2);
+        left: var(--x, 50vw); top: var(--y, 50vh); transform: translate(-50%, -50%);
+        border: 1.5px solid rgba(255,255,255,.85); border-radius: 50%; pointer-events: none;
+        box-shadow: 0 0 60px rgba(255,255,255,.18), inset 0 0 40px rgba(255,255,255,.08); }
+.ring::after { content: "COLOR"; position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+               font-size: 9.5px; letter-spacing: 4px; color: rgba(255,255,255,.75); }
+
+.veil { position: fixed; inset: 0; z-index: 2; pointer-events: none;
+        background: linear-gradient(180deg, rgba(10,10,14,.55), transparent 30%, transparent 62%,
+                                    rgba(10,10,14,.72)); }
+
+nav { position: fixed; z-index: 10; top: 0; left: 0; right: 0; display: flex;
+      justify-content: space-between; align-items: center; padding: 28px 4.5vw;
+      font-size: 12px; letter-spacing: 3px; }
+nav a { color: #fff; text-decoration: none; opacity: .85; }
+
+.hero-copy { position: fixed; z-index: 10; left: 4.5vw; bottom: 12vh; max-width: 720px; }
+.hero-copy .kicker { font-size: 12px; letter-spacing: 5px; color: rgba(255,255,255,.7); }
+.hero-copy h1 { margin-top: 16px; font-family: "Playfair Display", serif; font-weight: 800;
+                font-size: clamp(44px, 7.4vw, 104px); line-height: 1; letter-spacing: -.02em; }
+.hero-copy h1 em { font-style: italic; font-weight: 600; }
+.hero-copy p { margin-top: 18px; font-size: 14px; line-height: 1.85; color: rgba(255,255,255,.8);
+               max-width: 430px; word-break: keep-all; }
+
+/* 마그네틱 CTA — 커서가 다가오면 끌려옴 */
+.mag-cta { position: fixed; z-index: 10; right: 5vw; bottom: 12vh; width: 148px; height: 148px;
+           border-radius: 50%; border: 1px solid rgba(255,255,255,.5); background: rgba(255,255,255,.06);
+           backdrop-filter: blur(8px); color: #fff; font-family: inherit; font-size: 13px;
+           letter-spacing: 2.5px; font-weight: 600; display: flex; align-items: center;
+           justify-content: center; text-align: center; line-height: 1.7;
+           will-change: transform; transition: background .3s; }
+.mag-cta:hover { background: rgba(255,255,255,.95); color: #101012; }
+
+.scroll-note { position: fixed; z-index: 10; left: 50%; bottom: 3.6vh; transform: translateX(-50%);
+               font-size: 10.5px; letter-spacing: 4px; color: rgba(255,255,255,.5); }
+
+.dot { position: fixed; z-index: 20; width: 7px; height: 7px; border-radius: 50%; background: #fff;
+       pointer-events: none; transform: translate(-50%,-50%); mix-blend-mode: difference; }
+
+@media (max-width: 760px) {
+  body { cursor: auto; } .dot { display: none; }
+  .mag-cta { width: 110px; height: 110px; font-size: 11px; right: 6vw; bottom: 5vh; }
+}
+</style>
+</head>
+<body>
+<div class="mono"></div>
+<div class="color"></div>
+<div class="veil"></div>
+<div class="ring"></div>
+<div class="dot" id="dot"></div>
+
+<nav>
+  <span>MMCA — 특별기획전</span>
+  <a href="#">예매하기 →</a>
+</nav>
+
+<div class="hero-copy">
+  <div class="kicker">EXHIBITION · 2026. 7. 12 — 10. 4</div>
+  <h1>COLOR<br><em>in</em> MONO</h1>
+  <p>세상은 흑백으로 남고, 당신의 시선이 닿는 곳만 색을 되찾습니다.
+  커서의 렌즈를 움직여 잃어버린 색을 발굴하세요. 스크롤 없이, 오직 마우스로 관람하는 전시.</p>
+</div>
+
+<button class="mag-cta" id="mag">렌즈를<br>키우기 +</button>
+<div class="scroll-note">MOVE — 렌즈 이동 · CLICK — 렌즈 확장</div>
+
+<script>
+/* 커서 → 렌즈 좌표 (lerp) */
+const root = document.documentElement;
+const dot = document.getElementById('dot');
+let tx = innerWidth / 2, ty = innerHeight / 2, x = tx, y = ty;
+let radius = 150, targetR = 150;
+
+addEventListener('mousemove', e => {
+  tx = e.clientX; ty = e.clientY;
+  dot.style.left = tx + 'px'; dot.style.top = ty + 'px';
+});
+addEventListener('touchmove', e => {
+  tx = e.touches[0].clientX; ty = e.touches[0].clientY;
+}, { passive: true });
+
+/* 클릭하면 렌즈가 잠깐 크게 열렸다가 복귀 */
+addEventListener('click', () => {
+  targetR = 320;
+  setTimeout(() => targetR = 150, 650);
+});
+
+const mag = document.getElementById('mag');
+
+let frames = 0;
+(function loop() {
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+  x += (tx - x) * .14; y += (ty - y) * .14;
+  radius += (targetR - radius) * .1;
+  root.style.setProperty('--x', x.toFixed(1) + 'px');
+  root.style.setProperty('--y', y.toFixed(1) + 'px');
+  root.style.setProperty('--r', radius.toFixed(1) + 'px');
+
+  /* 마그네틱 CTA: 반경 220px 안에서 커서 쪽으로 끌려옴 */
+  const r = mag.getBoundingClientRect();
+  const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const dx = tx - cx, dy = ty - cy, dist = Math.hypot(dx, dy);
+  const pull = dist < 220 ? (1 - dist / 220) * 34 : 0;
+  mag.style.transform = `translate(${(dx / (dist || 1)) * pull}px, ${(dy / (dist || 1)) * pull}px)`;
+  requestAnimationFrame(loop);
+})();
+</script>
+
+<script>
+/* ── English mode (?lang=en) — non-destructive text swap ── */
+(function () {
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "COLOR IN MONO — 커서 렌즈가 색을 되찾는 전시": "COLOR IN MONO — An Exhibition Where a Cursor Lens Restores Color",
+    "MMCA — 특별기획전": "MMCA — Special Exhibition",
+    "예매하기 →": "Book tickets →",
+    "세상은 흑백으로 남고, 당신의 시선이 닿는 곳만 색을 되찾습니다. 커서의 렌즈를 움직여 잃어버린 색을 발굴하세요. 스크롤 없이, 오직 마우스로 관람하는 전시.": "The world stays black and white, and color returns only where your gaze falls. Move the cursor's lens to unearth the lost color. No scrolling — an exhibition viewed with the mouse alone.",
+    "렌즈를": "Grow the",
+    "키우기 +": "lens +",
+    "MOVE — 렌즈 이동 · CLICK — 렌즈 확장": "MOVE — move the lens · CLICK — expand the lens"
+  };
+  const KEYS = Object.keys(TR).sort((a, b) => b.length - a.length);
+  const swap = s => { let o = s; for (const k of KEYS) if (o.indexOf(k) !== -1) o = o.split(k).join(TR[k]); return o; };
+  const ATTRS = ['placeholder', 'title', 'alt', 'aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const v = n.nodeValue; if (!v || !v.trim()) return;
+      const c = v.replace(/\s+/g, ' ').trim();
+      if (TR[c] != null) { if (n.nodeValue !== TR[c]) n.nodeValue = TR[c]; return; }
+      const nv = swap(v); if (nv !== v) n.nodeValue = nv; return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) { const av = n.getAttribute(a); if (av && TR[av.trim()] != null) n.setAttribute(a, TR[av.trim()]); } });
+    if ((n.tagName === 'INPUT' || n.tagName === 'TEXTAREA') && n.value != null && TR[n.value.trim()] != null) n.value = TR[n.value.trim()];
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, { childList: true, subtree: true });
+  walk(document.body);
+  const dt = swap(document.title); if (dt !== document.title) document.title = dt;
+})();
+</script>
+</body>
+</html>

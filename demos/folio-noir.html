@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>서은재 — 흑백 미니멀 포트폴리오</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600&family=Playfair+Display:ital,wght@1,400;1,500&family=Noto+Sans+KR:wght@200;300;400;500;700&display=swap');
+
+/* 칠흑 위에 가는 활자 — 헤어라인과 여백, 커스텀 커서로 완성하는 다크 미니멀 포트폴리오. */
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{ --bg:#0a0a0a; --ink:#f5f5f5; --dim:#8a8a8a; --hair:1px solid rgba(255,255,255,.14); }
+html{ scroll-behavior:smooth; }
+body{ font-family:'Inter','Noto Sans KR',sans-serif; background:var(--bg); color:var(--ink);
+  -webkit-font-smoothing:antialiased; line-height:1.5; letter-spacing:-.01em; overflow-x:hidden; }
+a{ color:inherit; text-decoration:none; }
+::selection{ background:#f5f5f5; color:#0a0a0a; }
+body.has-cursor, body.has-cursor a{ cursor:none; }
+
+/* ── 커스텀 커서 ─────────────────────────────────── */
+#cursor{ position:fixed; left:0; top:0; width:8px; height:8px; border-radius:50%;
+  background:#fff; mix-blend-mode:difference; pointer-events:none; z-index:99;
+  display:none; will-change:transform; }
+body.has-cursor #cursor{ display:block; }
+
+/* ── 코너 HUD ────────────────────────────────────── */
+.hud{ position:fixed; z-index:40; font-size:10px; font-weight:500; letter-spacing:.28em;
+  text-transform:uppercase; color:var(--dim); pointer-events:none; }
+.hud.tl{ top:18px; left:22px; color:var(--ink); }
+.hud.tr{ top:18px; right:22px; font-variant-numeric:tabular-nums; }
+.hud.bl{ bottom:18px; left:22px; }
+.hud.br{ bottom:18px; right:22px; }
+@media(max-width:640px){ .hud.bl,.hud.br{ display:none; } }
+
+/* ── 스크롤 리빌 ─────────────────────────────────── */
+.rv{ opacity:0; transform:translateY(30px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+.rv.in{ opacity:1; transform:none; }
+
+/* ── 히어로 ──────────────────────────────────────── */
+.hero{ min-height:92vh; display:flex; flex-direction:column; justify-content:center;
+  padding:0 6vw; border-bottom:var(--hair); }
+.roles{ font-size:clamp(11px,1.4vw,14px); font-weight:400; letter-spacing:.34em;
+  text-transform:uppercase; color:var(--dim); min-height:1.6em; }
+.roles .ch{ display:inline-block; opacity:0; transform:translateY(14px);
+  animation:chIn .5s cubic-bezier(.2,.7,.2,1) forwards; }
+@keyframes chIn{ to{ opacity:1; transform:none; } }
+.hero h1{ margin-top:22px; font-size:clamp(58px,13vw,190px); font-weight:200;
+  letter-spacing:-.035em; line-height:.96; text-transform:uppercase; }
+.hero h1 em{ font-style:normal; font-weight:500; }
+.hero .lede{ margin-top:36px; max-width:460px; font-size:15px; font-weight:300;
+  color:var(--dim); word-break:keep-all; }
+
+/* ── 선택된 작업 (아코디언) ──────────────────────── */
+.works{ padding:90px 6vw; border-bottom:var(--hair); }
+.sec-label{ font-size:10px; font-weight:500; letter-spacing:.3em; text-transform:uppercase;
+  color:var(--dim); margin-bottom:36px; }
+.acc{ border-top:var(--hair); }
+.acc-head{ display:flex; align-items:baseline; gap:24px; padding:26px 4px;
+  cursor:pointer; user-select:none; transition:padding-left .25s ease; }
+.acc-head:hover{ padding-left:18px; }
+.acc-head .t{ flex:1; font-size:clamp(24px,4.4vw,52px); font-weight:200;
+  letter-spacing:-.02em; line-height:1.05; word-break:keep-all; }
+.acc-head .y{ font-size:12px; font-weight:400; color:var(--dim); font-variant-numeric:tabular-nums; }
+.acc-head .x{ font-size:20px; font-weight:200; color:var(--dim); transition:transform .35s ease; }
+.acc.open .acc-head .x{ transform:rotate(45deg); }
+.acc-body{ max-height:0; overflow:hidden; transition:max-height .55s cubic-bezier(.2,.7,.2,1); }
+.acc-inner{ padding:6px 4px 40px; }
+.acc-inner p{ max-width:520px; font-size:14px; font-weight:300; color:var(--dim);
+  word-break:keep-all; margin-bottom:24px; }
+.band{ height:clamp(120px,22vw,240px); border:var(--hair); margin-bottom:20px; }
+.b1{ background:linear-gradient(100deg,#1c1c1c 0%,#4d4d4d 42%,#141414 70%,#2a2a2a 100%),
+  radial-gradient(ellipse at 80% 20%, rgba(255,255,255,.16), transparent 55%);
+  background-blend-mode:screen; }
+.b2{ background:repeating-linear-gradient(135deg,#232323 0 22px,#131313 22px 44px),
+  radial-gradient(circle at 30% 50%, rgba(255,255,255,.12), transparent 60%);
+  background-blend-mode:screen; }
+.b3{ background:conic-gradient(from 210deg at 50% 60%, #0f0f0f, #3f3f3f 25%, #171717 50%, #565656 75%, #0f0f0f); }
+.b4{ background:radial-gradient(ellipse at 25% 50%, #5a5a5a, #101010 62%),
+  repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 60px); }
+.b5{ background:repeating-radial-gradient(circle at 70% 40%, #2e2e2e 0 6px, #101010 6px 26px); }
+.more{ display:inline-block; font-size:12px; font-weight:400; letter-spacing:.14em;
+  text-transform:uppercase; border-bottom:1px solid rgba(255,255,255,.3); padding-bottom:4px; }
+.more:hover{ border-color:#f5f5f5; }
+
+/* ── 로고 월 (마퀴) ──────────────────────────────── */
+.logowall{ overflow:hidden; padding:44px 0; border-bottom:var(--hair); white-space:nowrap; }
+.logowall .track{ display:inline-block; animation:mq 30s linear infinite; }
+.logowall b{ display:inline-block; margin:0 34px; font-size:clamp(18px,2.6vw,30px);
+  font-weight:300; letter-spacing:.12em; color:#5c5c5c; text-transform:uppercase; }
+@keyframes mq{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+body.anim-paused .logowall .track{ animation-play-state:paused; }
+
+/* ── 스테이트먼트 ────────────────────────────────── */
+.statement{ padding:130px 6vw; text-align:center; border-bottom:var(--hair); }
+.statement blockquote{ font-family:'Playfair Display','Noto Sans KR',serif; font-style:italic;
+  font-weight:400; font-size:clamp(26px,5vw,58px); line-height:1.3; letter-spacing:0;
+  max-width:900px; margin:0 auto; word-break:keep-all; }
+.statement cite{ display:block; margin-top:30px; font-family:'Inter','Noto Sans KR',sans-serif;
+  font-style:normal; font-size:10px; font-weight:500; letter-spacing:.3em;
+  text-transform:uppercase; color:var(--dim); }
+
+/* ── 푸터 ────────────────────────────────────────── */
+footer{ padding:110px 6vw 90px; text-align:center; }
+footer .small{ font-size:10px; font-weight:500; letter-spacing:.3em; text-transform:uppercase;
+  color:var(--dim); margin-bottom:26px; }
+.mail{ display:inline-block; position:relative; font-size:clamp(26px,6.4vw,84px);
+  font-weight:200; letter-spacing:-.03em; }
+.mail::after{ content:''; position:absolute; left:0; bottom:-8px; width:100%; height:1px;
+  background:#f5f5f5; transform:scaleX(0); transform-origin:left;
+  transition:transform .55s cubic-bezier(.2,.7,.2,1); }
+.mail:hover::after{ transform:scaleX(1); }
+footer .fine{ margin-top:60px; display:flex; justify-content:center; gap:34px; flex-wrap:wrap;
+  font-size:10px; font-weight:400; letter-spacing:.24em; text-transform:uppercase; color:var(--dim); }
+footer .fine a:hover{ color:var(--ink); }
+</style>
+</head>
+<body>
+
+<div id="cursor" aria-hidden="true"></div>
+
+<!-- 코너 HUD -->
+<div class="hud tl">SEO&nbsp;EUNJAE&nbsp;®</div>
+<div class="hud tr" id="clock">SEOUL 00:00:00</div>
+<div class="hud bl" data-i18n>스크롤</div>
+<div class="hud br">©2026&nbsp;STUDIO&nbsp;NOIR</div>
+
+<!-- 히어로 -->
+<header class="hero">
+  <div class="roles stagger" data-i18n>아트 디렉션 — 인터랙션 — 브랜드 경험</div>
+  <h1>EUNJAE<br><em>SEO</em></h1>
+  <p class="lede" data-i18n>어둠 속에서 위계는 더 선명해집니다. 빛 대신 여백으로, 색 대신 농도로 설계하는 아트 디렉터 서은재입니다.</p>
+</header>
+
+<!-- 선택된 작업 -->
+<section class="works">
+  <div class="sec-label rv" data-i18n>선택된 작업</div>
+
+  <div class="acc rv">
+    <div class="acc-head"><span class="t" data-i18n>침묵의 층위</span><span class="y">2026</span><span class="x">+</span></div>
+    <div class="acc-body"><div class="acc-inner">
+      <p data-i18n>소리 없는 전시를 위한 아이덴티티. 관람 동선을 명도 단계로 번역해, 공간이 어두워질수록 활자가 얇아지는 시스템을 설계했습니다.</p>
+      <div class="band b1" aria-hidden="true"></div>
+      <a class="more" href="#" data-i18n>자세히 보기 →</a>
+    </div></div>
+  </div>
+
+  <div class="acc rv">
+    <div class="acc-head"><span class="t" data-i18n>야간 항해</span><span class="y">2025</span><span class="x">+</span></div>
+    <div class="acc-body"><div class="acc-inner">
+      <p data-i18n>심야 라디오 채널의 브랜드 경험. 주파수의 흔들림을 사선 패턴으로 옮기고, 모든 화면을 새벽 세 시의 명도에 맞췄습니다.</p>
+      <div class="band b2" aria-hidden="true"></div>
+      <a class="more" href="#" data-i18n>자세히 보기 →</a>
+    </div></div>
+  </div>
+
+  <div class="acc rv">
+    <div class="acc-head"><span class="t" data-i18n>회색 지대</span><span class="y">2025</span><span class="x">+</span></div>
+    <div class="acc-body"><div class="acc-inner">
+      <p data-i18n>경계에 관한 사진집의 북 디자인. 흑도 백도 아닌 스물네 단계의 회색만으로 장을 구분하고 서사의 온도를 조절했습니다.</p>
+      <div class="band b3" aria-hidden="true"></div>
+      <a class="more" href="#" data-i18n>자세히 보기 →</a>
+    </div></div>
+  </div>
+
+  <div class="acc rv">
+    <div class="acc-head"><span class="t" data-i18n>빛의 잔상</span><span class="y">2024</span><span class="x">+</span></div>
+    <div class="acc-body"><div class="acc-inner">
+      <p data-i18n>조명 브랜드의 캠페인 아트 디렉션. 광원을 직접 보여주는 대신, 빛이 지나간 자리의 그라데이션만으로 제품을 이야기했습니다.</p>
+      <div class="band b4" aria-hidden="true"></div>
+      <a class="more" href="#" data-i18n>자세히 보기 →</a>
+    </div></div>
+  </div>
+
+  <div class="acc rv">
+    <div class="acc-head"><span class="t" data-i18n>무제 연작</span><span class="y">2023</span><span class="x">+</span></div>
+    <div class="acc-body"><div class="acc-inner">
+      <p data-i18n>개인 작업으로 이어온 흑백 포스터 연작. 제목을 비워둔 채, 동심원과 입자의 밀도만으로 매달의 감정을 기록합니다.</p>
+      <div class="band b5" aria-hidden="true"></div>
+      <a class="more" href="#" data-i18n>자세히 보기 →</a>
+    </div></div>
+  </div>
+</section>
+
+<!-- 로고 월 -->
+<section class="logowall rv" aria-hidden="true">
+  <div class="track">
+    <b>Monolith</b><b>Grisaille</b><b>Vanta&nbsp;Co.</b><b>Obsidian&nbsp;Press</b><b>Nord&nbsp;Atelier</b><b>Kaal</b><b>Whiteout</b><b>Halcyon</b>
+    <b>Monolith</b><b>Grisaille</b><b>Vanta&nbsp;Co.</b><b>Obsidian&nbsp;Press</b><b>Nord&nbsp;Atelier</b><b>Kaal</b><b>Whiteout</b><b>Halcyon</b>
+  </div>
+</section>
+
+<!-- 스테이트먼트 -->
+<section class="statement">
+  <blockquote class="rv" data-i18n>“빛을 그리고 싶다면, 먼저 어둠을 이해해야 한다.”</blockquote>
+  <cite class="rv" data-i18n>디자인 노트, 2026</cite>
+</section>
+
+<!-- 푸터 -->
+<footer>
+  <div class="small rv" data-i18n>새 프로젝트를 이야기해요</div>
+  <a class="mail rv" href="#">hello@eunjaeseo.kr</a>
+  <div class="fine rv">
+    <a href="#" data-i18n>인스타그램</a>
+    <a href="#" data-i18n>비핸스</a>
+    <a href="#" data-i18n>이력서</a>
+    <span data-i18n>서울, 대한민국</span>
+  </div>
+</footer>
+
+<script>
+/* ── 언어 (?lang=en) ─────────────────────────────── */
+const STR={
+  '스크롤':'Scroll',
+  '아트 디렉션 — 인터랙션 — 브랜드 경험':'Art Direction — Interaction — Brand Experience',
+  '어둠 속에서 위계는 더 선명해집니다. 빛 대신 여백으로, 색 대신 농도로 설계하는 아트 디렉터 서은재입니다.':
+    'In darkness, hierarchy grows sharper. Eunjae Seo is an art director who designs with whitespace instead of light, with density instead of color.',
+  '선택된 작업':'Selected Works',
+  '침묵의 층위':'Strata of Silence','야간 항해':'Night Voyage','회색 지대':'Grey Zone',
+  '빛의 잔상':'Afterimage of Light','무제 연작':'Untitled Series',
+  '소리 없는 전시를 위한 아이덴티티. 관람 동선을 명도 단계로 번역해, 공간이 어두워질수록 활자가 얇아지는 시스템을 설계했습니다.':
+    'Identity for a soundless exhibition. The visitor route was translated into steps of luminance — the darker the room, the thinner the type.',
+  '심야 라디오 채널의 브랜드 경험. 주파수의 흔들림을 사선 패턴으로 옮기고, 모든 화면을 새벽 세 시의 명도에 맞췄습니다.':
+    'Brand experience for a late-night radio channel. Frequency jitter became diagonal patterns, and every screen was tuned to the brightness of 3 a.m.',
+  '경계에 관한 사진집의 북 디자인. 흑도 백도 아닌 스물네 단계의 회색만으로 장을 구분하고 서사의 온도를 조절했습니다.':
+    'Book design for a photo essay on borders. Twenty-four shades of grey — neither black nor white — divide the chapters and set the narrative temperature.',
+  '조명 브랜드의 캠페인 아트 디렉션. 광원을 직접 보여주는 대신, 빛이 지나간 자리의 그라데이션만으로 제품을 이야기했습니다.':
+    'Campaign art direction for a lighting brand. Instead of showing the source, the product is told only through the gradients light leaves behind.',
+  '개인 작업으로 이어온 흑백 포스터 연작. 제목을 비워둔 채, 동심원과 입자의 밀도만으로 매달의 감정을 기록합니다.':
+    'An ongoing personal series of monochrome posters. Titles are left blank; each month’s mood is recorded only in rings and grain.',
+  '자세히 보기 →':'View project →',
+  '“빛을 그리고 싶다면, 먼저 어둠을 이해해야 한다.”':
+    '“If you want to draw light, you must first understand darkness.”',
+  '디자인 노트, 2026':'Design notes, 2026',
+  '새 프로젝트를 이야기해요':'Let’s talk about a new project',
+  '인스타그램':'Instagram','비핸스':'Behance','이력서':'CV','서울, 대한민국':'Seoul, South Korea'
+};
+let EN=new URLSearchParams(location.search).get('lang')==='en';
+const orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if(!orig.has(el)) orig.set(el,el.innerHTML);
+    const ko=orig.get(el).trim();
+    el.innerHTML=EN?(STR[ko]??orig.get(el)):orig.get(el);
+  });
+  document.documentElement.lang=EN?'en':'ko';
+  document.title=EN?'Eunjae Seo — B/W Minimal Portfolio':'서은재 — 흑백 미니멀 포트폴리오';
+}
+applyLang();
+
+/* ── 히어로 롤 텍스트: 글자 단위 스태거 인 ───────── */
+document.querySelectorAll('.stagger').forEach(el=>{
+  const txt=el.textContent;
+  el.textContent='';
+  [...txt].forEach((c,i)=>{
+    const s=document.createElement('span');
+    s.className='ch';
+    s.style.animationDelay=(i*38)+'ms';
+    s.innerHTML=(c===' ')?'&nbsp;':c;
+    el.appendChild(s);
+  });
+});
+
+/* ── 라이브 시계 (서울) ──────────────────────────── */
+const clockEl=document.getElementById('clock');
+function tick(){
+  let t;
+  try{ t=new Date().toLocaleTimeString('en-GB',{ timeZone:'Asia/Seoul', hour12:false }); }
+  catch(e){ t=new Date().toLocaleTimeString('en-GB',{ hour12:false }); }
+  clockEl.textContent='SEOUL '+t;
+}
+tick();
+setInterval(tick,1000);
+
+/* ── 아코디언 ────────────────────────────────────── */
+document.querySelectorAll('.acc').forEach(acc=>{
+  const head=acc.querySelector('.acc-head');
+  const body=acc.querySelector('.acc-body');
+  head.addEventListener('click',()=>{
+    const open=acc.classList.toggle('open');
+    body.style.maxHeight=open?(body.scrollHeight+'px'):'0px';
+  });
+});
+
+/* ── 스크롤 리빌 ─────────────────────────────────── */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{ threshold:.12 });
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+/* ── 커스텀 커서 (rAF lerp, __paused 가드) ───────── */
+const fine=window.matchMedia && matchMedia('(hover: hover) and (pointer: fine)').matches;
+const cur=document.getElementById('cursor');
+let cx=innerWidth/2, cy=innerHeight/2, tx=cx, ty=cy, curScale=1, frames=0;
+if(fine && innerWidth>700){
+  document.body.classList.add('has-cursor');
+  document.addEventListener('mousemove',e=>{ tx=e.clientX; ty=e.clientY; });
+  document.addEventListener('mouseover',e=>{
+    curScale=(e.target.closest && e.target.closest('a,.acc-head'))?4:1;
+  });
+  function loop(){
+    frames++;
+    if(window.__paused && frames>5){ setTimeout(()=>requestAnimationFrame(loop),300); return; }
+    cx+=(tx-cx)*.18; cy+=(ty-cy)*.18;
+    cur.style.transform='translate('+(cx-4)+'px,'+(cy-4)+'px) scale('+curScale+')';
+    requestAnimationFrame(loop);
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ── 갤러리 일시정지 연동 (마퀴 pause) ───────────── */
+setInterval(()=>{
+  document.body.classList.toggle('anim-paused', !!window.__paused);
+},300);
+</script>
+</body>
+</html>

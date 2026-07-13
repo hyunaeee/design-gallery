@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>여백 — 한서진 포트폴리오</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400;1,9..144,500&family=Noto+Serif+KR:wght@300;400;500;600&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+
+/* 여백(MARGIN) — 흑백 에디토리얼 매거진 포트폴리오.
+   색은 전혀 쓰지 않는다: 위계는 오직 크기, 여백, 헤어라인 괘선으로만 만든다. */
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --ink:#111111; --paper:#ffffff; --gray:#777777; --soft:#333333;
+  --hair:#111111; --hair-soft:rgba(17,17,17,.14);
+  --serif:'Fraunces','Noto Serif KR',serif;
+  --sans:'Inter','Noto Sans KR',sans-serif;
+}
+html{ scroll-behavior:smooth; }
+body{ background:var(--paper); color:var(--ink); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; line-height:1.5; overflow-x:hidden; }
+a{ color:inherit; text-decoration:none; }
+.wrap{ max-width:1120px; margin:0 auto; padding:0 6vw; }
+::selection{ background:#111; color:#fff; }
+
+/* ── 스크롤 리빌 ─────────────────────────────────── */
+.rv{ opacity:0; transform:translateY(24px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+.rv.in{ opacity:1; transform:none; }
+.rv.d1{ transition-delay:.1s; } .rv.d2{ transition-delay:.2s; }
+@media(prefers-reduced-motion:reduce){ .rv{ opacity:1; transform:none; transition:none; } }
+
+/* ── 마스트헤드 ──────────────────────────────────── */
+.masthead{ position:sticky; top:0; z-index:20; background:rgba(255,255,255,.92);
+  backdrop-filter:blur(8px); border-bottom:1px solid var(--hair); }
+.masthead-inner{ max-width:1120px; margin:0 auto; padding:0 6vw; height:62px;
+  display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:18px; }
+.mh-left{ font-family:var(--sans); font-size:11px; letter-spacing:.18em; color:var(--gray);
+  text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.brand{ justify-self:center; font-family:var(--serif); font-weight:600; font-size:20px; letter-spacing:.08em; white-space:nowrap; }
+.mh-right{ justify-self:end; display:flex; align-items:center; gap:22px; white-space:nowrap; }
+.mh-right a{ font-family:var(--sans); font-size:12px; letter-spacing:.08em; color:var(--ink); }
+.mh-right a:hover{ text-decoration:underline; text-underline-offset:4px; }
+.lang-btn{ font-family:var(--sans); font-size:11px; letter-spacing:.08em; font-weight:500;
+  color:var(--ink); background:none; border:1px solid var(--ink); border-radius:0;
+  padding:5px 12px; cursor:pointer; transition:background .2s, color .2s; }
+.lang-btn:hover{ background:var(--ink); color:#fff; }
+@media(max-width:860px){ .mh-left, .mh-right a:not(.lang-btn){ display:none; } }
+
+/* ── 히어로 ──────────────────────────────────────── */
+.hero{ padding:110px 0 80px; border-bottom:1px solid var(--hair); }
+.eyebrow{ font-family:var(--sans); font-size:12px; letter-spacing:.28em; text-transform:uppercase; color:var(--gray); }
+.hero h1{ margin-top:22px; font-family:var(--serif); font-weight:300;
+  font-size:clamp(44px,8.6vw,128px); line-height:1.08; letter-spacing:-.01em; word-break:keep-all; }
+.hero h1 em{ font-style:italic; font-weight:500; }
+.hero-foot{ margin-top:54px; padding-top:26px; border-top:1px solid var(--hair-soft);
+  display:flex; justify-content:space-between; align-items:flex-end; gap:32px; flex-wrap:wrap; }
+.dek{ max-width:520px; font-size:15.5px; font-weight:400; color:var(--soft); line-height:1.75; word-break:keep-all; }
+.byline{ font-size:12px; letter-spacing:.14em; color:var(--gray); white-space:nowrap; text-transform:uppercase; }
+
+/* ── 색인(목차) ──────────────────────────────────── */
+.index-sec{ padding:80px 0; border-bottom:1px solid var(--hair); }
+.sec-label{ font-family:var(--sans); font-size:11px; letter-spacing:.32em; text-transform:uppercase;
+  color:var(--gray); margin-bottom:30px; }
+.toc{ list-style:none; }
+.toc li{ border-top:1px solid var(--hair-soft); }
+.toc li:last-child{ border-bottom:1px solid var(--hair-soft); }
+.toc a{ display:flex; align-items:baseline; gap:14px; padding:20px 2px; }
+.toc .no{ font-family:var(--sans); font-size:12px; letter-spacing:.06em; color:var(--gray);
+  width:26px; flex:none; padding:3px 0; text-align:center; transition:background .2s, color .2s; }
+.toc .ti{ font-family:var(--serif); font-size:clamp(17px,2.4vw,25px); font-weight:400;
+  letter-spacing:-.005em; word-break:keep-all; transition:padding-left .25s ease; }
+.toc .leader{ flex:1; height:0; border-bottom:1px dotted #aaa; margin:0 6px 6px; min-width:20px; }
+.toc .pg{ font-family:var(--sans); font-size:12px; color:var(--gray); font-variant-numeric:tabular-nums; }
+.toc a:hover .no{ background:var(--ink); color:#fff; }
+.toc a:hover .ti{ padding-left:8px; }
+@media(max-width:640px){ .toc .leader{ display:none; } }
+
+/* ── 작업(스프레드 그리드) ───────────────────────── */
+.grid{ display:grid; grid-template-columns:1fr 1fr; border-top:1px solid var(--hair); }
+.spread{ border-bottom:1px solid var(--hair); border-right:1px solid var(--hair); padding:58px 5vw; }
+.spread:nth-child(even){ border-right:none; }
+@media(max-width:760px){ .grid{ grid-template-columns:1fr; } .spread{ border-right:none !important; } }
+.fig{ width:100%; max-width:210px; height:110px; margin-bottom:28px; }
+.fig svg{ width:100%; height:100%; display:block; }
+.pno{ display:block; font-family:var(--sans); font-size:11px; letter-spacing:.2em; color:var(--gray);
+  text-transform:uppercase; margin-bottom:12px; }
+.spread h3{ font-family:var(--serif); font-weight:400; font-size:clamp(22px,2.7vw,30px);
+  line-height:1.32; letter-spacing:-.005em; word-break:keep-all; }
+.spread .tags{ margin-top:10px; font-family:var(--sans); font-size:12px; letter-spacing:.14em;
+  color:var(--gray); text-transform:uppercase; }
+.spread p:not(.tags){ margin-top:18px; font-size:14.5px; line-height:1.8; color:var(--soft);
+  max-width:440px; word-break:keep-all; }
+.essay{ display:inline-flex; align-items:center; gap:8px; margin-top:26px; font-family:var(--sans);
+  font-size:12.5px; letter-spacing:.1em; border-bottom:1px solid var(--ink); padding-bottom:3px; transition:.25s; }
+.essay:hover{ color:var(--gray); border-color:var(--gray); }
+
+/* ── 인용구 ──────────────────────────────────────── */
+.quote{ padding:130px 6vw; text-align:center; border-bottom:1px solid var(--hair); }
+.quote blockquote{ font-family:var(--serif); font-style:italic; font-weight:400;
+  font-size:clamp(24px,4.6vw,50px); line-height:1.4; max-width:880px; margin:0 auto; word-break:keep-all; }
+.quote cite{ display:block; margin-top:28px; font-family:var(--sans); font-style:normal;
+  font-size:11px; letter-spacing:.26em; color:var(--gray); text-transform:uppercase; }
+
+/* ── 소개 ────────────────────────────────────────── */
+.about{ padding:100px 0; border-bottom:1px solid var(--hair); }
+.about-grid{ max-width:760px; }
+.about p.lede{ font-size:17px; line-height:1.85; color:#222; word-break:keep-all; }
+.about p.lede::first-letter{ font-family:var(--serif); font-size:58px; font-weight:500;
+  float:left; line-height:.72; padding:8px 10px 0 0; }
+.about p.body2{ margin-top:22px; font-size:15px; line-height:1.85; color:var(--soft); word-break:keep-all; }
+.stats{ display:flex; margin-top:52px; }
+.stats span{ flex:1; padding:0 26px; border-left:1px solid var(--hair); display:flex; flex-direction:column; gap:8px; }
+.stats span:first-child{ padding-left:0; border-left:none; }
+.stats b{ font-family:var(--serif); font-weight:400; font-size:clamp(30px,4vw,44px); }
+.stats i{ font-style:normal; font-size:11px; letter-spacing:.16em; color:var(--gray); text-transform:uppercase; }
+@media(max-width:640px){ .stats{ flex-direction:column; gap:22px; } .stats span{ border-left:none; padding-left:0; border-top:1px solid var(--hair-soft); padding-top:16px; } .stats span:first-child{ border-top:none; padding-top:0; } }
+
+/* ── 콜로폰(푸터) ────────────────────────────────── */
+footer{ padding:120px 0 56px; }
+footer .big{ font-family:var(--serif); font-weight:300; font-size:clamp(38px,7.6vw,92px);
+  line-height:1.14; letter-spacing:-.01em; word-break:keep-all; }
+footer .big em{ font-style:italic; font-weight:500; }
+footer .note{ margin-top:26px; max-width:440px; font-size:15px; color:var(--soft); line-height:1.7; word-break:keep-all; }
+.colophon{ margin-top:70px; display:grid; grid-template-columns:repeat(3,1fr); gap:34px;
+  border-top:1px solid var(--hair); padding-top:32px; }
+.col-block{ display:flex; flex-direction:column; gap:8px; font-size:13px; }
+.col-label{ font-size:10.5px; letter-spacing:.22em; color:var(--gray); text-transform:uppercase; margin-bottom:2px; }
+.col-block a:hover{ text-decoration:underline; text-underline-offset:3px; }
+.copy{ margin-top:64px; display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;
+  font-size:11px; letter-spacing:.08em; color:var(--gray); }
+@media(max-width:700px){ .colophon{ grid-template-columns:1fr; gap:24px; } }
+</style>
+</head>
+<body>
+
+<!-- 마스트헤드 -->
+<nav class="masthead">
+  <div class="masthead-inner">
+    <div class="mh-left">ISSUE No.07 — 2026</div>
+    <div class="brand">MARGIN</div>
+    <div class="mh-right">
+      <a href="#index" data-i18n>색인</a>
+      <a href="#work" data-i18n>작업</a>
+      <a href="#about" data-i18n>소개</a>
+      <a href="#contact" data-i18n>연락</a>
+      <button class="lang-btn" id="lang">EN</button>
+    </div>
+  </div>
+</nav>
+
+<!-- 히어로 -->
+<header class="hero wrap">
+  <p class="eyebrow rv" data-i18n>편집 노트 · 2026</p>
+  <h1 class="rv d1" data-i18n>쓰지 않은 자리가<br><em>본문</em>이 된다</h1>
+  <div class="hero-foot rv d2">
+    <p class="dek" data-i18n>한서진 — 글과 활자 사이의 간격을 설계하는 브랜드·에디토리얼 디자이너입니다. 페이지에 남는 침묵까지 편집합니다.</p>
+    <p class="byline" data-i18n>기획 및 디자인 — 한서진</p>
+  </div>
+</header>
+
+<!-- 색인 -->
+<section class="index-sec wrap" id="index">
+  <p class="sec-label rv" data-i18n>색인</p>
+  <ol class="toc">
+    <li class="rv"><a href="#p01"><span class="no">01</span><span class="ti" data-i18n>모래의 문법 — 도자 브랜드</span><span class="leader"></span><span class="pg">p. 12</span></a></li>
+    <li class="rv"><a href="#p02"><span class="no">02</span><span class="ti" data-i18n>계절 잡지 — 격월간 에디토리얼</span><span class="leader"></span><span class="pg">p. 28</span></a></li>
+    <li class="rv"><a href="#p03"><span class="no">03</span><span class="ti" data-i18n>낮은 목소리 — 낭독회 아이덴티티</span><span class="leader"></span><span class="pg">p. 44</span></a></li>
+    <li class="rv"><a href="#p04"><span class="no">04</span><span class="ti" data-i18n>서가의 순서 — 서점 리브랜딩</span><span class="leader"></span><span class="pg">p. 56</span></a></li>
+    <li class="rv"><a href="#p05"><span class="no">05</span><span class="ti" data-i18n>각주와 여백 — 전시 도록</span><span class="leader"></span><span class="pg">p. 70</span></a></li>
+    <li class="rv"><a href="#p06"><span class="no">06</span><span class="ti" data-i18n>원고지 위에서 — 타이포그래피 워크숍</span><span class="leader"></span><span class="pg">p. 84</span></a></li>
+  </ol>
+</section>
+
+<!-- 작업 -->
+<section id="work">
+  <div class="grid">
+
+    <article class="spread rv" id="p01">
+      <div class="fig" aria-hidden="true">
+        <svg viewBox="0 0 120 90"><circle cx="60" cy="45" r="7" stroke="#111" fill="none" stroke-width="1.1"/><circle cx="60" cy="45" r="19" stroke="#111" fill="none" stroke-width="1.1"/><circle cx="60" cy="45" r="31" stroke="#111" fill="none" stroke-width="1.1"/><circle cx="60" cy="45" r="43" stroke="#111" fill="none" stroke-width="1.1"/></svg>
+      </div>
+      <span class="pno">Fig. 01</span>
+      <h3 data-i18n>모래의 문법 — 도자 브랜드</h3>
+      <p class="tags" data-i18n>브랜딩 · 패키지</p>
+      <p data-i18n>장작 가마에서 구운 도자기 브랜드의 아이덴티티. 모래와 유약의 질감을 활자의 획 굵기로 옮겨, 손으로 빚은 흔적이 페이지에도 남도록 설계했습니다.</p>
+      <a class="essay" href="#"><span data-i18n>에세이 읽기</span><span aria-hidden="true">→</span></a>
+    </article>
+
+    <article class="spread rv" id="p02">
+      <div class="fig" aria-hidden="true">
+        <svg viewBox="0 0 120 90">
+          <line x1="4" y1="86" x2="34" y2="4" stroke="#111" stroke-width="1.1"/>
+          <line x1="24" y1="86" x2="54" y2="4" stroke="#111" stroke-width="1.1"/>
+          <line x1="44" y1="86" x2="74" y2="4" stroke="#111" stroke-width="1.1"/>
+          <line x1="64" y1="86" x2="94" y2="4" stroke="#111" stroke-width="1.1"/>
+          <line x1="84" y1="86" x2="114" y2="4" stroke="#111" stroke-width="1.1"/>
+        </svg>
+      </div>
+      <span class="pno">Fig. 02</span>
+      <h3 data-i18n>계절 잡지 — 격월간 에디토리얼</h3>
+      <p class="tags" data-i18n>에디토리얼 · 타이포그래피</p>
+      <p data-i18n>계절마다 발행되는 독립 잡지의 그리드와 표지 시스템. 호마다 하나의 활자를 바꾸는 규칙만으로 서로 다른 표정을 만들었습니다.</p>
+      <a class="essay" href="#"><span data-i18n>에세이 읽기</span><span aria-hidden="true">→</span></a>
+    </article>
+
+    <article class="spread rv" id="p03">
+      <div class="fig" aria-hidden="true">
+        <svg viewBox="0 0 120 90"><path d="M2 45 Q 17 18 32 45 T 62 45 T 92 45 T 122 45" stroke="#111" fill="none" stroke-width="1.2"/></svg>
+      </div>
+      <span class="pno">Fig. 03</span>
+      <h3 data-i18n>낮은 목소리 — 낭독회 아이덴티티</h3>
+      <p class="tags" data-i18n>아이덴티티 · 포스터</p>
+      <p data-i18n>시를 소리 내어 읽는 낭독회를 위한 포스터 연작. 목소리의 높낮이를 선의 굵기로 옮겨, 소리가 눈에 보이는 방식을 실험했습니다.</p>
+      <a class="essay" href="#"><span data-i18n>에세이 읽기</span><span aria-hidden="true">→</span></a>
+    </article>
+
+    <article class="spread rv" id="p04">
+      <div class="fig" aria-hidden="true">
+        <svg viewBox="0 0 120 90">
+          <rect x="4" y="6" width="24" height="24" stroke="#111" fill="none" stroke-width="1"/><rect x="32" y="6" width="24" height="24" stroke="#111" fill="none" stroke-width="1"/><rect x="60" y="6" width="24" height="24" stroke="#111" fill="none" stroke-width="1"/>
+          <rect x="4" y="34" width="24" height="24" stroke="#111" fill="none" stroke-width="1"/><rect x="32" y="34" width="24" height="24" stroke="#111" fill="none" stroke-width="1"/><rect x="60" y="34" width="24" height="24" stroke="#111" fill="none" stroke-width="1"/>
+          <rect x="4" y="62" width="24" height="24" stroke="#111" fill="none" stroke-width="1"/><rect x="32" y="62" width="24" height="24" stroke="#111" fill="none" stroke-width="1"/><rect x="60" y="62" width="24" height="24" stroke="#111" fill="none" stroke-width="1"/>
+        </svg>
+      </div>
+      <span class="pno">Fig. 04</span>
+      <h3 data-i18n>서가의 순서 — 서점 리브랜딩</h3>
+      <p class="tags" data-i18n>리브랜딩 · 사이니지</p>
+      <p data-i18n>동네 서점의 사이니지와 분류 체계를 다시 설계했습니다. 책의 순서를 정하는 기준을 활자 크기의 위계로 그대로 옮겼습니다.</p>
+      <a class="essay" href="#"><span data-i18n>에세이 읽기</span><span aria-hidden="true">→</span></a>
+    </article>
+
+    <article class="spread rv" id="p05">
+      <div class="fig" aria-hidden="true">
+        <svg viewBox="0 0 120 90">
+          <circle cx="14" cy="14" r="11" fill="#111"/><circle cx="42" cy="14" r="9" fill="#111"/><circle cx="66" cy="14" r="7" fill="#111"/><circle cx="86" cy="14" r="5" fill="#111"/><circle cx="102" cy="14" r="3.4" fill="#111"/><circle cx="114" cy="14" r="2" fill="#111"/>
+          <line x1="4" y1="46" x2="116" y2="46" stroke="#111" stroke-width="1"/>
+          <line x1="4" y1="70" x2="90" y2="70" stroke="#111" stroke-width="1"/>
+          <line x1="4" y1="82" x2="60" y2="82" stroke="#111" stroke-width="1"/>
+        </svg>
+      </div>
+      <span class="pno">Fig. 05</span>
+      <h3 data-i18n>각주와 여백 — 전시 도록</h3>
+      <p class="tags" data-i18n>북디자인 · 인쇄</p>
+      <p data-i18n>국내 순회 전시의 도록 디자인. 본문보다 각주가 많은 책을 만들며, 여백 자체를 하나의 챕터로 취급했습니다.</p>
+      <a class="essay" href="#"><span data-i18n>에세이 읽기</span><span aria-hidden="true">→</span></a>
+    </article>
+
+    <article class="spread rv" id="p06">
+      <div class="fig" aria-hidden="true">
+        <svg viewBox="0 0 120 90">
+          <g stroke="#111" stroke-width="1">
+            <line x1="60" y1="45" x2="60" y2="4"/><line x1="60" y1="45" x2="94" y2="14"/><line x1="60" y1="45" x2="116" y2="45"/><line x1="60" y1="45" x2="94" y2="76"/>
+            <line x1="60" y1="45" x2="60" y2="86"/><line x1="60" y1="45" x2="26" y2="76"/><line x1="60" y1="45" x2="4" y2="45"/><line x1="60" y1="45" x2="26" y2="14"/>
+          </g>
+          <circle cx="60" cy="45" r="4" fill="#111"/>
+        </svg>
+      </div>
+      <span class="pno">Fig. 06</span>
+      <h3 data-i18n>원고지 위에서 — 타이포그래피 워크숍</h3>
+      <p class="tags" data-i18n>워크숍 · 아트 디렉션</p>
+      <p data-i18n>원고지의 칸을 그리드 삼아 진행한 타이포그래피 워크숍. 참가자들이 손으로 쓴 문장을 활자로 변환하는 과정을 기록했습니다.</p>
+      <a class="essay" href="#"><span data-i18n>에세이 읽기</span><span aria-hidden="true">→</span></a>
+    </article>
+
+  </div>
+</section>
+
+<!-- 인용구 -->
+<section class="quote">
+  <blockquote class="rv" data-i18n>“편집이란, 무엇을 남길지가 아니라 무엇을 비울지 정하는 일이다.”</blockquote>
+  <cite class="rv" data-i18n>한서진 — 작업 노트</cite>
+</section>
+
+<!-- 소개 -->
+<section class="about wrap" id="about">
+  <div class="about-grid">
+    <p class="lede rv" data-i18n>한서진은 브랜드와 에디토리얼 사이를 오가며 활동하는 디자이너입니다. 그리드와 여백, 활자의 굵기만으로 위계를 설계하는 작업을 오래 이어오고 있습니다.</p>
+    <p class="body2 rv" data-i18n>색을 더하기보다 덜어내는 방식을 택합니다. 무엇을 지울지 결정하는 순간이 가장 디자인다운 순간이라고 믿기 때문입니다.</p>
+    <div class="stats rv">
+      <span><b>9</b><i data-i18n>활동 연차</i></span>
+      <span><b>52</b><i data-i18n>발행 프로젝트</i></span>
+      <span><b>15</b><i data-i18n>수상 및 선정</i></span>
+    </div>
+  </div>
+</section>
+
+<!-- 콜로폰 / 푸터 -->
+<footer id="contact">
+  <div class="wrap">
+    <p class="big rv" data-i18n>다음 호를<br>함께 <em>씁니다</em></p>
+    <p class="note rv d1" data-i18n>새 프로젝트나 협업 제안은 언제든 환영합니다.</p>
+
+    <div class="colophon rv">
+      <div class="col-block">
+        <span class="col-label" data-i18n>연락</span>
+        <a href="#">hello@margin.kr</a>
+      </div>
+      <div class="col-block">
+        <span class="col-label" data-i18n>SNS</span>
+        <a href="#" data-i18n>인스타그램</a>
+        <a href="#" data-i18n>비핸스</a>
+      </div>
+      <div class="col-block">
+        <span class="col-label" data-i18n>발행</span>
+        <span data-i18n>제7호 · 2026 · 서울</span>
+      </div>
+    </div>
+
+    <div class="copy">
+      <span data-i18n>© 2026 여백 스튜디오 · 서울</span>
+      <span data-i18n>MIT 라이선스로 배포됩니다</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* 언어 (?lang=en + 토글) */
+const STR={
+  '색인':'Index','작업':'Work','소개':'About','연락':'Contact',
+  '편집 노트 · 2026':'Editor’s Note · 2026',
+  '쓰지 않은 자리가<br><em>본문</em>이 된다':'What’s left unwritten<br>becomes the <em>text</em>',
+  '한서진 — 글과 활자 사이의 간격을 설계하는 브랜드·에디토리얼 디자이너입니다. 페이지에 남는 침묵까지 편집합니다.':
+    'Seojin Han — a brand and editorial designer who shapes the space between words. Even the silence left on a page is something to edit.',
+  '기획 및 디자인 — 한서진':'Concept & Design — Seojin Han',
+  '모래의 문법 — 도자 브랜드':'Grammar of Sand — Ceramics Brand',
+  '계절 잡지 — 격월간 에디토리얼':'Season Journal — Bimonthly Editorial',
+  '낮은 목소리 — 낭독회 아이덴티티':'Low Voice — Reading Series Identity',
+  '서가의 순서 — 서점 리브랜딩':'Order of the Shelf — Bookstore Rebrand',
+  '각주와 여백 — 전시 도록':'Footnotes & Margins — Exhibition Catalog',
+  '원고지 위에서 — 타이포그래피 워크숍':'On Manuscript Paper — Type Workshop',
+  '브랜딩 · 패키지':'Branding · Packaging',
+  '에디토리얼 · 타이포그래피':'Editorial · Typography',
+  '아이덴티티 · 포스터':'Identity · Poster',
+  '리브랜딩 · 사이니지':'Rebranding · Signage',
+  '북디자인 · 인쇄':'Book Design · Print',
+  '워크숍 · 아트 디렉션':'Workshop · Art Direction',
+  '장작 가마에서 구운 도자기 브랜드의 아이덴티티. 모래와 유약의 질감을 활자의 획 굵기로 옮겨, 손으로 빚은 흔적이 페이지에도 남도록 설계했습니다.':
+    'Identity for a wood-fired ceramics brand. The texture of sand and glaze was translated into stroke weight, so the trace of the hand remains on the page.',
+  '계절마다 발행되는 독립 잡지의 그리드와 표지 시스템. 호마다 하나의 활자를 바꾸는 규칙만으로 서로 다른 표정을 만들었습니다.':
+    'Grid and cover system for a seasonal independent magazine. One typeface change per issue is the only rule, yet each issue reads with a different face.',
+  '시를 소리 내어 읽는 낭독회를 위한 포스터 연작. 목소리의 높낮이를 선의 굵기로 옮겨, 소리가 눈에 보이는 방식을 실험했습니다.':
+    'A poster series for a poetry reading series. Pitch became line weight — an experiment in making sound visible.',
+  '동네 서점의 사이니지와 분류 체계를 다시 설계했습니다. 책의 순서를 정하는 기준을 활자 크기의 위계로 그대로 옮겼습니다.':
+    'Redesigned signage and classification for a neighborhood bookstore. The logic that orders the books became the hierarchy of type size.',
+  '국내 순회 전시의 도록 디자인. 본문보다 각주가 많은 책을 만들며, 여백 자체를 하나의 챕터로 취급했습니다.':
+    'Catalog design for a touring exhibition. A book with more footnotes than body text, treating the margin itself as a chapter.',
+  '원고지의 칸을 그리드 삼아 진행한 타이포그래피 워크숍. 참가자들이 손으로 쓴 문장을 활자로 변환하는 과정을 기록했습니다.':
+    'A typography workshop using manuscript-paper cells as a grid, documenting how handwritten sentences turn into type.',
+  '에세이 읽기':'Read the essay',
+  '“편집이란, 무엇을 남길지가 아니라 무엇을 비울지 정하는 일이다.”':
+    '“To edit is not to decide what to keep, but what to leave empty.”',
+  '한서진 — 작업 노트':'Seojin Han — Working Notes',
+  '한서진은 브랜드와 에디토리얼 사이를 오가며 활동하는 디자이너입니다. 그리드와 여백, 활자의 굵기만으로 위계를 설계하는 작업을 오래 이어오고 있습니다.':
+    'Seojin Han is a designer working between brand and editorial practice, long occupied with building hierarchy from grid, margin and stroke weight alone.',
+  '색을 더하기보다 덜어내는 방식을 택합니다. 무엇을 지울지 결정하는 순간이 가장 디자인다운 순간이라고 믿기 때문입니다.':
+    'The practice favors subtraction over addition — the moment of deciding what to erase is, I believe, the most designerly moment of all.',
+  '활동 연차':'Years Active','발행 프로젝트':'Published Projects','수상 및 선정':'Awards & Selections',
+  '다음 호를<br>함께 <em>씁니다</em>':'Let’s write<br>the next <em>issue</em> together',
+  '새 프로젝트나 협업 제안은 언제든 환영합니다.':'New project or collaboration proposals are always welcome.',
+  'SNS':'Social',
+  '인스타그램':'Instagram','비핸스':'Behance',
+  '발행':'Published',
+  '제7호 · 2026 · 서울':'No.07 · 2026 · Seoul',
+  '© 2026 여백 스튜디오 · 서울':'© 2026 Margin Studio · Seoul',
+  'MIT 라이선스로 배포됩니다':'Released under the MIT License'
+};
+let EN=new URLSearchParams(location.search).get('lang')==='en';
+const orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if(!orig.has(el)) orig.set(el, el.innerHTML);
+    const ko=orig.get(el).trim();
+    el.innerHTML = EN ? (STR[ko] ?? orig.get(el)) : orig.get(el);
+  });
+  document.getElementById('lang').textContent = EN ? 'KO' : 'EN';
+  document.documentElement.lang = EN ? 'en' : 'ko';
+  document.title = EN ? 'Margin — Seojin Han Portfolio' : '여백 — 한서진 포트폴리오';
+}
+document.getElementById('lang').addEventListener('click',()=>{ EN=!EN; applyLang(); });
+applyLang();
+
+/* 스크롤 리빌 */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{ threshold:.12 });
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+</script>
+</body>
+</html>

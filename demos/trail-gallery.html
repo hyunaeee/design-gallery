@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>이미지 트레일 — 마우스가 뿌리는 아카이브</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* 마우스 인터랙션: 커서가 지나간 자리에 AI 생성 이미지가 흩뿌려지는 트레일 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --paper: #efece5; --ink: #16130f; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: var(--paper); color: var(--ink);
+       height: 100vh; overflow: hidden; cursor: crosshair; }
+
+.stage { position: fixed; inset: 0; }
+
+/* 트레일 이미지 조각 */
+.shard { position: absolute; width: 190px; aspect-ratio: 3/4; object-fit: cover; pointer-events: none;
+         border-radius: 6px; box-shadow: 0 18px 44px rgba(22,19,15,.3);
+         animation: shard 2.4s cubic-bezier(.16,.8,.3,1) both; will-change: transform, opacity; }
+@keyframes shard {
+  0%   { opacity: 0; transform: translate(-50%,-50%) scale(.4) rotate(var(--r)); }
+  12%  { opacity: 1; transform: translate(-50%,-50%) scale(1) rotate(var(--r)); }
+  70%  { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, calc(-50% + 46px)) scale(.92) rotate(var(--r)); }
+}
+
+/* 중앙 콘텐츠 */
+.center { position: fixed; inset: 0; z-index: 5; display: flex; flex-direction: column;
+          align-items: center; justify-content: center; text-align: center; pointer-events: none;
+          mix-blend-mode: darken; }
+.center .eyebrow { font-size: 12px; letter-spacing: 6px; color: #8d8778; }
+.center h1 { margin-top: 18px; font-family: "Playfair Display", serif; font-weight: 800;
+             font-size: clamp(52px, 9.5vw, 138px); line-height: .98; letter-spacing: -.02em; }
+.center h1 em { font-style: italic; font-weight: 600; }
+.center .hint { margin-top: 26px; font-size: 13px; letter-spacing: 3px; color: #8d8778;
+                animation: pulse 2.4s ease-in-out infinite; }
+@keyframes pulse { 0%,100% { opacity: .55 } 50% { opacity: 1 } }
+
+nav { position: fixed; z-index: 10; top: 0; left: 0; right: 0; display: flex;
+      justify-content: space-between; padding: 26px 4vw; font-size: 12.5px; letter-spacing: 2.5px; }
+nav a { color: var(--ink); text-decoration: none; border-bottom: 1px solid transparent; }
+nav a:hover { border-color: var(--ink); }
+
+.foot { position: fixed; z-index: 10; bottom: 0; left: 0; right: 0; display: flex;
+        justify-content: space-between; align-items: center; padding: 22px 4vw;
+        font-size: 11.5px; letter-spacing: 2px; color: #8d8778; }
+.count { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 700px) { .shard { width: 130px; } }
+</style>
+</head>
+<body>
+<div class="stage" id="stage"></div>
+
+<nav>
+  <span>ARCHIVE 025</span>
+  <a href="#">전체 작업 보기 →</a>
+</nav>
+
+<div class="center">
+  <div class="eyebrow">VISUAL ARCHIVE — SINCE 2023</div>
+  <h1>마우스를<br><em>움직여</em> 보세요</h1>
+  <div class="hint">커서가 지나간 자리에 아카이브가 흩뿌려집니다</div>
+</div>
+
+<div class="foot">
+  <span>이미지 전부 AI 생성 (HIGGSFIELD)</span>
+  <span class="count"><b id="n">0</b> IMAGES SPAWNED</span>
+</div>
+
+<script>
+/* 커서 이동 거리 임계값마다 이미지 조각 생성 → 1.5초 뒤 자멸 */
+const IMGS = [
+  '../assets/gen/fashion-1.png', '../assets/gen/fashion-2.png', '../assets/gen/chrome.png',
+  '../assets/gen/brutalist.png', '../assets/gen/botanical.png', '../assets/gen/travel-lake.png',
+  '../assets/gen/travel-kyoto.png', '../assets/gen/travel-desert.png',
+];
+/* 프리로드 */
+IMGS.forEach(src => { const i = new Image(); i.src = src; });
+
+const stage = document.getElementById('stage');
+const counter = document.getElementById('n');
+let lastX = -100, lastY = -100, idx = 0, spawned = 0;
+const GAP = 90;               /* 조각 사이 최소 이동 거리(px) */
+const MAX = 24;               /* 동시 존재 상한 (성능) */
+
+function spawn(x, y) {
+  if (stage.children.length > MAX) stage.firstChild.remove();
+  const img = document.createElement('img');
+  img.className = 'shard';
+  img.src = IMGS[idx++ % IMGS.length];
+  img.style.left = x + 'px';
+  img.style.top = y + 'px';
+  img.style.setProperty('--r', (Math.random() * 22 - 11).toFixed(1) + 'deg');
+  img.style.zIndex = ++spawned;
+  img.addEventListener('animationend', () => img.remove());
+  stage.appendChild(img);
+  counter.textContent = spawned;
+}
+
+function onMove(x, y) {
+  if (Math.hypot(x - lastX, y - lastY) < GAP) return;
+  lastX = x; lastY = y;
+  spawn(x, y);
+}
+addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+addEventListener('touchmove', e => onMove(e.touches[0].clientX, e.touches[0].clientY), { passive: true });
+
+/* 첫 방문 데모: 썸네일에서도 보이도록 중앙에 세 장 미리 뿌리기 */
+setTimeout(() => { spawn(innerWidth * .32, innerHeight * .38); }, 150);
+setTimeout(() => { spawn(innerWidth * .68, innerHeight * .3); }, 320);
+setTimeout(() => { spawn(innerWidth * .55, innerHeight * .66); }, 500);
+</script>
+<script>
+/* English mode: ?lang=en swaps every visible Korean string to English. Adds only — no markup/CSS/logic changed. */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "이미지 트레일 — 마우스가 뿌리는 아카이브": "Image Trail — An Archive Scattered by Your Mouse",
+    "전체 작업 보기 →": "View all work →",
+    "마우스를": "Move your",
+    "움직여": "mouse",
+    "보세요": "around",
+    "커서가 지나간 자리에 아카이브가 흩뿌려집니다": "The archive scatters in the cursor's wake",
+    "이미지 전부 AI 생성 (HIGGSFIELD)": "All images AI-generated (HIGGSFIELD)"
+  };
+  const norm = s => s.replace(/\s+/g,' ').trim();
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swapText = n => {
+    const raw = n.nodeValue, key = norm(raw);
+    if (!key || TR[key] == null) return;
+    n.nodeValue = raw.match(/^\s*/)[0] + TR[key] + raw.match(/\s*$/)[0];
+  };
+  const walk = n => {
+    if (n.nodeType === 3) { swapText(n); return; }
+    if (n.nodeType !== 1) return;
+    for (const a of ATTRS) {
+      if (n.hasAttribute && n.hasAttribute(a)) {
+        const k = norm(n.getAttribute(a));
+        if (TR[k] != null) n.setAttribute(a, TR[k]);
+      }
+    }
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = norm(document.title);
+  if (TR[dt] != null) document.title = TR[dt];
+})();
+</script>
+</body>
+</html>

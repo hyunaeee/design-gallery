@@ -1,0 +1,36 @@
+{
+  "chat": {
+    "color": {
+      "background":      { "value": "#B2C7DA", "type": "color", "description": "대화방 배경" },
+      "bubble-mine":     { "value": "#FFE812", "type": "color", "description": "내 말풍선" },
+      "bubble-other":    { "value": "#FFFFFF", "type": "color", "description": "상대 말풍선" },
+      "text-primary":    { "value": "#1E2226", "type": "color" },
+      "text-secondary":  { "value": "#67717C", "type": "color" },
+      "read-badge":      { "value": "#F7B500", "type": "color", "description": "읽음(1) 표시" },
+      "inputbar":        { "value": "#FFFFFF", "type": "color" },
+      "input-field":     { "value": "#F2F4F6", "type": "color" }
+    },
+    "radius": {
+      "bubble":       { "value": "16", "type": "borderRadius" },
+      "bubble-tail":  { "value": "4", "type": "borderRadius", "description": "말풍선 꼬리쪽 모서리" },
+      "avatar":       { "value": "13", "type": "borderRadius", "description": "스쿼클 아바타" },
+      "input":        { "value": "20", "type": "borderRadius" }
+    },
+    "spacing": {
+      "bubble-x":  { "value": "13", "type": "spacing" },
+      "bubble-y":  { "value": "10", "type": "spacing" },
+      "msg-gap":   { "value": "10", "type": "spacing" },
+      "log-x":     { "value": "14", "type": "spacing" }
+    },
+    "typography": {
+      "bubble": { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "400", "fontSize": "14", "lineHeight": "1.5" }, "type": "typography" },
+      "name":   { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "400", "fontSize": "11.5" }, "type": "typography" },
+      "time":   { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "400", "fontSize": "10" }, "type": "typography" }
+    },
+    "component": {
+      "bubble-max-width": { "value": "68%", "type": "other" },
+      "avatar-size":      { "value": "34", "type": "sizing" },
+      "input-height":     { "value": "36", "type": "sizing" }
+    }
+  }
+}

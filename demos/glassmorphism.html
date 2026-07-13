@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>글래스모피즘 — 프로스티드 글래스 대시보드</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; min-height: 100vh; color: #fff;
+       background: #0c0a1d; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+
+/* ── 컬러 블롭 + 노이즈 ── */
+.blob { position: fixed; border-radius: 50%; filter: blur(100px); z-index: 0;
+        animation: drift 20s ease-in-out infinite alternate; }
+.b1 { width: 560px; height: 560px; background: #ff2e88; opacity: .5; top: -160px; left: -140px; }
+.b2 { width: 500px; height: 500px; background: #2e6bff; opacity: .5; bottom: -140px; right: -100px;
+      animation-delay: -7s; }
+.b3 { width: 420px; height: 420px; background: #00e0c6; opacity: .38; top: 38%; left: 52%;
+      animation-delay: -13s; }
+@keyframes drift { from { transform: translate(0,0) scale(1); } to { transform: translate(70px,-60px) scale(1.18); } }
+.noise { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .35; mix-blend-mode: overlay;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="4"/></filter><rect width="100%" height="100%" filter="url(%23n)"/></svg>'); }
+
+.layout { position: relative; z-index: 2; display: grid; grid-template-columns: 210px 1fr;
+          gap: 22px; max-width: 1080px; margin: 0 auto; padding: 30px 24px 70px; }
+
+.glass { background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.16);
+         border-radius: 20px; backdrop-filter: blur(20px) saturate(1.4);
+         -webkit-backdrop-filter: blur(20px) saturate(1.4);
+         box-shadow: 0 8px 32px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12); }
+
+/* ── 사이드바 ── */
+.sidebar { padding: 22px 14px; align-self: start; position: sticky; top: 30px; }
+.brand { display: flex; align-items: center; gap: 10px; padding: 4px 10px 18px; font-weight: 700;
+         font-size: 16px; letter-spacing: -.3px; }
+.brand i { width: 30px; height: 30px; border-radius: 9px; font-style: normal; display: flex;
+           align-items: center; justify-content: center; font-size: 15px;
+           background: linear-gradient(135deg, #ff2e88, #ffb02e); box-shadow: 0 6px 16px -4px rgba(255,46,136,.6); }
+.nav-item { display: flex; align-items: center; gap: 11px; padding: 11px 13px; border-radius: 12px;
+            font-size: 14px; color: rgba(255,255,255,.65); cursor: pointer; transition: all .2s; margin-bottom: 3px; }
+.nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
+.nav-item.on { background: rgba(255,255,255,.14); color: #fff; font-weight: 600;
+               box-shadow: inset 0 1px 0 rgba(255,255,255,.15); }
+.upgrade { margin-top: 20px; padding: 16px 14px; border-radius: 14px; text-align: center;
+           background: linear-gradient(135deg, rgba(255,46,136,.25), rgba(46,107,255,.25));
+           border: 1px solid rgba(255,255,255,.18); }
+.upgrade b { font-size: 13.5px; }
+.upgrade p { font-size: 11.5px; color: rgba(255,255,255,.65); margin-top: 5px; line-height: 1.5; }
+.upgrade button { margin-top: 12px; width: 100%; border: none; cursor: pointer; padding: 9px;
+                  border-radius: 9px; font-size: 12.5px; font-weight: 700; color: #0c0a1d;
+                  background: linear-gradient(90deg, #7effc9, #6bc9ff); font-family: inherit;
+                  transition: transform .15s; }
+.upgrade button:hover { transform: scale(1.03); }
+
+/* ── 메인 ── */
+.main { display: flex; flex-direction: column; gap: 22px; min-width: 0; }
+.topbar { display: flex; align-items: center; gap: 16px; padding: 15px 22px; border-radius: 99px; }
+.topbar h1 { font-size: 16.5px; font-weight: 700; }
+.topbar small { display: block; font-weight: 400; color: rgba(255,255,255,.55); font-size: 12px; margin-top: 2px; }
+.seg { margin-left: auto; display: flex; background: rgba(0,0,0,.25); border-radius: 99px; padding: 3px; }
+.seg button { border: none; background: none; color: rgba(255,255,255,.6); font-size: 12.5px; font-weight: 600;
+              padding: 7px 16px; border-radius: 99px; cursor: pointer; font-family: inherit; transition: all .2s; }
+.seg button.on { background: rgba(255,255,255,.18); color: #fff; }
+.avatar { width: 38px; height: 38px; border-radius: 50%; background: linear-gradient(135deg,#ff2e88,#ffb02e);
+          border: 2px solid rgba(255,255,255,.3); }
+
+.kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 22px; }
+.kpi { padding: 24px 22px; transition: transform .3s, background .3s; }
+.kpi:hover { transform: translateY(-5px); background: rgba(255,255,255,.12); }
+.kpi .k-head { display: flex; align-items: center; justify-content: space-between; }
+.kpi .label { font-size: 13px; color: rgba(255,255,255,.6); font-weight: 500; }
+.kpi .k-ico { width: 32px; height: 32px; border-radius: 10px; display: flex; align-items: center;
+              justify-content: center; font-size: 14px; background: rgba(255,255,255,.1); }
+.kpi .value { font-size: 30px; font-weight: 800; margin-top: 12px; letter-spacing: -1px;
+              font-variant-numeric: tabular-nums; }
+.kpi .delta { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; font-size: 12px;
+              font-weight: 600; padding: 4px 11px; border-radius: 99px;
+              background: rgba(46,224,150,.18); color: #7effc9; }
+.kpi .delta.down { background: rgba(255,80,80,.18); color: #ff9d9d; }
+
+.row2 { display: grid; grid-template-columns: 1.6fr 1fr; gap: 22px; }
+.panel { padding: 24px; min-width: 0; }
+.panel .p-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+.panel .p-head b { font-size: 14.5px; }
+.panel .p-head span { font-size: 12px; color: rgba(255,255,255,.5); }
+
+/* 영역 차트 */
+.area-chart svg { width: 100%; height: 170px; display: block; }
+.area-chart .line { fill: none; stroke: #7effc9; stroke-width: 2.5; stroke-linecap: round;
+                    filter: drop-shadow(0 0 8px rgba(126,255,201,.65));
+                    stroke-dasharray: 700; stroke-dashoffset: 700; animation: draw 2.4s ease-out forwards .4s; }
+.area-chart .line2 { fill: none; stroke: rgba(107,201,255,.75); stroke-width: 2; stroke-dasharray: 3 6;
+                     stroke-linecap: round; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.legend { display: flex; gap: 18px; margin-top: 14px; font-size: 11.5px; color: rgba(255,255,255,.6); }
+.legend i { display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; font-style: normal; }
+
+/* 도넛 */
+.donut-wrap { display: flex; align-items: center; gap: 22px; }
+.donut { --p1: 42; --p2: 30; --p3: 18; position: relative; width: 128px; height: 128px; border-radius: 50%;
+         background: conic-gradient(#ff2e88 0 calc(var(--p1)*1%), #6bc9ff calc(var(--p1)*1%) calc((var(--p1) + var(--p2))*1%),
+                     #7effc9 calc((var(--p1) + var(--p2))*1%) calc((var(--p1) + var(--p2) + var(--p3))*1%),
+                     rgba(255,255,255,.12) calc((var(--p1) + var(--p2) + var(--p3))*1%));
+         flex-shrink: 0; animation: spin-in 1.2s cubic-bezier(.2,.7,.3,1) both .3s; }
+@keyframes spin-in { from { transform: rotate(-120deg) scale(.85); opacity: 0; } }
+.donut::before { content: ""; position: absolute; inset: 17px; border-radius: 50%; background: #171430;
+                 box-shadow: inset 0 2px 10px rgba(0,0,0,.5); }
+.donut span { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+              justify-content: center; font-size: 21px; font-weight: 800; z-index: 1; }
+.donut small { font-size: 9.5px; font-weight: 500; color: rgba(255,255,255,.55); }
+.d-legend { font-size: 12.5px; display: flex; flex-direction: column; gap: 10px; }
+.d-legend div { display: flex; align-items: center; gap: 8px; color: rgba(255,255,255,.75); }
+.d-legend i { width: 9px; height: 9px; border-radius: 3px; font-style: normal; flex-shrink: 0; }
+.d-legend b { margin-left: auto; font-variant-numeric: tabular-nums; }
+
+/* 거래 내역 */
+.tx { display: flex; align-items: center; gap: 13px; padding: 12px 4px; font-size: 13.5px;
+      border-bottom: 1px solid rgba(255,255,255,.09); }
+.tx:last-child { border-bottom: none; }
+.tx .t-ico { width: 38px; height: 38px; border-radius: 12px; display: flex; align-items: center;
+             justify-content: center; font-size: 16px; background: rgba(255,255,255,.1); flex-shrink: 0; }
+.tx small { display: block; color: rgba(255,255,255,.5); font-size: 11px; margin-top: 2px; }
+.tx .amt { margin-left: auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tx .amt.plus { color: #7effc9; }
+
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity .8s cubic-bezier(.2,.6,.2,1), transform .8s cubic-bezier(.2,.6,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 860px) {
+  .layout { grid-template-columns: 1fr; }
+  .sidebar { display: none; }
+  .kpis, .row2 { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div>
+<div class="noise"></div>
+
+<div class="layout">
+  <aside class="glass sidebar">
+    <div class="brand"><i>◈</i> glassy</div>
+    <div class="nav-item on">📊 대시보드</div>
+    <div class="nav-item">💳 결제</div>
+    <div class="nav-item">👥 고객</div>
+    <div class="nav-item">📈 애널리틱스</div>
+    <div class="nav-item">⚙️ 설정</div>
+    <div class="upgrade">
+      <b>Pro로 업그레이드</b>
+      <p>무제한 리포트와 실시간 알림을 사용해 보세요.</p>
+      <button>14일 무료 체험</button>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="glass topbar">
+      <div>
+        <h1>안녕하세요, 루나님 👋</h1>
+        <small>2026년 7월 10일 · 실시간 업데이트 중</small>
+      </div>
+      <div class="seg">
+        <button class="on">주간</button><button>월간</button><button>연간</button>
+      </div>
+      <div class="avatar"></div>
+    </div>
+
+    <div class="kpis reveal in">
+      <div class="glass kpi">
+        <div class="k-head"><span class="label">총 수익</span><span class="k-ico">💰</span></div>
+        <div class="value" data-count="48213000" data-prefix="₩">₩0</div>
+        <span class="delta">▲ 12.4% 지난주 대비</span>
+      </div>
+      <div class="glass kpi">
+        <div class="k-head"><span class="label">활성 사용자</span><span class="k-ico">⚡</span></div>
+        <div class="value" data-count="21384">0</div>
+        <span class="delta">▲ 8.1% 지난주 대비</span>
+      </div>
+      <div class="glass kpi">
+        <div class="k-head"><span class="label">이탈률</span><span class="k-ico">📉</span></div>
+        <div class="value" data-count="2.36" data-suffix="%">0%</div>
+        <span class="delta down">▼ 0.4%p 지난주 대비</span>
+      </div>
+    </div>
+
+    <div class="row2 reveal">
+      <div class="glass panel area-chart">
+        <div class="p-head"><b>수익 추이</b><span>최근 14일</span></div>
+        <svg viewBox="0 0 560 170" preserveAspectRatio="none">
+          <defs>
+            <linearGradient id="ag" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#7effc9" stop-opacity=".28"/>
+              <stop offset="100%" stop-color="#7effc9" stop-opacity="0"/>
+            </linearGradient>
+          </defs>
+          <path fill="url(#ag)" d="M0,130 C50,122 70,96 115,100 C160,104 185,64 230,70 C275,76 300,48 345,52 C390,56 415,30 460,26 C495,23 530,36 560,18 L560,170 L0,170 Z"/>
+          <path class="line2" d="M0,142 C60,136 90,118 140,120 C200,122 240,96 300,98 C360,100 420,78 470,72 C510,67 540,74 560,62"/>
+          <path class="line" d="M0,130 C50,122 70,96 115,100 C160,104 185,64 230,70 C275,76 300,48 345,52 C390,56 415,30 460,26 C495,23 530,36 560,18"/>
+        </svg>
+        <div class="legend">
+          <span><i style="background:#7effc9"></i>이번 기간</span>
+          <span><i style="background:rgba(107,201,255,.75)"></i>지난 기간</span>
+        </div>
+      </div>
+
+      <div class="glass panel">
+        <div class="p-head"><b>트래픽 소스</b><span>이번 주</span></div>
+        <div class="donut-wrap">
+          <div class="donut"><span>90%<small>목표 달성</small></span></div>
+          <div class="d-legend">
+            <div><i style="background:#ff2e88"></i>검색 <b>42%</b></div>
+            <div><i style="background:#6bc9ff"></i>소셜 <b>30%</b></div>
+            <div><i style="background:#7effc9"></i>추천 <b>18%</b></div>
+            <div><i style="background:rgba(255,255,255,.3)"></i>기타 <b>10%</b></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="glass panel reveal">
+      <div class="p-head"><b>최근 거래</b><span>전체 보기 →</span></div>
+      <div class="tx"><span class="t-ico">💳</span><div>프로 플랜 결제<small>오늘 14:32 · 카드 **** 4242</small></div><span class="amt plus">+₩29,000</span></div>
+      <div class="tx"><span class="t-ico">🎨</span><div>디자인 에셋 구독<small>오늘 11:05 · 자동 결제</small></div><span class="amt">−₩12,000</span></div>
+      <div class="tx"><span class="t-ico">👥</span><div>팀 시트 3석 추가<small>어제 18:44 · 인보이스</small></div><span class="amt plus">+₩87,000</span></div>
+      <div class="tx"><span class="t-ico">☁️</span><div>클라우드 사용량<small>어제 09:12 · 자동 결제</small></div><span class="amt">−₩34,200</span></div>
+    </div>
+  </main>
+</div>
+
+<script>
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('in');
+  e.target.querySelectorAll('[data-count]').forEach(el => {
+    if (el.dataset.done) return; el.dataset.done = 1;
+    const target = parseFloat(el.dataset.count);
+    const pfx = el.dataset.prefix || '', sfx = el.dataset.suffix || '';
+    const dec = el.dataset.count.includes('.') ? 2 : 0;
+    const t0 = performance.now();
+    (function tick(t) {
+      const p = Math.min((t - t0) / 1600, 1), ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = pfx + (target * ease).toFixed(dec).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + sfx;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+}), { threshold: .15 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+<script>
+/* ── English mode (?lang=en) — non-destructive text swap ── */
+(function () {
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "글래스모피즘 — 프로스티드 글래스 대시보드": "Glassmorphism — Frosted Glass Dashboard",
+    "대시보드": "Dashboard",
+    "결제": "Payments",
+    "고객": "Customers",
+    "애널리틱스": "Analytics",
+    "설정": "Settings",
+    "Pro로 업그레이드": "Upgrade to Pro",
+    "무제한 리포트와 실시간 알림을 사용해 보세요.": "Unlock unlimited reports and real-time alerts.",
+    "14일 무료 체험": "14-day free trial",
+    "안녕하세요, 루나님 👋": "Welcome, Luna 👋",
+    "2026년 7월 10일 · 실시간 업데이트 중": "July 10, 2026 · Live updating",
+    "주간": "Weekly",
+    "월간": "Monthly",
+    "연간": "Yearly",
+    "총 수익": "Total Revenue",
+    "활성 사용자": "Active Users",
+    "이탈률": "Churn Rate",
+    "지난주 대비": "vs last week",
+    "수익 추이": "Revenue Trend",
+    "최근 14일": "Last 14 days",
+    "이번 기간": "This period",
+    "지난 기간": "Previous period",
+    "트래픽 소스": "Traffic Sources",
+    "이번 주": "This week",
+    "목표 달성": "Goal reached",
+    "검색": "Search ",
+    "소셜": "Social ",
+    "추천": "Referral ",
+    "기타": "Other ",
+    "최근 거래": "Recent Transactions",
+    "전체 보기 →": "View all →",
+    "프로 플랜 결제": "Pro plan payment",
+    "오늘 14:32 · 카드 **** 4242": "Today 14:32 · Card **** 4242",
+    "디자인 에셋 구독": "Design asset subscription",
+    "오늘 11:05 · 자동 결제": "Today 11:05 · Auto payment",
+    "팀 시트 3석 추가": "Added 3 team seats",
+    "어제 18:44 · 인보이스": "Yesterday 18:44 · Invoice",
+    "클라우드 사용량": "Cloud usage",
+    "어제 09:12 · 자동 결제": "Yesterday 09:12 · Auto payment"
+  };
+  const KEYS = Object.keys(TR).sort((a, b) => b.length - a.length);
+  const swap = s => { let o = s; for (const k of KEYS) if (o.indexOf(k) !== -1) o = o.split(k).join(TR[k]); return o; };
+  const ATTRS = ['placeholder', 'title', 'alt', 'aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const v = n.nodeValue; if (!v || !v.trim()) return;
+      const c = v.replace(/\s+/g, ' ').trim();
+      if (TR[c] != null) { if (n.nodeValue !== TR[c]) n.nodeValue = TR[c]; return; }
+      const nv = swap(v); if (nv !== v) n.nodeValue = nv; return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) { const av = n.getAttribute(a); if (av && TR[av.trim()] != null) n.setAttribute(a, TR[av.trim()]); } });
+    if ((n.tagName === 'INPUT' || n.tagName === 'TEXTAREA') && n.value != null && TR[n.value.trim()] != null) n.value = TR[n.value.trim()];
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, { childList: true, subtree: true });
+  walk(document.body);
+  const dt = swap(document.title); if (dt !== document.title) document.title = dt;
+})();
+</script>
+</body>
+</html>

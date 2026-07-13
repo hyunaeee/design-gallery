@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앱 · 중고거래 피드 — 당근 스타일</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ──────────────────────────────────────────────
+   WWIT 분류
+   카테고리: 커머스/로컬  |  패턴: 홈, 피드  |  컴포넌트: 칩 필터, 리스트, FAB
+   ────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --carrot: #ff6f0f; --ink: #212124; --sub: #868b94; --line: #f1f3f5; }
+body { font-family: "Noto Sans KR", sans-serif; min-height: 100vh; display: flex; align-items: center;
+       justify-content: center; gap: 64px; padding: 40px 24px;
+       background: linear-gradient(160deg, #fff3e8, #f4f0ec); -webkit-font-smoothing: antialiased; }
+
+.phone { position: relative; width: 375px; height: 780px; flex-shrink: 0; border-radius: 54px;
+         background: #0b0c0e; padding: 10px;
+         box-shadow: 0 50px 100px -24px rgba(60,30,0,.4), inset 0 0 0 2px #3a3d42; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden;
+          background: #fff; display: flex; flex-direction: column; }
+.island { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 110px;
+          height: 30px; background: #0b0c0e; border-radius: 99px; z-index: 50; }
+.statusbar { display: flex; justify-content: space-between; padding: 20px 30px 8px;
+             font-size: 14px; font-weight: 700; color: var(--ink); }
+
+.app-head { display: flex; align-items: center; gap: 14px; padding: 8px 18px 10px; }
+.loc { display: flex; align-items: center; gap: 5px; font-size: 18px; font-weight: 900;
+       color: var(--ink); cursor: pointer; }
+.loc i { font-style: normal; font-size: 12px; color: var(--sub); }
+.app-head .icons { margin-left: auto; display: flex; gap: 17px; font-size: 19px; }
+.app-head .chatn { position: relative; }
+.app-head .chatn::after { content: "3"; position: absolute; top: -5px; right: -8px; background: var(--carrot);
+  color: #fff; font-size: 9.5px; font-weight: 700; width: 16px; height: 16px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center; }
+
+/* 칩 필터 */
+.chips { display: flex; gap: 8px; padding: 4px 18px 12px; overflow-x: auto; scrollbar-width: none;
+         border-bottom: 1px solid var(--line); }
+.chips::-webkit-scrollbar { display: none; }
+.chip { flex-shrink: 0; border: 1px solid #e9ecef; background: #fff; font-family: inherit;
+        font-size: 13px; font-weight: 500; color: #4d5159; padding: 7px 14px; border-radius: 99px;
+        cursor: pointer; transition: all .15s; }
+.chip.on { background: var(--ink); color: #fff; border-color: var(--ink); font-weight: 700; }
+
+.feed { flex: 1; overflow-y: auto; padding-bottom: 88px; scrollbar-width: none; }
+.feed::-webkit-scrollbar { display: none; }
+
+.item { display: flex; gap: 14px; padding: 16px 18px; border-bottom: 1px solid var(--line);
+        cursor: pointer; transition: background .15s; }
+.item:active { background: #fafafa; }
+.item .ph { position: relative; width: 108px; height: 108px; border-radius: 12px; overflow: hidden;
+            flex-shrink: 0; background: var(--fb, #f1f3f5); }
+.item .ph img { width: 100%; height: 100%; object-fit: cover; }
+.item .ph .emo { position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+                 font-size: 38px; }
+.item .ph.noimg .emo { display: flex; }
+.item .info { flex: 1; min-width: 0; display: flex; flex-direction: column; }
+.item .title { font-size: 15px; color: var(--ink); line-height: 1.4;
+               display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.item .meta { margin-top: 4px; font-size: 12.5px; color: var(--sub); }
+.item .price { margin-top: 5px; font-size: 16px; font-weight: 900; color: var(--ink); }
+.item .price .badge-free { color: var(--carrot); }
+.item .counts { margin-top: auto; align-self: flex-end; font-size: 12px; color: var(--sub);
+                display: flex; gap: 9px; }
+.tag-resv { display: inline-block; background: #1d7d45; color: #fff; font-size: 11px; font-weight: 700;
+            padding: 2.5px 7px; border-radius: 5px; margin-right: 5px; vertical-align: 2px; }
+
+/* FAB — 탭하면 확장 */
+.fab { position: absolute; z-index: 40; right: 18px; bottom: 96px; display: flex; align-items: center;
+       gap: 8px; border: none; background: var(--carrot); color: #fff; font-family: inherit;
+       font-size: 15px; font-weight: 700; height: 54px; padding: 0 18px; border-radius: 99px;
+       cursor: pointer; box-shadow: 0 10px 24px rgba(255,111,15,.45);
+       transition: transform .2s, filter .2s; white-space: nowrap; }
+.fab:active { transform: scale(.94); filter: brightness(.92); }
+.fab .plus { font-size: 21px; font-weight: 500; }
+.fab .label { max-width: 0; overflow: hidden; transition: max-width .35s cubic-bezier(.2,.8,.2,1); }
+.fab.wide .label { max-width: 90px; }
+
+.tabbar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 40; display: flex;
+          background: rgba(255,255,255,.96); backdrop-filter: blur(14px);
+          border-top: 1px solid var(--line); padding: 8px 6px 22px; }
+.tab { flex: 1; border: none; background: none; font-family: inherit; display: flex; flex-direction: column;
+       align-items: center; gap: 3px; font-size: 10.5px; color: #b0b8c1; cursor: pointer; font-weight: 500; }
+.tab i { font-style: normal; font-size: 20px; filter: grayscale(1) opacity(.5); }
+.tab.on { color: var(--ink); font-weight: 700; }
+.tab.on i { filter: none; }
+.home-bar { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 130px;
+            height: 5px; border-radius: 99px; background: #0b0c0e; z-index: 60; opacity: .85; }
+
+/* ── WWIT 명세 패널 ── */
+.specs { max-width: 360px; }
+.specs .pill { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+               color: #8a6a4f; border: 1.5px solid #dcc9b8; border-radius: 99px; padding: 6px 16px; }
+.specs h1 { margin-top: 18px; font-size: 34px; font-weight: 900; letter-spacing: -1px; color: #212124; }
+.specs .desc { margin-top: 12px; font-size: 14.5px; line-height: 1.75; color: #55504a; word-break: keep-all; }
+.spec-group { margin-top: 22px; }
+.spec-group h4 { font-size: 11.5px; font-weight: 700; letter-spacing: 2px; color: #a09383; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.tags span { font-size: 12.5px; font-weight: 600; background: #fff; border: 1px solid #eadfd3;
+             padding: 6px 13px; border-radius: 99px; color: #4a4237; }
+.tokens { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.tk { display: flex; align-items: center; gap: 7px; font-family: "JetBrains Mono", monospace; font-size: 11px;
+      color: #7d7265; background: #fff; border: 1px solid #eadfd3; border-radius: 10px; padding: 7px 11px; }
+.tk i { width: 15px; height: 15px; border-radius: 5px; }
+.hint { margin-top: 24px; font-size: 12.5px; color: #a09383; line-height: 1.7; }
+.hint b { color: var(--carrot); }
+
+@media (max-width: 900px) { body { flex-direction: column; gap: 32px; } .specs { max-width: 375px; } }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span>􀙇 􀙈 􀛨</span></div>
+
+    <div class="app-head">
+      <span class="loc">역삼동 <i>▼</i></span>
+      <div class="icons"><span>🔍</span><span class="chatn">💬</span><span>🔔</span></div>
+    </div>
+
+    <div class="chips">
+      <button class="chip on">전체</button>
+      <button class="chip">디지털기기</button>
+      <button class="chip">가구/인테리어</button>
+      <button class="chip">유아동</button>
+      <button class="chip">생활가전</button>
+      <button class="chip">의류</button>
+    </div>
+
+    <div class="feed">
+      <div class="item">
+        <div class="ph" style="--fb:linear-gradient(135deg,#dfe9f3,#ffffff)">
+          <img src="https://picsum.photos/id/119/220/220" alt="" loading="lazy"
+               onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="emo">💻</span>
+        </div>
+        <div class="info">
+          <span class="title">맥북 프로 14인치 M3 급처합니다</span>
+          <span class="meta">역삼동 · 10분 전</span>
+          <span class="price">1,850,000원</span>
+          <span class="counts">♡ 12 &nbsp;💬 5</span>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ph" style="--fb:linear-gradient(135deg,#fbe9d7,#f6d5b8)">
+          <img src="https://picsum.photos/id/1080/220/220" alt="" loading="lazy"
+               onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="emo">🪑</span>
+        </div>
+        <div class="info">
+          <span class="title"><span class="tag-resv">예약중</span>원목 식탁 4인용 + 의자 세트</span>
+          <span class="meta">대치동 · 32분 전</span>
+          <span class="price">120,000원</span>
+          <span class="counts">♡ 28 &nbsp;💬 11</span>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ph" style="--fb:linear-gradient(135deg,#e8f5e9,#c8e6c9)">
+          <img src="https://picsum.photos/id/96/220/220" alt="" loading="lazy"
+               onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="emo">🌱</span>
+        </div>
+        <div class="info">
+          <span class="title">몬스테라 대품 화분째로 드려요</span>
+          <span class="meta">도곡동 · 1시간 전</span>
+          <span class="price"><span class="badge-free">나눔 🧡</span></span>
+          <span class="counts">♡ 41 &nbsp;💬 23</span>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ph" style="--fb:linear-gradient(135deg,#ede7f6,#d1c4e9)">
+          <img src="https://picsum.photos/id/175/220/220" alt="" loading="lazy"
+               onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="emo">📷</span>
+        </div>
+        <div class="info">
+          <span class="title">필름카메라 캐논 AE-1 작동 완벽</span>
+          <span class="meta">역삼동 · 2시간 전</span>
+          <span class="price">230,000원</span>
+          <span class="counts">♡ 19 &nbsp;💬 7</span>
+        </div>
+      </div>
+      <div class="item">
+        <div class="ph" style="--fb:linear-gradient(135deg,#fff3e0,#ffe0b2)">
+          <img src="https://picsum.photos/id/21/220/220" alt="" loading="lazy"
+               onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="emo">👟</span>
+        </div>
+        <div class="info">
+          <span class="title">나이키 에어포스 270 새상품 (박스풀)</span>
+          <span class="meta">삼성동 · 3시간 전</span>
+          <span class="price">89,000원</span>
+          <span class="counts">♡ 8 &nbsp;💬 2</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="fab" id="fab"><span class="plus">＋</span><span class="label">글쓰기</span></button>
+
+    <div class="tabbar">
+      <button class="tab on"><i>🏠</i>홈</button>
+      <button class="tab"><i>🗞️</i>동네생활</button>
+      <button class="tab"><i>📍</i>내 근처</button>
+      <button class="tab"><i>💬</i>채팅</button>
+      <button class="tab"><i>👤</i>나의 당근</button>
+    </div>
+    <div class="home-bar"></div>
+  </div>
+</div>
+
+<aside class="specs">
+  <span class="pill">APP REFERENCE</span>
+  <h1>중고거래 피드<br>— 당근 스타일</h1>
+  <p class="desc">동네 셀렉터 헤더, 칩 필터, 썸네일 리스트로 구성된 로컬 커머스 피드.
+  <b>피드를 스크롤하면 FAB가 아이콘으로 접히고</b>, 멈추면 다시 펼쳐집니다.</p>
+
+  <div class="spec-group"><h4>카테고리</h4>
+    <div class="tags"><span>커머스</span><span>로컬</span></div></div>
+  <div class="spec-group"><h4>패턴</h4>
+    <div class="tags"><span>홈</span><span>피드</span><span>필터</span></div></div>
+  <div class="spec-group"><h4>컴포넌트</h4>
+    <div class="tags"><span>칩</span><span>리스트 셀</span><span>FAB</span><span>탭바</span><span>뱃지</span></div></div>
+  <div class="spec-group"><h4>디자인 토큰</h4>
+    <div class="tokens">
+      <span class="tk"><i style="background:#ff6f0f"></i>#FF6F0F</span>
+      <span class="tk"><i style="background:#212124"></i>#212124</span>
+      <span class="tk"><i style="background:#868b94"></i>#868B94</span>
+    </div>
+    <div class="tokens"><span class="tk">radius 12px</span><span class="tk">cell 108px</span></div></div>
+
+  <p class="hint">💡 리스트 셀은 flex 한 줄이면 끝나는 구조라 <b>RecyclerView·FlatList로 그대로 번역</b>됩니다.
+  이미지 실패 시 이모지 폴백까지 포함.</p>
+</aside>
+
+<script>
+/* 칩/탭 활성 전환 */
+document.querySelectorAll('.chip').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('.chip').forEach(x => x.classList.remove('on')); c.classList.add('on');
+}));
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on')); t.classList.add('on');
+}));
+
+/* FAB: 스크롤 중 접힘 → 멈추면 펼침 */
+const fab = document.getElementById('fab'), feed = document.querySelector('.feed');
+fab.classList.add('wide');
+let fabTimer;
+feed.addEventListener('scroll', () => {
+  fab.classList.remove('wide');
+  clearTimeout(fabTimer);
+  fabTimer = setTimeout(() => fab.classList.add('wide'), 350);
+});
+</script>
+<script>
+/* ── EN mode (?lang=en) — additive, non-destructive ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "앱 · 중고거래 피드 — 당근 스타일": "App · Secondhand Feed — Karrot Style",
+    "역삼동": "Yeoksam-dong",
+    "전체": "All",
+    "디지털기기": "Digital devices",
+    "가구/인테리어": "Furniture / Interior",
+    "유아동": "Kids & Baby",
+    "생활가전": "Appliances",
+    "의류": "Clothing",
+    "맥북 프로 14인치 M3 급처합니다": "MacBook Pro 14\" M3, quick sale",
+    "역삼동 · 10분 전": "Yeoksam-dong · 10 min ago",
+    "1,850,000원": "1,850,000 KRW",
+    "예약중": "Reserved",
+    "원목 식탁 4인용 + 의자 세트": "Solid wood dining table for 4 + chair set",
+    "대치동 · 32분 전": "Daechi-dong · 32 min ago",
+    "120,000원": "120,000 KRW",
+    "몬스테라 대품 화분째로 드려요": "Large monstera, giving it away with the pot",
+    "도곡동 · 1시간 전": "Dogok-dong · 1 hr ago",
+    "나눔 🧡": "Free 🧡",
+    "필름카메라 캐논 AE-1 작동 완벽": "Film camera Canon AE-1, works perfectly",
+    "역삼동 · 2시간 전": "Yeoksam-dong · 2 hrs ago",
+    "230,000원": "230,000 KRW",
+    "나이키 에어포스 270 새상품 (박스풀)": "Nike Air Force 270, brand new (in box)",
+    "삼성동 · 3시간 전": "Samseong-dong · 3 hrs ago",
+    "89,000원": "89,000 KRW",
+    "글쓰기": "Post",
+    "홈": "Home",
+    "동네생활": "Community",
+    "내 근처": "Nearby",
+    "채팅": "Chat",
+    "나의 당근": "My Karrot",
+    "중고거래 피드": "Secondhand Feed",
+    "— 당근 스타일": "— Karrot style",
+    "동네 셀렉터 헤더, 칩 필터, 썸네일 리스트로 구성된 로컬 커머스 피드.": "A local commerce feed with a neighborhood-selector header, chip filters, and a thumbnail list.",
+    "피드를 스크롤하면 FAB가 아이콘으로 접히고": "Scroll the feed and the FAB collapses to an icon",
+    ", 멈추면 다시 펼쳐집니다.": ", then expands again when you stop.",
+    "카테고리": "Category",
+    "패턴": "Pattern",
+    "컴포넌트": "Component",
+    "디자인 토큰": "Design tokens",
+    "커머스": "Commerce",
+    "로컬": "Local",
+    "피드": "Feed",
+    "필터": "Filter",
+    "칩": "Chip",
+    "리스트 셀": "List cell",
+    "탭바": "Tab bar",
+    "뱃지": "Badge",
+    "💡 리스트 셀은 flex 한 줄이면 끝나는 구조라": "💡 Each list cell is just one flex row, so it",
+    "RecyclerView·FlatList로 그대로 번역": "translates directly to RecyclerView / FlatList",
+    "됩니다.\n  이미지 실패 시 이모지 폴백까지 포함.": ". It even includes an emoji fallback when images fail."
+  };
+  const swap = s => { const t = s.trim(); return TR[t] != null ? s.replace(t, TR[t]) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (TR[n.nodeValue.trim()] != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ['placeholder','title','alt','aria-label'].forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && TR[n.getAttribute(a).trim()] != null) n.setAttribute(a, TR[n.getAttribute(a).trim()]); });
+    n.childNodes.forEach(walk);
+  };
+  walk(document.body);
+  if (TR[document.title.trim()]) document.title = TR[document.title.trim()];
+})();
+</script>
+</body>
+</html>

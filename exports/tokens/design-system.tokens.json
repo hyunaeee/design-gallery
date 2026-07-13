@@ -1,0 +1,1108 @@
+{
+  "chat": {
+    "color": {
+      "background": {
+        "value": "#B2C7DA",
+        "type": "color",
+        "description": "대화방 배경"
+      },
+      "bubble-mine": {
+        "value": "#FFE812",
+        "type": "color",
+        "description": "내 말풍선"
+      },
+      "bubble-other": {
+        "value": "#FFFFFF",
+        "type": "color",
+        "description": "상대 말풍선"
+      },
+      "text-primary": {
+        "value": "#1E2226",
+        "type": "color"
+      },
+      "text-secondary": {
+        "value": "#67717C",
+        "type": "color"
+      },
+      "read-badge": {
+        "value": "#F7B500",
+        "type": "color",
+        "description": "읽음(1) 표시"
+      },
+      "inputbar": {
+        "value": "#FFFFFF",
+        "type": "color"
+      },
+      "input-field": {
+        "value": "#F2F4F6",
+        "type": "color"
+      }
+    },
+    "radius": {
+      "bubble": {
+        "value": "16",
+        "type": "borderRadius"
+      },
+      "bubble-tail": {
+        "value": "4",
+        "type": "borderRadius",
+        "description": "말풍선 꼬리쪽 모서리"
+      },
+      "avatar": {
+        "value": "13",
+        "type": "borderRadius",
+        "description": "스쿼클 아바타"
+      },
+      "input": {
+        "value": "20",
+        "type": "borderRadius"
+      }
+    },
+    "spacing": {
+      "bubble-x": {
+        "value": "13",
+        "type": "spacing"
+      },
+      "bubble-y": {
+        "value": "10",
+        "type": "spacing"
+      },
+      "msg-gap": {
+        "value": "10",
+        "type": "spacing"
+      },
+      "log-x": {
+        "value": "14",
+        "type": "spacing"
+      }
+    },
+    "typography": {
+      "bubble": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "14",
+          "lineHeight": "1.5"
+        },
+        "type": "typography"
+      },
+      "name": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "11.5"
+        },
+        "type": "typography"
+      },
+      "time": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "10"
+        },
+        "type": "typography"
+      }
+    },
+    "component": {
+      "bubble-max-width": {
+        "value": "68%",
+        "type": "other"
+      },
+      "avatar-size": {
+        "value": "34",
+        "type": "sizing"
+      },
+      "input-height": {
+        "value": "36",
+        "type": "sizing"
+      }
+    }
+  },
+  "delivery": {
+    "color": {
+      "primary": {
+        "value": "#2AC1BC",
+        "type": "color",
+        "description": "브랜드 민트 — 헤더, 활성 탭"
+      },
+      "background": {
+        "value": "#FFFFFF",
+        "type": "color"
+      },
+      "text-primary": {
+        "value": "#1C1C1E",
+        "type": "color"
+      },
+      "text-secondary": {
+        "value": "#8E8E93",
+        "type": "color"
+      },
+      "divider": {
+        "value": "#F2F2F7",
+        "type": "color"
+      },
+      "star": {
+        "value": "#FFC400",
+        "type": "color"
+      },
+      "order-bar": {
+        "value": "#1C1C1E",
+        "type": "color",
+        "description": "주문 현황 플로팅 바 배경"
+      },
+      "category-bg": {
+        "value": "#F7F8FA",
+        "type": "color"
+      }
+    },
+    "radius": {
+      "search": {
+        "value": "14",
+        "type": "borderRadius"
+      },
+      "banner": {
+        "value": "16",
+        "type": "borderRadius"
+      },
+      "card": {
+        "value": "14",
+        "type": "borderRadius"
+      },
+      "category": {
+        "value": "18",
+        "type": "borderRadius"
+      },
+      "order-bar": {
+        "value": "16",
+        "type": "borderRadius"
+      }
+    },
+    "spacing": {
+      "screen-x": {
+        "value": "16",
+        "type": "spacing"
+      },
+      "section-gap": {
+        "value": "26",
+        "type": "spacing"
+      },
+      "card-gap": {
+        "value": "12",
+        "type": "spacing"
+      }
+    },
+    "typography": {
+      "section-title": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "900",
+          "fontSize": "17"
+        },
+        "type": "typography"
+      },
+      "shop-name": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "700",
+          "fontSize": "14"
+        },
+        "type": "typography"
+      },
+      "banner-title": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "900",
+          "fontSize": "18"
+        },
+        "type": "typography"
+      },
+      "address": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "900",
+          "fontSize": "16.5"
+        },
+        "type": "typography"
+      }
+    },
+    "component": {
+      "category-icon": {
+        "value": "52",
+        "type": "sizing"
+      },
+      "category-grid": {
+        "value": "5",
+        "type": "other",
+        "description": "카테고리 그리드 열 수"
+      },
+      "shop-card-width": {
+        "value": "168",
+        "type": "sizing"
+      },
+      "banner-height": {
+        "value": "96",
+        "type": "sizing"
+      }
+    }
+  },
+  "finance": {
+    "color": {
+      "primary": {
+        "value": "#3182F6",
+        "type": "color",
+        "description": "브랜드 블루 — CTA, 활성 상태"
+      },
+      "background": {
+        "value": "#F2F4F6",
+        "type": "color",
+        "description": "화면 배경"
+      },
+      "surface": {
+        "value": "#FFFFFF",
+        "type": "color",
+        "description": "카드 배경"
+      },
+      "text-primary": {
+        "value": "#191F28",
+        "type": "color"
+      },
+      "text-secondary": {
+        "value": "#8B95A1",
+        "type": "color"
+      },
+      "negative": {
+        "value": "#F04452",
+        "type": "color",
+        "description": "경고, 상승(국내 주식 관례)"
+      },
+      "chart-track": {
+        "value": "#E5E8EB",
+        "type": "color"
+      }
+    },
+    "radius": {
+      "card": {
+        "value": "20",
+        "type": "borderRadius"
+      },
+      "button": {
+        "value": "14",
+        "type": "borderRadius"
+      },
+      "sheet": {
+        "value": "28",
+        "type": "borderRadius",
+        "description": "바텀시트 상단 모서리"
+      },
+      "icon": {
+        "value": "14",
+        "type": "borderRadius"
+      }
+    },
+    "spacing": {
+      "screen-x": {
+        "value": "16",
+        "type": "spacing"
+      },
+      "card": {
+        "value": "20",
+        "type": "spacing"
+      },
+      "row-y": {
+        "value": "13",
+        "type": "spacing"
+      }
+    },
+    "typography": {
+      "amount": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "700",
+          "fontSize": "16.5"
+        },
+        "type": "typography"
+      },
+      "title": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "700",
+          "fontSize": "15"
+        },
+        "type": "typography"
+      },
+      "caption": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "13"
+        },
+        "type": "typography"
+      },
+      "spend-total": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "900",
+          "fontSize": "24"
+        },
+        "type": "typography"
+      }
+    },
+    "component": {
+      "tabbar-height": {
+        "value": "84",
+        "type": "sizing"
+      },
+      "acct-icon": {
+        "value": "40",
+        "type": "sizing"
+      },
+      "sheet-grab": {
+        "value": "44",
+        "type": "sizing",
+        "description": "바텀시트 그랩 핸들 너비"
+      }
+    }
+  },
+  "market": {
+    "color": {
+      "primary": {
+        "value": "#FF6F0F",
+        "type": "color",
+        "description": "브랜드 오렌지 — FAB, 뱃지"
+      },
+      "background": {
+        "value": "#FFFFFF",
+        "type": "color"
+      },
+      "text-primary": {
+        "value": "#212124",
+        "type": "color"
+      },
+      "text-secondary": {
+        "value": "#868B94",
+        "type": "color"
+      },
+      "divider": {
+        "value": "#F1F3F5",
+        "type": "color"
+      },
+      "chip-border": {
+        "value": "#E9ECEF",
+        "type": "color"
+      },
+      "reserved": {
+        "value": "#1D7D45",
+        "type": "color",
+        "description": "예약중 뱃지"
+      }
+    },
+    "radius": {
+      "thumbnail": {
+        "value": "12",
+        "type": "borderRadius"
+      },
+      "chip": {
+        "value": "999",
+        "type": "borderRadius"
+      },
+      "fab": {
+        "value": "999",
+        "type": "borderRadius"
+      },
+      "badge": {
+        "value": "5",
+        "type": "borderRadius"
+      }
+    },
+    "spacing": {
+      "screen-x": {
+        "value": "18",
+        "type": "spacing"
+      },
+      "cell-y": {
+        "value": "16",
+        "type": "spacing"
+      },
+      "cell-gap": {
+        "value": "14",
+        "type": "spacing"
+      }
+    },
+    "typography": {
+      "item-title": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "15"
+        },
+        "type": "typography"
+      },
+      "price": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "900",
+          "fontSize": "16"
+        },
+        "type": "typography"
+      },
+      "meta": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "12.5"
+        },
+        "type": "typography"
+      },
+      "location": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "900",
+          "fontSize": "18"
+        },
+        "type": "typography"
+      }
+    },
+    "component": {
+      "thumbnail-size": {
+        "value": "108",
+        "type": "sizing"
+      },
+      "fab-height": {
+        "value": "54",
+        "type": "sizing"
+      },
+      "chip-height": {
+        "value": "34",
+        "type": "sizing"
+      }
+    }
+  },
+  "onboarding": {
+    "color": {
+      "primary": {
+        "value": "#6C5CE7",
+        "type": "color",
+        "description": "브랜드 바이올렛 — CTA, 활성 dot"
+      },
+      "background": {
+        "value": "#FFFFFF",
+        "type": "color"
+      },
+      "text-primary": {
+        "value": "#1D1B2E",
+        "type": "color"
+      },
+      "text-secondary": {
+        "value": "#8C88A3",
+        "type": "color"
+      },
+      "dot-inactive": {
+        "value": "#E3E0F0",
+        "type": "color"
+      },
+      "kakao": {
+        "value": "#FEE500",
+        "type": "color"
+      },
+      "naver": {
+        "value": "#03C75A",
+        "type": "color"
+      },
+      "apple": {
+        "value": "#111111",
+        "type": "color"
+      },
+      "email": {
+        "value": "#F2F2F7",
+        "type": "color"
+      },
+      "last-login": {
+        "value": "#FF4757",
+        "type": "color",
+        "description": "마지막 로그인 뱃지"
+      }
+    },
+    "radius": {
+      "cta": {
+        "value": "16",
+        "type": "borderRadius"
+      },
+      "social": {
+        "value": "14",
+        "type": "borderRadius"
+      },
+      "art": {
+        "value": "64",
+        "type": "borderRadius",
+        "description": "온보딩 일러스트 박스"
+      },
+      "badge": {
+        "value": "999",
+        "type": "borderRadius"
+      }
+    },
+    "spacing": {
+      "screen-x": {
+        "value": "26",
+        "type": "spacing"
+      },
+      "social-gap": {
+        "value": "11",
+        "type": "spacing"
+      },
+      "cta-bottom": {
+        "value": "42",
+        "type": "spacing"
+      }
+    },
+    "typography": {
+      "ob-title": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "900",
+          "fontSize": "25",
+          "lineHeight": "1.35"
+        },
+        "type": "typography"
+      },
+      "ob-body": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "14.5",
+          "lineHeight": "1.75"
+        },
+        "type": "typography"
+      },
+      "cta": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "700",
+          "fontSize": "16"
+        },
+        "type": "typography"
+      },
+      "social": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "700",
+          "fontSize": "15"
+        },
+        "type": "typography"
+      }
+    },
+    "component": {
+      "art-size": {
+        "value": "220",
+        "type": "sizing"
+      },
+      "dot-active-w": {
+        "value": "22",
+        "type": "sizing"
+      },
+      "social-height": {
+        "value": "52",
+        "type": "sizing"
+      }
+    }
+  },
+  "payment": {
+    "color": {
+      "primary": {
+        "value": "#1E45D6",
+        "type": "color",
+        "description": "브랜드 딥 블루 — CTA, 선택 상태, 완료 체크"
+      },
+      "primary-tint": {
+        "value": "#F0F4FF",
+        "type": "color",
+        "description": "선택된 라디오 카드·쿠폰 배경"
+      },
+      "background": {
+        "value": "#F4F5F9",
+        "type": "color",
+        "description": "화면 배경"
+      },
+      "surface": {
+        "value": "#FFFFFF",
+        "type": "color",
+        "description": "섹션 카드 배경"
+      },
+      "text-primary": {
+        "value": "#141C3D",
+        "type": "color",
+        "description": "네이비 잉크"
+      },
+      "text-secondary": {
+        "value": "#8A91A8",
+        "type": "color"
+      },
+      "discount": {
+        "value": "#F04452",
+        "type": "color",
+        "description": "쿠폰 할인 금액"
+      },
+      "border": {
+        "value": "#E1E4EE",
+        "type": "color",
+        "description": "라디오 카드·체크박스 기본 보더"
+      },
+      "divider": {
+        "value": "#EDEFF5",
+        "type": "color"
+      }
+    },
+    "radius": {
+      "card": {
+        "value": "18",
+        "type": "borderRadius",
+        "description": "섹션 카드"
+      },
+      "radio": {
+        "value": "14",
+        "type": "borderRadius",
+        "description": "결제수단 라디오 카드·쿠폰"
+      },
+      "button": {
+        "value": "16",
+        "type": "borderRadius",
+        "description": "결제하기 CTA"
+      },
+      "sheet": {
+        "value": "24",
+        "type": "borderRadius",
+        "description": "쿠폰 바텀시트 상단 모서리"
+      },
+      "thumb": {
+        "value": "12",
+        "type": "borderRadius",
+        "description": "주문 상품 썸네일"
+      }
+    },
+    "spacing": {
+      "screen-x": {
+        "value": "16",
+        "type": "spacing"
+      },
+      "card": {
+        "value": "18",
+        "type": "spacing",
+        "description": "섹션 카드 패딩"
+      },
+      "radio-gap": {
+        "value": "9",
+        "type": "spacing",
+        "description": "라디오 카드 2열 그리드 간격"
+      }
+    },
+    "typography": {
+      "section-title": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "700",
+          "fontSize": "15"
+        },
+        "type": "typography"
+      },
+      "item-price": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "800",
+          "fontSize": "14.5"
+        },
+        "type": "typography"
+      },
+      "total": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "900",
+          "fontSize": "18"
+        },
+        "type": "typography",
+        "description": "총 결제 금액"
+      },
+      "cta": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "700",
+          "fontSize": "16"
+        },
+        "type": "typography"
+      },
+      "terms": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "13"
+        },
+        "type": "typography"
+      }
+    },
+    "component": {
+      "thumb-size": {
+        "value": "56",
+        "type": "sizing",
+        "description": "주문 상품 썸네일 한 변"
+      },
+      "checkbox-size": {
+        "value": "21",
+        "type": "sizing",
+        "description": "원형 체크박스 지름"
+      },
+      "radio-border": {
+        "value": "1.5",
+        "type": "borderWidth"
+      },
+      "spinner-duration": {
+        "value": "1000",
+        "type": "other",
+        "description": "결제 버튼 로딩 스피너 시간 ms"
+      }
+    }
+  },
+  "search": {
+    "color": {
+      "primary": {
+        "value": "#00C471",
+        "type": "color",
+        "description": "브랜드 딥 그린 — 포커스 보더, 하이라이트, TOP3 랭크"
+      },
+      "background": {
+        "value": "#FFFFFF",
+        "type": "color",
+        "description": "화면 배경"
+      },
+      "field": {
+        "value": "#F4F6F8",
+        "type": "color",
+        "description": "검색바·칩 배경"
+      },
+      "text-primary": {
+        "value": "#191F28",
+        "type": "color"
+      },
+      "text-secondary": {
+        "value": "#8B95A1",
+        "type": "color"
+      },
+      "rank-up": {
+        "value": "#F04452",
+        "type": "color",
+        "description": "인기 검색어 순위 상승 ▲"
+      },
+      "rank-down": {
+        "value": "#3182F6",
+        "type": "color",
+        "description": "인기 검색어 순위 하락 ▼"
+      },
+      "skeleton": {
+        "value": "#EEF1F4",
+        "type": "color",
+        "description": "스켈레톤 셔머 베이스"
+      },
+      "divider": {
+        "value": "#F2F4F6",
+        "type": "color"
+      }
+    },
+    "radius": {
+      "searchbar": {
+        "value": "12",
+        "type": "borderRadius"
+      },
+      "thumb": {
+        "value": "14",
+        "type": "borderRadius",
+        "description": "결과 카드 썸네일"
+      },
+      "chip": {
+        "value": "99",
+        "type": "borderRadius",
+        "description": "최근 검색어 칩 — pill"
+      },
+      "list-item": {
+        "value": "12",
+        "type": "borderRadius",
+        "description": "자동완성 행"
+      }
+    },
+    "spacing": {
+      "screen-x": {
+        "value": "20",
+        "type": "spacing"
+      },
+      "chip-gap": {
+        "value": "8",
+        "type": "spacing"
+      },
+      "card-y": {
+        "value": "14",
+        "type": "spacing"
+      },
+      "pop-col-gap": {
+        "value": "24",
+        "type": "spacing",
+        "description": "인기 검색어 2열 사이 간격"
+      }
+    },
+    "typography": {
+      "input": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "16"
+        },
+        "type": "typography"
+      },
+      "section-title": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "700",
+          "fontSize": "15"
+        },
+        "type": "typography"
+      },
+      "suggestion": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "15"
+        },
+        "type": "typography"
+      },
+      "price": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "800",
+          "fontSize": "16"
+        },
+        "type": "typography"
+      },
+      "rank": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "800",
+          "fontSize": "15"
+        },
+        "type": "typography"
+      }
+    },
+    "component": {
+      "searchbar-height": {
+        "value": "48",
+        "type": "sizing"
+      },
+      "thumb-size": {
+        "value": "84",
+        "type": "sizing",
+        "description": "결과 카드 썸네일 한 변"
+      },
+      "focus-border": {
+        "value": "1.5",
+        "type": "borderWidth",
+        "description": "검색바 포커스 보더"
+      },
+      "skeleton-duration": {
+        "value": "800",
+        "type": "other",
+        "description": "스켈레톤 노출 시간 ms"
+      }
+    }
+  },
+  "settings": {
+    "color": {
+      "accent": {
+        "value": "#FA4E6E",
+        "type": "color",
+        "description": "브랜드 로즈 — 프로필 편집, 아바타 그라디언트 시작"
+      },
+      "switch-on": {
+        "value": "#34C759",
+        "type": "color",
+        "description": "스위치 ON 트랙 (iOS 그린)"
+      },
+      "danger": {
+        "value": "#FF3B30",
+        "type": "color",
+        "description": "로그아웃, 파괴적 액션"
+      },
+      "avatar-gradient-end": {
+        "value": "#FF9500",
+        "type": "color",
+        "description": "아바타 그라디언트 끝"
+      },
+      "light": {
+        "background": {
+          "value": "#F2F2F7",
+          "type": "color",
+          "description": "라이트 화면 배경"
+        },
+        "surface": {
+          "value": "#FFFFFF",
+          "type": "color",
+          "description": "라이트 그룹 카드"
+        },
+        "text-primary": {
+          "value": "#1C1C1E",
+          "type": "color"
+        },
+        "text-secondary": {
+          "value": "#8E8E93",
+          "type": "color"
+        },
+        "divider": {
+          "value": "#E5E5EA",
+          "type": "color",
+          "description": "행 구분선 · 스위치 OFF 트랙"
+        }
+      },
+      "dark": {
+        "background": {
+          "value": "#0B0B0F",
+          "type": "color",
+          "description": "다크 화면 배경"
+        },
+        "surface": {
+          "value": "#1C1C1E",
+          "type": "color",
+          "description": "다크 그룹 카드"
+        },
+        "text-primary": {
+          "value": "#F2F2F7",
+          "type": "color"
+        },
+        "text-secondary": {
+          "value": "#98989F",
+          "type": "color"
+        },
+        "divider": {
+          "value": "#2C2C2E",
+          "type": "color"
+        }
+      }
+    },
+    "radius": {
+      "profile": {
+        "value": "16",
+        "type": "borderRadius",
+        "description": "프로필 헤더 카드"
+      },
+      "group": {
+        "value": "14",
+        "type": "borderRadius",
+        "description": "iOS 그룹 리스트"
+      },
+      "icon": {
+        "value": "8",
+        "type": "borderRadius",
+        "description": "행 아이콘 타일"
+      },
+      "dialog": {
+        "value": "16",
+        "type": "borderRadius"
+      },
+      "toast": {
+        "value": "99",
+        "type": "borderRadius",
+        "description": "토스트 — pill"
+      }
+    },
+    "spacing": {
+      "screen-x": {
+        "value": "16",
+        "type": "spacing"
+      },
+      "row-x": {
+        "value": "14",
+        "type": "spacing",
+        "description": "리스트 행 좌우 패딩"
+      },
+      "row-y": {
+        "value": "11",
+        "type": "spacing"
+      },
+      "group-label": {
+        "value": "20",
+        "type": "spacing",
+        "description": "그룹 라벨 위 마진"
+      }
+    },
+    "typography": {
+      "nav-title": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "900",
+          "fontSize": "26"
+        },
+        "type": "typography"
+      },
+      "row-label": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "14.5"
+        },
+        "type": "typography"
+      },
+      "row-value": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "400",
+          "fontSize": "13"
+        },
+        "type": "typography"
+      },
+      "group-label": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "500",
+          "fontSize": "12.5"
+        },
+        "type": "typography"
+      },
+      "profile-name": {
+        "value": {
+          "fontFamily": "Noto Sans KR",
+          "fontWeight": "800",
+          "fontSize": "17"
+        },
+        "type": "typography"
+      }
+    },
+    "component": {
+      "switch-width": {
+        "value": "51",
+        "type": "sizing",
+        "description": "iOS 스위치 트랙 너비"
+      },
+      "switch-height": {
+        "value": "31",
+        "type": "sizing"
+      },
+      "switch-thumb": {
+        "value": "27",
+        "type": "sizing",
+        "description": "스위치 썸 지름"
+      },
+      "avatar": {
+        "value": "62",
+        "type": "sizing",
+        "description": "프로필 아바타 지름"
+      },
+      "icon-tile": {
+        "value": "30",
+        "type": "sizing",
+        "description": "행 아이콘 타일 한 변"
+      },
+      "dialog-width": {
+        "value": "272",
+        "type": "sizing"
+      },
+      "theme-duration": {
+        "value": "350",
+        "type": "other",
+        "description": "다크 모드 전환 트랜지션 ms"
+      }
+    }
+  }
+}

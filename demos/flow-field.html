@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FLUX — 흐름을 코드로 그립니다</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: "Noto Sans KR", sans-serif; background: #05060a; color: #fff;
+       -webkit-font-smoothing: antialiased; }
+
+#c { position: fixed; inset: 0; display: block; touch-action: none; z-index: 0; }
+
+/* ── 상단 네비게이션 ── */
+.nav { position: fixed; z-index: 12; top: 0; left: 0; right: 0;
+       display: flex; align-items: center; justify-content: space-between;
+       padding: 22px 34px; pointer-events: none; }
+.brand { display: flex; align-items: center; gap: 11px; pointer-events: auto; text-decoration: none; }
+.brand .mark { width: 30px; height: 30px; position: relative; }
+.brand .mark::before, .brand .mark::after { content: ""; position: absolute; inset: 0;
+     border: 2px solid #fff; border-radius: 50% 50% 50% 0; }
+.brand .mark::after { transform: rotate(45deg); opacity: .55; }
+.brand .name { font-family: "Space Mono", monospace; font-size: 20px; font-weight: 700;
+               letter-spacing: 4px; color: #fff; }
+.nav .links { display: flex; align-items: center; gap: 26px; pointer-events: auto; }
+.nav .links a { font-size: 13.5px; color: rgba(255,255,255,.72); text-decoration: none;
+                letter-spacing: .5px; transition: color .2s; }
+.nav .links a:hover { color: #fff; }
+.nav .links a.pill { padding: 8px 18px; border-radius: 99px; color: #05060a; font-weight: 700;
+                     background: #fff; }
+
+/* ── 히어로 (좌측, 파티클 위 텍스트 레이어) ── */
+.head { position: fixed; z-index: 11; top: 108px; left: 34px; pointer-events: none;
+        width: min(440px, 88vw); }
+.head .kicker { font-family: "Space Mono", monospace; font-size: 11px; letter-spacing: 4px;
+                color: rgba(255,255,255,.5); }
+.head h1 { margin-top: 12px; font-size: clamp(30px, 5vw, 52px); font-weight: 700;
+           letter-spacing: -.02em; line-height: 1.18; text-shadow: 0 2px 30px rgba(0,0,0,.8); }
+.head p { margin-top: 14px; font-size: 13.5px; color: rgba(255,255,255,.7); max-width: 360px;
+          line-height: 1.7; word-break: keep-all; }
+.head .cta { display: inline-block; margin-top: 22px; pointer-events: auto;
+             font-family: "Noto Sans KR", sans-serif; font-size: 15px; font-weight: 700;
+             color: #05060a; text-decoration: none; padding: 13px 28px; border-radius: 99px;
+             background: #fff; box-shadow: 0 10px 34px rgba(0,0,0,.35);
+             transition: transform .2s, box-shadow .2s; }
+.head .cta:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(0,0,0,.5); }
+.head .edition { margin-top: 20px; display: flex; gap: 22px; font-family: "Space Mono", monospace; }
+.head .edition div { display: flex; flex-direction: column; gap: 3px; }
+.head .edition .k { font-size: 10px; letter-spacing: 2px; color: rgba(255,255,255,.4); }
+.head .edition .v { font-size: 14px; font-weight: 700; color: rgba(255,255,255,.9); }
+
+/* ── 하단 컨트롤 ── */
+.ui { position: fixed; z-index: 10; bottom: 24px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 8px; padding: 9px 12px; flex-wrap: wrap;
+      justify-content: center; max-width: 94vw;
+      background: rgba(14,16,24,.6); border: 1px solid rgba(255,255,255,.12);
+      border-radius: 99px; backdrop-filter: blur(16px); }
+.ui .grp { display: flex; gap: 5px; }
+.ui button { font-family: "Noto Sans KR", sans-serif; font-size: 12.5px; color: rgba(255,255,255,.72);
+             background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.1);
+             padding: 8px 15px; border-radius: 99px; cursor: pointer; transition: all .2s;
+             white-space: nowrap; }
+.ui button:hover { color: #fff; background: rgba(255,255,255,.13); }
+.ui button.on { color: #05060a; background: #fff; border-color: #fff; font-weight: 700; }
+.ui .sep { width: 1px; height: 22px; background: rgba(255,255,255,.14); margin: 0 3px; }
+
+.hint { position: fixed; z-index: 10; bottom: 78px; left: 50%; transform: translateX(-50%);
+        font-family: "Space Mono", monospace; font-size: 11px; letter-spacing: 2px;
+        color: rgba(255,255,255,.4); pointer-events: none; text-align: center; white-space: nowrap; }
+
+@media (max-width: 620px) {
+  .head p { display: none; }
+  .ui .lbl { display: none; }
+}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<nav class="nav">
+  <a class="brand" href="#"><span class="mark"></span><span class="name">FLUX</span></a>
+  <div class="links">
+    <a href="#">작품</a>
+    <a href="#">전시</a>
+    <a href="#">소개</a>
+    <a class="pill" href="#">컬렉션</a>
+  </div>
+</nav>
+
+<div class="head">
+  <div class="kicker">GENERATIVE ART STUDIO</div>
+  <h1>흐름을 코드로<br>그립니다</h1>
+  <p>수천 개의 입자가 알고리즘이 만든 벡터장을 따라 흐릅니다. 마우스로 흐름을 휘저으면, 두 번 다시 똑같이 재현되지 않는 한 점의 제너러티브 작품이 됩니다.</p>
+  <a class="cta" href="#">컬렉션 보기</a>
+  <div class="edition">
+    <div><span class="k">EDITION</span><span class="v">1 / 128</span></div>
+    <div><span class="k">MINTED</span><span class="v">2026.07</span></div>
+    <div><span class="k">CHAIN</span><span class="v">ON-CHAIN</span></div>
+  </div>
+</div>
+
+<div class="hint">마우스를 움직여 교란 · 클릭하면 소용돌이</div>
+
+<div class="ui">
+  <span class="grp" id="pal"></span>
+  <span class="sep"></span>
+  <button id="cnt"><span class="lbl">입자 </span>많이</button>
+  <button id="rst">흐름 리셋</button>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   바람의 결 — 플로우 필드 파티클 (라이브러리 없음)
+   value noise 로 벡터장 생성 → 입자가 흐름을 따라 이동, 잔상 트레일
+   ───────────────────────────────────────────── */
+
+/* rAF 루프에서 참조하는 모든 것은 루프 시작 前에 선언한다 */
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+
+/* ── value noise (직접 구현) ── */
+const perm = new Uint8Array(512);
+(function seedNoise(){
+  const p = new Uint8Array(256);
+  for (let i = 0; i < 256; i++) p[i] = i;
+  for (let i = 255; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; const t = p[i]; p[i] = p[j]; p[j] = t; }
+  for (let i = 0; i < 512; i++) perm[i] = p[i & 255];
+})();
+function fade(t){ return t * t * t * (t * (t * 6 - 15) + 10); }
+function lerp(a, b, t){ return a + (b - a) * t; }
+function grad(h, x, y){ const u = (h & 1) ? x : -x, v = (h & 2) ? y : -y; return u + v; }
+/* 2D value/perlin 유사 노이즈 → [-1,1] */
+function noise2(x, y){
+  const X = Math.floor(x) & 255, Y = Math.floor(y) & 255;
+  const xf = x - Math.floor(x), yf = y - Math.floor(y);
+  const u = fade(xf), v = fade(yf);
+  const aa = perm[perm[X] + Y], ab = perm[perm[X] + Y + 1];
+  const ba = perm[perm[X + 1] + Y], bb = perm[perm[X + 1] + Y + 1];
+  const x1 = lerp(grad(aa, xf, yf), grad(ba, xf - 1, yf), u);
+  const x2 = lerp(grad(ab, xf, yf - 1), grad(bb, xf - 1, yf - 1), u);
+  return lerp(x1, x2, v);
+}
+
+/* ── 팔레트 (각도 hue 매핑용 기준 색조) ── */
+const palettes = {
+  '오로라':  { name:'오로라', hues:[150, 175, 200, 280], sat:78, light:60, bg:'rgba(4,7,10,0.055)' },
+  '석양':    { name:'석양', hues:[8, 26, 44, 330], sat:88, light:60, bg:'rgba(10,4,6,0.06)' },
+  '딥오션':  { name:'딥오션', hues:[195, 210, 225, 260], sat:70, light:58, bg:'rgba(3,6,12,0.06)' },
+  '모노':    { name:'모노', hues:[0, 0, 0, 0], sat:0, light:78, bg:'rgba(6,6,8,0.07)', mono:true }
+};
+let palKey = '오로라';
+
+/* ── 상태 ── */
+let particles = [];
+let counts = [1500, 3000, 5500]; let countIdx = 1;
+const SCALE = 0.0016;   // 노이즈 좌표 스케일
+const ZSPEED = 0.00012; // 시간에 따른 필드 변화
+let t = 0;
+
+const mouse = { x: -9999, y: -9999, active: false };
+let vortices = []; // {x,y,life,dir}
+
+function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = '#05060a'; ctx.fillRect(0, 0, W, H);
+}
+
+function spawn(n){
+  particles = [];
+  for (let i = 0; i < n; i++){
+    particles.push({ x: Math.random() * W, y: Math.random() * H, px: 0, py: 0, life: Math.random() * 200 });
+    particles[i].px = particles[i].x; particles[i].py = particles[i].y;
+  }
+}
+
+function reset(){ ctx.fillStyle = '#05060a'; ctx.fillRect(0, 0, W, H); spawn(counts[countIdx]); }
+
+/* 각도 → 팔레트 색 */
+function colorFor(angle, speed){
+  const p = palettes[palKey];
+  const seg = ((angle / (Math.PI * 2)) % 1 + 1) % 1;       // 0..1
+  const idx = Math.min(3, Math.floor(seg * 4));
+  const hue = p.hues[idx] + noise2(angle, speed) * 12;
+  const l = Math.min(85, p.light + speed * 6);
+  return 'hsla(' + hue.toFixed(0) + ',' + p.sat + '%,' + l.toFixed(0) + '%,0.9)';
+}
+
+/* ── 초기화 ── */
+resize();
+addEventListener('resize', resize);
+spawn(counts[countIdx]);
+/* 로드 즉시 살아있도록 필드를 살짝 미리 전개 */
+t = 1000;
+
+/* ── 입력 ── */
+function setMouse(x, y){ mouse.x = x; mouse.y = y; mouse.active = true; }
+addEventListener('mousemove', e => setMouse(e.clientX, e.clientY));
+addEventListener('mouseleave', () => { mouse.active = false; });
+addEventListener('mousedown', e => addVortex(e.clientX, e.clientY));
+canvas.addEventListener('touchstart', e => {
+  const tt = e.touches[0]; setMouse(tt.clientX, tt.clientY); addVortex(tt.clientX, tt.clientY);
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  const tt = e.touches[0]; setMouse(tt.clientX, tt.clientY);
+}, { passive: true });
+canvas.addEventListener('touchend', () => { mouse.active = false; }, { passive: true });
+
+function addVortex(x, y){ vortices.push({ x, y, life: 1, dir: Math.random() < 0.5 ? 1 : -1 }); }
+
+/* ── UI ── */
+const palWrap = document.getElementById('pal');
+Object.keys(palettes).forEach(k => {
+  const b = document.createElement('button');
+  b.textContent = palettes[k].name;
+  if (k === palKey) b.classList.add('on');
+  b.onclick = () => {
+    palKey = k;
+    [...palWrap.children].forEach(c => c.classList.remove('on'));
+    b.classList.add('on');
+  };
+  palWrap.appendChild(b);
+});
+const cntBtn = document.getElementById('cnt');
+const cntLbl = ['적게', '보통', '많이'];
+cntBtn.onclick = () => { countIdx = (countIdx + 1) % counts.length;
+  cntBtn.innerHTML = '<span class="lbl">입자 </span>' + cntLbl[countIdx]; reset(); };
+document.getElementById('rst').onclick = reset;
+
+/* ── 메인 루프 ── */
+let frames = 0;
+(function loop(){
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+  t++;
+
+  /* 반투명 검정으로 살짝 덮어 트레일 페이드 */
+  ctx.fillStyle = palettes[palKey].bg;
+  ctx.fillRect(0, 0, W, H);
+
+  const zt = t * ZSPEED * 60 * 0.0166;
+  ctx.lineWidth = 1.1;
+
+  for (let i = 0; i < particles.length; i++){
+    const pt = particles[i];
+    /* 노이즈 각도로 흐름 벡터 */
+    let ang = noise2(pt.x * SCALE, pt.y * SCALE + zt) * Math.PI * 3.2;
+    let vx = Math.cos(ang), vy = Math.sin(ang);
+    let sp = 1.4;
+
+    /* 마우스 교란: 커서 주변에서 밀어냄 + 접선 성분(소용돌이 느낌) */
+    if (mouse.active){
+      const dx = pt.x - mouse.x, dy = pt.y - mouse.y;
+      const d2 = dx * dx + dy * dy;
+      if (d2 < 26000){
+        const d = Math.sqrt(d2) + 0.001;
+        const f = (1 - d / 161) * 3.2;
+        vx += (dx / d) * f * 0.5 + (-dy / d) * f * 0.5;
+        vy += (dy / d) * f * 0.5 + (dx / d) * f * 0.5;
+        sp += f * 0.4;
+      }
+    }
+
+    /* 클릭 소용돌이 */
+    for (let v = 0; v < vortices.length; v++){
+      const vo = vortices[v];
+      const dx = pt.x - vo.x, dy = pt.y - vo.y;
+      const d = Math.sqrt(dx * dx + dy * dy) + 0.001;
+      if (d < 240){
+        const f = (1 - d / 240) * vo.life * 4.5;
+        vx += (-dy / d) * f * vo.dir - (dx / d) * f * 0.3;
+        vy += (dx / d) * f * vo.dir - (dy / d) * f * 0.3;
+        sp += f * 0.3;
+      }
+    }
+
+    pt.px = pt.x; pt.py = pt.y;
+    pt.x += vx * sp; pt.y += vy * sp;
+    pt.life--;
+
+    /* 화면 밖 또는 수명 종료 시 재배치 */
+    if (pt.x < 0 || pt.x > W || pt.y < 0 || pt.y > H || pt.life < 0){
+      pt.x = Math.random() * W; pt.y = Math.random() * H;
+      pt.px = pt.x; pt.py = pt.y; pt.life = 60 + Math.random() * 240;
+      continue;
+    }
+
+    const speed = Math.min(4, Math.hypot(pt.x - pt.px, pt.y - pt.py));
+    ctx.strokeStyle = colorFor(ang, speed);
+    ctx.beginPath();
+    ctx.moveTo(pt.px, pt.py);
+    ctx.lineTo(pt.x, pt.y);
+    ctx.stroke();
+  }
+
+  /* 소용돌이 수명 감쇠 */
+  vortices = vortices.filter(v => (v.life -= 0.012) > 0);
+
+  requestAnimationFrame(loop);
+})();
+</script>
+
+<script>
+/* ── English mode (?lang=en) — non-destructive text swap ── */
+(function () {
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "FLUX — 흐름을 코드로 그립니다": "FLUX — Drawing Flow in Code",
+    "작품": "Works",
+    "전시": "Exhibitions",
+    "소개": "About",
+    "컬렉션 보기": "View the collection",
+    "컬렉션": "Collection",
+    "흐름을 코드로": "Flow, drawn",
+    "그립니다": "in code",
+    "수천 개의 입자가 알고리즘이 만든 벡터장을 따라 흐릅니다. 마우스로 흐름을 휘저으면, 두 번 다시 똑같이 재현되지 않는 한 점의 제너러티브 작품이 됩니다.": "Thousands of particles flow along a vector field built by an algorithm. Stir the flow with your mouse and it becomes a single generative work that will never be reproduced the same way twice.",
+    "마우스를 움직여 교란 · 클릭하면 소용돌이": "Move to disturb · click to swirl",
+    "입자": "Particles ",
+    "흐름 리셋": "Reset flow",
+    "많이": "Many",
+    "보통": "Medium",
+    "적게": "Few",
+    "오로라": "Aurora",
+    "석양": "Sunset",
+    "딥오션": "Deep Ocean",
+    "모노": "Mono"
+  };
+  const KEYS = Object.keys(TR).sort((a, b) => b.length - a.length);
+  const swap = s => { let o = s; for (const k of KEYS) if (o.indexOf(k) !== -1) o = o.split(k).join(TR[k]); return o; };
+  const ATTRS = ['placeholder', 'title', 'alt', 'aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const v = n.nodeValue; if (!v || !v.trim()) return;
+      const c = v.replace(/\s+/g, ' ').trim();
+      if (TR[c] != null) { if (n.nodeValue !== TR[c]) n.nodeValue = TR[c]; return; }
+      const nv = swap(v); if (nv !== v) n.nodeValue = nv; return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) { const av = n.getAttribute(a); if (av && TR[av.trim()] != null) n.setAttribute(a, TR[av.trim()]); } });
+    if ((n.tagName === 'INPUT' || n.tagName === 'TEXTAREA') && n.value != null && TR[n.value.trim()] != null) n.value = TR[n.value.trim()];
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, { childList: true, subtree: true });
+  walk(document.body);
+  const dt = swap(document.title); if (dt !== document.title) document.title = dt;
+})();
+</script>
+</body>
+</html>

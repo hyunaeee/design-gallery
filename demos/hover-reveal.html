@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAISON QUATRE — 호버로 갈아입는 향의 세계</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Noto+Serif+KR:wght@600;900&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* 마우스 인터랙션: 메뉴에 호버하면 배경 세계(AI 생성 이미지)와 컬러 테마가 통째로 전환 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --accent: #9db98a; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; height: 100vh; overflow: hidden; color: #fff;
+       background: #0c0f0a; }
+
+/* 배경 레이어 4장 크로스페이드 */
+.bg { position: fixed; inset: 0; background-size: cover; background-position: center;
+      opacity: 0; transition: opacity 1s ease, transform 6s ease; transform: scale(1.06); }
+.bg.on { opacity: 1; transform: scale(1); }
+.veil { position: fixed; inset: 0;
+        background: linear-gradient(90deg, rgba(8,10,7,.72) 0%, rgba(8,10,7,.35) 55%, rgba(8,10,7,.15)); }
+
+.wrap { position: relative; z-index: 5; height: 100%; display: flex; flex-direction: column;
+        padding: 0 5vw; }
+nav { display: flex; justify-content: space-between; align-items: center; padding: 30px 0;
+      font-size: 12px; letter-spacing: 3px; }
+nav .brand { font-family: "Playfair Display", serif; font-size: 19px; letter-spacing: 4px; }
+nav a { color: #fff; text-decoration: none; opacity: .8; }
+nav a:hover { opacity: 1; }
+
+.main { flex: 1; display: flex; align-items: center; gap: 6vw; }
+
+/* 좌: 향 메뉴 */
+.menu { flex: 1.2; }
+.menu .kicker { font-size: 11.5px; letter-spacing: 5px; color: var(--accent);
+                transition: color .8s; }
+.scent { display: flex; align-items: baseline; gap: 24px; padding: 3.2vh 0;
+         border-bottom: 1px solid rgba(255,255,255,.16); cursor: pointer; }
+.scent .no { font-family: "Playfair Display", serif; font-style: italic; font-size: 15px;
+             color: rgba(255,255,255,.5); width: 34px; transition: color .4s; }
+.scent h2 { font-family: "Noto Serif KR", serif; font-weight: 900;
+            font-size: clamp(26px, 4.2vw, 54px); letter-spacing: -.01em;
+            color: rgba(255,255,255,.42); transition: color .4s, transform .4s;
+            transform-origin: left; }
+.scent .en { margin-left: auto; font-size: 11px; letter-spacing: 3px; color: rgba(255,255,255,.4);
+             transition: color .4s; }
+.scent.on .no { color: var(--accent); }
+.scent.on h2 { color: #fff; transform: translateX(10px); }
+.scent.on .en { color: rgba(255,255,255,.8); }
+
+/* 우: 노트 카드 */
+.note { flex: .8; max-width: 340px; }
+.note .num { font-family: "Playfair Display", serif; font-style: italic; font-size: 64px;
+             color: var(--accent); line-height: 1; transition: color .8s; }
+.note h3 { margin-top: 12px; font-size: 15px; letter-spacing: 3px; }
+.note p { margin-top: 14px; font-size: 13.5px; line-height: 1.9; color: rgba(255,255,255,.78);
+          word-break: keep-all; min-height: 78px; }
+.note .notes-row { display: flex; gap: 8px; margin-top: 18px; flex-wrap: wrap; }
+.note .notes-row span { font-size: 11px; letter-spacing: 1px; border: 1px solid rgba(255,255,255,.3);
+                        border-radius: 99px; padding: 6px 13px; color: rgba(255,255,255,.85); }
+.note .cta { display: inline-block; margin-top: 26px; font-size: 12.5px; letter-spacing: 3px;
+             color: #0c0f0a; background: var(--accent); padding: 14px 28px; border-radius: 99px;
+             text-decoration: none; font-weight: 600; transition: background .8s, transform .2s; }
+.note .cta:hover { transform: translateY(-2px); }
+
+.foot { display: flex; justify-content: space-between; padding: 0 0 26px; font-size: 11px;
+        letter-spacing: 2.5px; color: rgba(255,255,255,.55); }
+
+@media (max-width: 860px) {
+  body { overflow: auto; } .main { flex-direction: column; align-items: flex-start; gap: 30px;
+        padding-top: 10px; }
+  .note { max-width: none; }
+}
+</style>
+</head>
+<body>
+<div class="bg on" id="bg0" style="background-image:url('../assets/gen/scent-forest.png'),linear-gradient(120deg,#1d3620,#0a130b)"></div>
+<div class="bg" id="bg1" style="background-image:url('../assets/gen/scent-ocean.png'),linear-gradient(120deg,#0e3a46,#071b21)"></div>
+<div class="bg" id="bg2" style="background-image:url('../assets/gen/scent-amber.png'),linear-gradient(120deg,#5e3d15,#241505)"></div>
+<div class="bg" id="bg3" style="background-image:url('../assets/gen/scent-night.png'),linear-gradient(120deg,#2b1f3d,#0d0813)"></div>
+<div class="veil"></div>
+
+<div class="wrap">
+  <nav>
+    <span class="brand">MAISON QUATRE</span>
+    <div style="display:flex;gap:28px">
+      <a href="#">컬렉션</a><a href="#">아틀리에</a><a href="#">스토어</a>
+    </div>
+  </nav>
+
+  <div class="main">
+    <div class="menu">
+      <div class="kicker">FOUR WORLDS OF SCENT — 호버해 보세요</div>
+      <div class="scent on" data-i="0">
+        <span class="no">01</span><h2>숲의 기억</h2><span class="en">FORÊT</span>
+      </div>
+      <div class="scent" data-i="1">
+        <span class="no">02</span><h2>파도의 아침</h2><span class="en">MARÉE</span>
+      </div>
+      <div class="scent" data-i="2">
+        <span class="no">03</span><h2>호박빛 오후</h2><span class="en">AMBRE</span>
+      </div>
+      <div class="scent" data-i="3">
+        <span class="no">04</span><h2>자정의 난초</h2><span class="en">MINUIT</span>
+      </div>
+    </div>
+
+    <aside class="note">
+      <div class="num" id="num">№1</div>
+      <h3 id="nm">숲의 기억 — FORÊT</h3>
+      <p id="ds">비 갠 새벽 숲의 첫 숨. 이끼와 젖은 흙, 침엽수의 서늘함이
+      차례로 열리는 그린 우디 계열.</p>
+      <div class="notes-row" id="notes">
+        <span>이끼</span><span>侧柏 시더</span><span>베티버</span>
+      </div>
+      <a class="cta" href="#">이 향 시향하기</a>
+    </aside>
+  </div>
+
+  <div class="foot">
+    <span>EAU DE PARFUM · 50ML</span>
+    <span>배경 4점 — AI 생성 (HIGGSFIELD)</span>
+  </div>
+</div>
+
+<script>
+const WORLDS = [
+  { num: '№1', nm: '숲의 기억 — FORÊT', accent: '#9db98a',
+    ds: '비 갠 새벽 숲의 첫 숨. 이끼와 젖은 흙, 침엽수의 서늘함이 차례로 열리는 그린 우디 계열.',
+    notes: ['이끼', '시더우드', '베티버'] },
+  { num: '№2', nm: '파도의 아침 — MARÉE', accent: '#8fc7d4',
+    ds: '햇빛을 통과한 파도의 투명함. 소금기 어린 바람과 시트러스가 부서지는 아쿠아틱 계열.',
+    notes: ['씨솔트', '베르가못', '화이트머스크'] },
+  { num: '№3', nm: '호박빛 오후 — AMBRE', accent: '#d4a45e',
+    ds: '늦은 오후의 창가, 실크 위에 녹아드는 앰버와 바닐라. 살결처럼 따뜻한 오리엔탈 계열.',
+    notes: ['앰버', '바닐라', '통카빈'] },
+  { num: '№4', nm: '자정의 난초 — MINUIT', accent: '#b48fd4',
+    ds: '모두 잠든 시간의 검은 난초. 연기처럼 낮게 깔리는 플로럴 스모키 계열.',
+    notes: ['블랙오키드', '인센스', '파출리'] },
+];
+
+const bgs = [...document.querySelectorAll('.bg')];
+const scents = [...document.querySelectorAll('.scent')];
+const numEl = document.getElementById('num'), nmEl = document.getElementById('nm');
+const dsEl = document.getElementById('ds'), notesEl = document.getElementById('notes');
+
+function activate(i) {
+  const w = WORLDS[i];
+  bgs.forEach((b, k) => b.classList.toggle('on', k === i));
+  scents.forEach((s, k) => s.classList.toggle('on', k === i));
+  document.documentElement.style.setProperty('--accent', w.accent);
+  numEl.textContent = w.num; nmEl.textContent = w.nm; dsEl.textContent = w.ds;
+  notesEl.innerHTML = w.notes.map(n => `<span>${n}</span>`).join('');
+}
+scents.forEach(s => {
+  s.addEventListener('mouseenter', () => activate(+s.dataset.i));
+  s.addEventListener('click', () => activate(+s.dataset.i));   /* 터치 대응 */
+});
+</script>
+
+<script>
+/* ── English mode (?lang=en) — non-destructive text swap ── */
+(function () {
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "MAISON QUATRE — 호버로 갈아입는 향의 세계": "MAISON QUATRE — A World of Scent That Shifts on Hover",
+    "컬렉션": "Collection",
+    "아틀리에": "Atelier",
+    "스토어": "Store",
+    "FOUR WORLDS OF SCENT — 호버해 보세요": "FOUR WORLDS OF SCENT — hover to explore",
+    "숲의 기억 — FORÊT": "Forest Memory — FORÊT",
+    "파도의 아침 — MARÉE": "Morning Tide — MARÉE",
+    "호박빛 오후 — AMBRE": "Amber Afternoon — AMBRE",
+    "자정의 난초 — MINUIT": "Midnight Orchid — MINUIT",
+    "숲의 기억": "Forest Memory",
+    "파도의 아침": "Morning Tide",
+    "호박빛 오후": "Amber Afternoon",
+    "자정의 난초": "Midnight Orchid",
+    "비 갠 새벽 숲의 첫 숨. 이끼와 젖은 흙, 침엽수의 서늘함이 차례로 열리는 그린 우디 계열.": "The first breath of a forest at rain-washed dawn. Moss, wet earth and the coolness of conifers open one after another in a green-woody accord.",
+    "햇빛을 통과한 파도의 투명함. 소금기 어린 바람과 시트러스가 부서지는 아쿠아틱 계열.": "The clarity of waves lit through by sunlight. Salt-tinged wind and citrus break apart in an aquatic accord.",
+    "늦은 오후의 창가, 실크 위에 녹아드는 앰버와 바닐라. 살결처럼 따뜻한 오리엔탈 계열.": "A late-afternoon window; amber and vanilla melting over silk. A skin-warm oriental accord.",
+    "모두 잠든 시간의 검은 난초. 연기처럼 낮게 깔리는 플로럴 스모키 계열.": "A black orchid in the hour when all are asleep. A floral-smoky accord that settles low like smoke.",
+    "이끼": "Moss",
+    "侧柏 시더": "Cedar",
+    "시더우드": "Cedarwood",
+    "베티버": "Vetiver",
+    "씨솔트": "Sea Salt",
+    "베르가못": "Bergamot",
+    "화이트머스크": "White Musk",
+    "앰버": "Amber",
+    "바닐라": "Vanilla",
+    "통카빈": "Tonka Bean",
+    "블랙오키드": "Black Orchid",
+    "인센스": "Incense",
+    "파출리": "Patchouli",
+    "이 향 시향하기": "Sample this scent",
+    "배경 4점 — AI 생성 (HIGGSFIELD)": "4 backgrounds — AI-generated (HIGGSFIELD)"
+  };
+  const KEYS = Object.keys(TR).sort((a, b) => b.length - a.length);
+  const swap = s => { let o = s; for (const k of KEYS) if (o.indexOf(k) !== -1) o = o.split(k).join(TR[k]); return o; };
+  const ATTRS = ['placeholder', 'title', 'alt', 'aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const v = n.nodeValue; if (!v || !v.trim()) return;
+      const c = v.replace(/\s+/g, ' ').trim();
+      if (TR[c] != null) { if (n.nodeValue !== TR[c]) n.nodeValue = TR[c]; return; }
+      const nv = swap(v); if (nv !== v) n.nodeValue = nv; return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) { const av = n.getAttribute(a); if (av && TR[av.trim()] != null) n.setAttribute(a, TR[av.trim()]); } });
+    if ((n.tagName === 'INPUT' || n.tagName === 'TEXTAREA') && n.value != null && TR[n.value.trim()] != null) n.value = TR[n.value.trim()];
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, { childList: true, subtree: true });
+  walk(document.body);
+  const dt = swap(document.title); if (dt !== document.title) document.title = dt;
+})();
+</script>
+</body>
+</html>

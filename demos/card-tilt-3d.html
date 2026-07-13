@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>홀로그램 몬스터 카드 — 풀아트 컬렉션</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Orbitron:wght@500;700;900&family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;700&display=swap');
+
+/* 홀로 포일·스프링·쇼케이스 기법은 simey의 pokemon-cards-css(MIT) 방식을 재현.
+   풀아트 카드·몬스터는 AI 생성(Higgsfield) 오리지널. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --red:hsl(2,100%,73%); --orange:hsl(30,100%,72%); --yellow:hsl(53,100%,69%);
+  --green:hsl(93,100%,69%); --cyan:hsl(176,100%,76%); --blue:hsl(228,100%,74%); --violet:hsl(283,100%,73%);
+}
+body { font-family: "Noto Sans KR", sans-serif; color: #eef2ff; min-height: 100vh; overflow-x: hidden;
+       background: radial-gradient(120% 90% at 50% 0%, #1a1f3a, #0a0c16 70%); -webkit-font-smoothing: antialiased; }
+body::before { content:""; position: fixed; inset:0; pointer-events:none; opacity:.4;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3"/></filter><rect width="100%" height="100%" filter="url(%23n)" opacity="0.05"/></svg>'); }
+
+.head { text-align: center; padding: 52px 24px 6px; }
+.head .k { font-family: "Space Grotesk", monospace; font-size: 12px; letter-spacing: 6px; color: #8fa0d8; }
+.head h1 { margin-top: 14px; font-size: clamp(28px, 4.4vw, 46px); font-weight: 900; letter-spacing: -.02em; }
+.head h1 em { font-style: normal; background: linear-gradient(90deg,#7cf0d8,#7c8cf8,#c96df8);
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+.head p { margin-top: 12px; color: #9fb0d8; font-size: 14px; }
+
+.rack { position: relative; z-index: 1; display: flex; flex-wrap: wrap; gap: 46px; justify-content: center;
+        align-items: center; max-width: 1080px; margin: 46px auto 90px; padding: 0 24px; perspective: 1600px; }
+/* 카드가 떠오르면 rack 전체를 백드롭 위로 올린다 (rack이 perspective로 독립 스택 컨텍스트라 필요) */
+body.has-active .rack { z-index: 100; }
+/* 떠오른 카드 외 나머지는 흐리게 (백드롭 효과를 형제 카드에도) */
+body.has-active .card:not(.active) { opacity: .25; filter: blur(2px) saturate(.6);
+  pointer-events: none; transition: opacity .45s ease, filter .45s ease; }
+
+/* ── 카드 (틸트 + 팝업 translate/scale) ── */
+.card { --px:50%; --py:50%; --bgx:50%; --bgy:50%; --rx:0deg; --ry:0deg; --o:0; --tx:0px; --ty:0px; --scale:1;
+  position: relative; z-index: 1; width: 260px; aspect-ratio: 0.716; border-radius: 5% / 3.6%;
+  transform-style: preserve-3d;
+  transform: translate3d(var(--tx), var(--ty), 0) scale(var(--scale)) rotateY(var(--rx)) rotateX(var(--ry));
+  cursor: pointer; }   /* 모든 변형은 JS 스프링이 매 프레임 갱신 */
+.card.active { z-index: 100; cursor: zoom-out; }
+
+.flipper { position: absolute; inset: 0; transform-style: preserve-3d;
+  animation: dealIn .95s cubic-bezier(.2,.7,.2,1) both;
+  filter: drop-shadow(0 18px 30px rgba(0,0,0,.65)); }
+@keyframes dealIn {
+  0%   { transform: translateY(46px) rotateY(180deg) scale(.82); opacity: 0; }
+  35%  { opacity: 1; }
+  100% { transform: translateY(0) rotateY(0deg) scale(1); opacity: 1; }
+}
+.card.interacting .flipper { filter: drop-shadow(0 0 14px var(--glow,#7c8cf8)) drop-shadow(0 26px 44px rgba(0,0,0,.7)); }
+.card.active .flipper { filter: drop-shadow(0 0 22px var(--glow,#7c8cf8)) drop-shadow(0 40px 60px rgba(0,0,0,.8)); }
+
+.face { position: absolute; inset: 0; border-radius: 5% / 3.6%; overflow: hidden;
+        backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.card.common  { --glow:#7cf0b0; } .card.rare { --glow:#7cc0f8; } .card.legend { --glow:#f8d67c; }
+
+.front { border: 3px solid; box-shadow: inset 0 0 0 1px rgba(0,0,0,.5); }
+.card.common .front { border-color:#8fe0b8; } .card.rare .front { border-color:#8fc4f0; }
+.card.legend .front { border-color:#f0d68a; }
+.front .art { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.front .veil-t { position: absolute; z-index: 1; top: 0; left: 0; right: 0; height: 24%;
+  background: linear-gradient(180deg, rgba(0,0,0,.55), transparent); }
+.front .veil-b { position: absolute; z-index: 1; bottom: 0; left: 0; right: 0; height: 42%;
+  background: linear-gradient(0deg, rgba(6,8,18,.9) 22%, rgba(6,8,18,.55) 55%, transparent); }
+
+.c-top { position: absolute; z-index: 2; top: 12px; left: 14px; right: 14px; display: flex;
+         justify-content: space-between; align-items: center; }
+.rank { font-family: "Orbitron", sans-serif; font-size: 9.5px; font-weight: 700; letter-spacing: 1.5px;
+        padding: 4px 9px; border-radius: 6px; background: rgba(0,0,0,.5); }
+.card.common .rank { color:#7cf0b0; } .card.rare .rank { color:#7cc0f8; } .card.legend .rank { color:#f8d67c; }
+.hp { font-family: "JetBrains Mono", monospace; font-size: 13px; font-weight: 700; text-shadow: 0 1px 3px #000; }
+.hp b { color:#ff7a9e; }
+.c-name { position: absolute; z-index: 2; left: 16px; right: 16px; bottom: 40px; }
+.c-name h3 { font-family: "Cinzel", "Noto Sans KR", serif; font-size: 21px; font-weight: 800;
+             letter-spacing: -.01em; text-shadow: 0 2px 8px #000; }
+.c-name .type { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 1px;
+                color: #cdd8f4; margin-top: 3px; text-shadow: 0 1px 3px #000; }
+.c-bars { position: absolute; z-index: 2; left: 16px; right: 16px; bottom: 16px; display: flex; gap: 6px; }
+.c-bars .bar { flex: 1; height: 4px; border-radius: 3px; background: rgba(255,255,255,.22); overflow: hidden; }
+.c-bars .bar i { display: block; height: 100%; background: linear-gradient(90deg,#7cf0d8,#c96df8); }
+
+.back { transform: rotateY(180deg); border: 3px solid #3a4a7a;
+  background: radial-gradient(circle at 50% 42%, #3550a0, #16204a 60%),
+    repeating-conic-gradient(from 0deg at 50% 42%, #1a2550 0 8deg, #22306a 8deg 16deg); }
+.back .emblem-b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 10px; }
+.back .emblem-b .orb { width: 96px; height: 96px; border-radius: 50%;
+  background: radial-gradient(circle at 38% 32%, #9fb4ff, #3a2a7a);
+  box-shadow: 0 0 40px rgba(124,140,248,.7), inset 0 0 20px rgba(0,0,0,.4); }
+.back .emblem-b .txt { font-family: "Cinzel", serif; font-size: 13px; letter-spacing: 4px; color: #9fb0e0; }
+
+/* ── SHINE ── */
+.card__shine { position: absolute; inset: 0; z-index: 3; overflow: hidden; opacity: var(--o);
+  mix-blend-mode: color-dodge;
+  background-image:
+    repeating-linear-gradient(110deg,
+      var(--violet), var(--blue), var(--cyan), var(--green), var(--yellow), var(--orange), var(--red),
+      var(--violet), var(--blue), var(--cyan), var(--green), var(--yellow), var(--orange), var(--red)),
+    repeating-linear-gradient(90deg, #0a0a0a 0 1px, #666 1px 2px, #0a0a0a 2px 3px, #999 3px 4px);
+  background-size: 300% 300%, cover;
+  background-position: calc(((50% - var(--bgx))*2.8)+50%) calc(((50% - var(--bgy))*3.4)+50%), center;
+  background-blend-mode: overlay; filter: brightness(.9) contrast(2.3) saturate(1.5); }
+.card__shine::after { content:""; position:absolute; inset:0; mix-blend-mode:color-dodge;
+  background-image: repeating-linear-gradient(-38deg,
+    var(--red), var(--yellow), var(--green), var(--cyan), var(--blue), var(--violet),
+    var(--red), var(--yellow), var(--green), var(--cyan), var(--blue), var(--violet));
+  background-size: 220% 220%;
+  background-position: calc(((50% - var(--bgx))*-2.2)+50%) calc(((50% - var(--bgy))*-2.6)+50%);
+  filter: contrast(1.4) saturate(1.2); opacity: .5; }
+
+/* ── GLITTER ── */
+.card__glitter { position: absolute; inset: 0; z-index: 3; overflow: hidden; opacity: calc(var(--o) * .6);
+  mix-blend-mode: color-dodge; filter: brightness(1.05) contrast(1.4);
+  background-image:
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="s"><feTurbulence type="fractalNoise" baseFrequency="0.55" numOctaves="2" stitchTiles="stitch"/><feColorMatrix type="matrix" values="0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 12 -6"/></filter><rect width="100%" height="100%" filter="url(%23s)"/></svg>'),
+    radial-gradient(circle at var(--px) var(--py), hsla(0,0%,100%,.5), transparent 45%);
+  background-size: 22% 22%, cover;
+  background-position: calc(var(--bgx) * 1.4) calc(var(--bgy) * 1.4), center;
+  background-blend-mode: color-dodge; }
+
+/* ── GLARE ── */
+.card__glare { position: absolute; inset: 0; z-index: 4; overflow: hidden; opacity: var(--o);
+  mix-blend-mode: overlay;
+  background-image: radial-gradient(farthest-corner circle at var(--px) var(--py),
+    hsla(0,0%,100%,.85) 8%, hsla(0,0%,100%,.5) 22%, hsla(0,0%,0%,.5) 90%); }
+
+/* ── 백드롭 + 설명 패널 (카드가 떠오르면 등장) ── */
+.backdrop { position: fixed; inset: 0; z-index: 90; background: rgba(5,7,16,.82); backdrop-filter: blur(6px);
+  opacity: 0; pointer-events: none; transition: opacity .4s ease; }
+.backdrop.on { opacity: 1; pointer-events: auto; }
+.side { position: fixed; z-index: 105; top: 50%; right: 6vw; transform: translateY(-50%);
+  width: min(400px, 42vw); opacity: 0; pointer-events: none; transition: opacity .4s ease .1s, transform .5s cubic-bezier(.2,.8,.3,1) .1s; }
+.side.on { opacity: 1; pointer-events: auto; }
+.side { transform: translateY(-46%); }
+.side.on { transform: translateY(-50%); }
+.side .rank-lg { font-family: "Orbitron", sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 3px; }
+.side h2 { font-family: "Cinzel","Noto Sans KR",serif; font-size: clamp(30px,4vw,46px); font-weight: 800;
+           letter-spacing: -.01em; margin-top: 8px; }
+.side .latin { font-family: "Space Grotesk", monospace; font-style: italic; color: #8fa0d8; font-size: 14px; margin-top: 4px; }
+.side .lore { margin-top: 20px; font-size: 15px; line-height: 1.85; color: #c3cdf0; word-break: keep-all; }
+.side .stats { margin-top: 24px; display: flex; flex-direction: column; gap: 12px; }
+.side .stat { display: flex; align-items: center; gap: 14px; }
+.side .stat .lbl { font-family: "JetBrains Mono", monospace; font-size: 12px; color: #9fb0d8; width: 52px; }
+.side .stat .track { flex: 1; height: 7px; border-radius: 5px; background: rgba(255,255,255,.1); overflow: hidden; }
+.side .stat .track i { display: block; height: 100%; border-radius: 5px;
+  background: linear-gradient(90deg,#7cf0d8,#7c8cf8,#c96df8); transform-origin: left; }
+.side .stat .val { font-family: "JetBrains Mono", monospace; font-size: 12px; width: 34px; text-align: right; }
+.side .skills { margin-top: 24px; display: flex; gap: 10px; flex-wrap: wrap; }
+.side .skill { font-size: 12.5px; border: 1px solid rgba(255,255,255,.2); background: rgba(255,255,255,.05);
+               padding: 8px 14px; border-radius: 99px; }
+.side .skill b { color: #7cf0d8; }
+.side .hint { margin-top: 26px; font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 2px;
+              color: #6b7ba8; }
+
+@media (max-width: 820px) {
+  .side { top: auto; bottom: 4vh; right: 5vw; left: 5vw; width: auto; transform: none; text-align: center; }
+  .side.on { transform: none; }
+  .side .stats { max-width: 360px; margin-left: auto; margin-right: auto; }
+}
+</style>
+</head>
+<body>
+<div class="head">
+  <div class="k">HOLOGRAPHIC COLLECTION</div>
+  <h1>기울이면 빛나는 <em>풀아트 카드</em></h1>
+  <p>팩을 열듯 등장 · 커서를 올려 홀로 포일을, 클릭하면 카드가 떠오릅니다</p>
+</div>
+
+<div class="rack" id="rack"></div>
+
+<div class="backdrop" id="backdrop"></div>
+<aside class="side" id="side"></aside>
+
+<script>
+const MONS = [
+  { key:'earth', rank:'common', rankKo:'COMMON', name:'수호정령', latin:'Terra Custos', type:'대지 · 바위',
+    hp:90, no:'001/150',
+    lore:'이끼 낀 바위산의 오랜 파수꾼. 천 년을 미동도 없이 골짜기를 지켜왔다. 화가 나면 산을 통째로 들어 올린다.',
+    stats:{ 공격:62, 방어:95, 속도:38 }, skills:[['바위 방벽','방어 +40'],['대지 진동','광역 스턴']] },
+  { key:'water', rank:'rare', rankKo:'RARE', name:'심연의 파도', latin:'Abyssos Unda', type:'심해 · 물',
+    hp:110, no:'047/150',
+    lore:'가장 깊은 바다에서 온 뱀. 지느러미가 지나간 자리에 소용돌이가 남고, 울음소리는 폭풍을 부른다.',
+    stats:{ 공격:84, 방어:70, 속도:88 }, skills:[['소용돌이','속박 3턴'],['심해의 노래','회복 +30']] },
+  { key:'sun', rank:'legend', rankKo:'LEGEND', name:'태양의 왕관', latin:'Solis Corona', type:'태양 · 불사',
+    hp:150, no:'150/150',
+    lore:'새벽마다 다시 타오르는 불사조. 깃털 하나가 도시 하나를 밝힌다. 재가 되어도 이튿날 아침이면 되살아난다.',
+    stats:{ 공격:98, 방어:82, 속도:92 }, skills:[['여명의 불꽃','대미지 x2'],['불사','쓰러져도 1회 부활']] },
+  { key:'leaf', rank:'common', rankKo:'COMMON', name:'숲의 씨앗', latin:'Silva Semen', type:'자연 · 풀',
+    hp:70, no:'012/150',
+    lore:'머리에 돋은 새싹과 함께 자라는 어린 정령. 봄이 오면 온몸에 꽃을 피우고, 지나간 자리마다 풀이 돋는다.',
+    stats:{ 공격:48, 방어:55, 속도:66 }, skills:[['새싹 성장','매 턴 회복'],['홀씨 바람','상태이상 해제']] },
+];
+
+const rack = document.getElementById('rack');
+const CARDS = [];
+let activeCard = null;
+
+MONS.forEach((m, idx) => {
+  const el = document.createElement('div');
+  el.className = 'card ' + m.rank;
+  el.innerHTML = `
+    <div class="flipper" style="animation-delay:${idx*0.16}s">
+      <div class="face front">
+        <img class="art" src="../assets/gen/card-${m.key}.png" alt="${m.name}" onerror="this.style.display='none'">
+        <div class="veil-t"></div><div class="veil-b"></div>
+        <div class="c-top"><span class="rank">${m.rankKo}</span><span class="hp">HP <b>${m.hp}</b></span></div>
+        <div class="c-name"><h3>${m.name}</h3><div class="type">${m.type}</div></div>
+        <div class="c-bars">
+          <div class="bar"><i style="width:${m.stats.공격}%"></i></div>
+          <div class="bar"><i style="width:${m.stats.방어}%"></i></div>
+          <div class="bar"><i style="width:${m.stats.속도}%"></i></div>
+        </div>
+        <div class="card__shine"></div><div class="card__glitter"></div><div class="card__glare"></div>
+      </div>
+      <div class="face back"><div class="emblem-b"><div class="orb"></div><div class="txt">MONSTER</div></div></div>
+    </div>`;
+  rack.appendChild(el);
+
+  const st = {
+    cur:{rx:0,ry:0,gx:50,gy:50,go:0,bx:50,by:50,tx:0,ty:0,scale:1},
+    tgt:{rx:0,ry:0,gx:50,gy:50,go:0,bx:50,by:50,tx:0,ty:0,scale:1},
+    vel:{rx:0,ry:0,gx:0,gy:0,go:0,bx:0,by:0,tx:0,ty:0,scale:0},
+    mode:'idle', idleA: Math.random()*Math.PI*2, returnUntil:0, active:false, idx,
+  };
+  el._st = st; CARDS.push(el);
+
+  st.setHolo = (px100, py100, o) => {
+    const cx = px100-50, cy = py100-50;
+    st.tgt.rx = -(cx/3.5); st.tgt.ry = (cy/3.5);
+    st.tgt.gx = px100; st.tgt.gy = py100; st.tgt.go = o;
+    st.tgt.bx = 37 + px100*0.26; st.tgt.by = 33 + py100*0.34;
+  };
+
+  el.addEventListener('pointermove', e => {
+    const r = el.getBoundingClientRect();
+    const px = Math.max(0,Math.min(100,(e.clientX-r.left)/r.width*100));
+    const py = Math.max(0,Math.min(100,(e.clientY-r.top)/r.height*100));
+    if (!st.active) st.mode = 'hover';
+    else st.mode = 'active-hover';
+    el.classList.add('interacting');
+    st.setHolo(px, py, 1);
+  });
+  el.addEventListener('pointerleave', () => {
+    el.classList.remove('interacting');
+    if (st.active) { st.mode='active'; st.setHolo(50,50,0.35); }  // 떠 있을 땐 은은히 유지
+    else { st.mode='return'; st.returnUntil = performance.now()+600; st.setHolo(50,50,0); }
+  });
+  el.addEventListener('click', e => { e.stopPropagation(); toggleActive(el); });
+});
+
+/* ── 카드 팝업(뜨는 효과): 스프링으로 확대·중앙 이동 ── */
+function popTarget(el){
+  const r = el.getBoundingClientRect();
+  const wide = innerWidth > 820;
+  const tX = wide ? innerWidth*0.34 : innerWidth*0.5;
+  const tY = wide ? innerHeight*0.5 : innerHeight*0.34;
+  const cx = r.left + r.width/2, cy = r.top + r.height/2;
+  return { tx: tX-cx, ty: tY-cy, scale: wide ? 1.72 : 1.34 };
+}
+const backdrop = document.getElementById('backdrop');
+const side = document.getElementById('side');
+
+function activate(el){
+  if (activeCard) deactivate();
+  activeCard = el; const st = el._st; st.active = true;
+  el.classList.add('active');
+  document.body.classList.add('has-active');
+  setTimeout(() => document.addEventListener('click', onDocClick), 0);
+  const p = popTarget(el);
+  st.tgt.tx = p.tx; st.tgt.ty = p.ty; st.tgt.scale = p.scale;
+  st.mode = 'active'; st.setHolo(50,50,0.35);
+  const m = MONS[st.idx];
+  side.className = 'side on ' + m.rank;
+  side.innerHTML = `
+    <div class="rank-lg" style="color:${m.rank==='legend'?'#f8d67c':m.rank==='rare'?'#7cc0f8':'#7cf0b0'}">✦ ${m.rankKo} · ${m.no}</div>
+    <h2>${m.name}</h2>
+    <div class="latin">${m.latin} — ${m.type}</div>
+    <p class="lore">${m.lore}</p>
+    <div class="stats">
+      ${Object.entries(m.stats).map(([k,v])=>`<div class="stat"><span class="lbl">${k}</span>
+        <span class="track"><i style="width:${v}%"></i></span><span class="val">${v}</span></div>`).join('')}
+      <div class="stat"><span class="lbl">HP</span>
+        <span class="track"><i style="width:${Math.min(100,m.hp/1.5)}%;background:linear-gradient(90deg,#ff9e7c,#ff7a9e)"></i></span>
+        <span class="val">${m.hp}</span></div>
+    </div>
+    <div class="skills">${m.skills.map(s=>`<span class="skill"><b>${s[0]}</b> · ${s[1]}</span>`).join('')}</div>
+    <div class="hint">카드 위에서 마우스를 움직여 보세요 · 배경 클릭 또는 ESC로 닫기</div>`;
+  backdrop.classList.add('on');
+}
+function deactivate(){
+  if (!activeCard) return;
+  const st = activeCard._st;
+  st.tgt.tx = 0; st.tgt.ty = 0; st.tgt.scale = 1; st.setHolo(50,50,0);
+  st.mode = 'return'; st.returnUntil = performance.now()+600;
+  const card = activeCard;
+  setTimeout(()=>{ if (!card._st.active) card.classList.remove('active'); }, 500);
+  st.active = false;
+  activeCard = null;
+  document.body.classList.remove('has-active');
+  document.removeEventListener('click', onDocClick);
+  backdrop.classList.remove('on'); side.className = 'side';
+}
+/* 카드/설명 바깥을 클릭하면 닫기 */
+function onDocClick(e){
+  if (!activeCard) return;
+  if (activeCard.contains(e.target) || side.contains(e.target)) return;
+  deactivate();
+}
+function toggleActive(el){ (el._st.active) ? deactivate() : activate(el); }
+backdrop.addEventListener('click', deactivate);
+addEventListener('keydown', e => { if (e.key==='Escape') deactivate(); });
+addEventListener('resize', () => { if (activeCard){ const p = popTarget(activeCard);
+  activeCard._st.tgt.tx=p.tx; activeCard._st.tgt.ty=p.ty; activeCard._st.tgt.scale=p.scale; } });
+
+/* ── 공유 스프링 루프 ── */
+const HOLO = ['rx','ry','gx','gy','go','bx','by'];
+const POP = ['tx','ty','scale'];
+let frames = 0;
+(function loop(t){
+  if (window.__paused && frames > 5) { setTimeout(()=>requestAnimationFrame(loop), 300); return; }
+  frames++;
+  for (const el of CARDS){
+    const st = el._st;
+    if (st.mode === 'idle'){
+      st.idleA += 0.011;
+      st.setHolo(50+Math.cos(st.idleA)*26, 50+Math.sin(st.idleA)*26, 0.42);
+    } else if (st.mode === 'return' && t > st.returnUntil){
+      st.mode = 'idle';
+    }
+    const hov = (st.mode==='hover' || st.mode==='active-hover');
+    const hStiff = hov ? 0.11 : 0.05, hDamp = hov ? 0.78 : 0.86;
+    for (const k of HOLO){ const f=(st.tgt[k]-st.cur[k])*hStiff; st.vel[k]=(st.vel[k]+f)*hDamp; st.cur[k]+=st.vel[k]; }
+    /* 팝업(뜨는) 스프링은 더 부드럽게(popover) */
+    for (const k of POP){ const f=(st.tgt[k]-st.cur[k])*0.055; st.vel[k]=(st.vel[k]+f)*0.80; st.cur[k]+=st.vel[k]; }
+    const c = st.cur;
+    el.style.setProperty('--rx', c.rx.toFixed(2)+'deg'); el.style.setProperty('--ry', c.ry.toFixed(2)+'deg');
+    el.style.setProperty('--px', c.gx.toFixed(2)+'%'); el.style.setProperty('--py', c.gy.toFixed(2)+'%');
+    el.style.setProperty('--o', c.go.toFixed(3));
+    el.style.setProperty('--bgx', c.bx.toFixed(2)+'%'); el.style.setProperty('--bgy', c.by.toFixed(2)+'%');
+    el.style.setProperty('--tx', c.tx.toFixed(1)+'px'); el.style.setProperty('--ty', c.ty.toFixed(1)+'px');
+    el.style.setProperty('--scale', c.scale.toFixed(3));
+  }
+  requestAnimationFrame(loop);
+})(0);
+</script>
+
+<script>
+/* ── English mode (?lang=en): translate all visible Korean text, no logic changes ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "홀로그램 몬스터 카드 — 풀아트 컬렉션": "Holographic Monster Cards — Full-Art Collection",
+    "기울이면 빛나는": "Tilt to Make It Shine",
+    "풀아트 카드": "Full-Art Cards",
+    "팩을 열듯 등장 · 커서를 올려 홀로 포일을, 클릭하면 카드가 떠오릅니다": "They appear like opening a pack · Hover for holo foil, click to make a card rise",
+    "수호정령": "Guardian Spirit",
+    "심연의 파도": "Abyssal Tide",
+    "태양의 왕관": "Crown of the Sun",
+    "숲의 씨앗": "Forest Seedling",
+    "대지 · 바위": "Earth · Rock",
+    "심해 · 물": "Deep Sea · Water",
+    "태양 · 불사": "Sun · Undying",
+    "자연 · 풀": "Nature · Grass",
+    "Terra Custos — 대지 · 바위": "Terra Custos — Earth · Rock",
+    "Abyssos Unda — 심해 · 물": "Abyssos Unda — Deep Sea · Water",
+    "Solis Corona — 태양 · 불사": "Solis Corona — Sun · Undying",
+    "Silva Semen — 자연 · 풀": "Silva Semen — Nature · Grass",
+    "이끼 낀 바위산의 오랜 파수꾼. 천 년을 미동도 없이 골짜기를 지켜왔다. 화가 나면 산을 통째로 들어 올린다.": "The ancient sentinel of a moss-covered rocky peak. For a thousand years it has guarded the valley without stirring. When angered, it hoists an entire mountain overhead.",
+    "가장 깊은 바다에서 온 뱀. 지느러미가 지나간 자리에 소용돌이가 남고, 울음소리는 폭풍을 부른다.": "A serpent from the deepest sea. Whirlpools trail wherever its fins pass, and its cry summons storms.",
+    "새벽마다 다시 타오르는 불사조. 깃털 하나가 도시 하나를 밝힌다. 재가 되어도 이튿날 아침이면 되살아난다.": "A phoenix that blazes anew each dawn. A single feather lights a whole city. Even reduced to ash, it revives by the next morning.",
+    "머리에 돋은 새싹과 함께 자라는 어린 정령. 봄이 오면 온몸에 꽃을 피우고, 지나간 자리마다 풀이 돋는다.": "A young spirit that grows alongside the sprout on its head. When spring comes it blooms all over, and grass springs up wherever it goes.",
+    "공격": "ATK",
+    "방어": "DEF",
+    "속도": "SPD",
+    "바위 방벽": "Rock Bulwark",
+    "대지 진동": "Earthquake",
+    "소용돌이": "Maelstrom",
+    "심해의 노래": "Abyssal Song",
+    "새싹 성장": "Sprout Growth",
+    "홀씨 바람": "Spore Wind",
+    "여명의 불꽃": "Dawnfire",
+    "불사": "Immortality",
+    "· 방어 +40": "· Defense +40",
+    "· 광역 스턴": "· Area stun",
+    "· 속박 3턴": "· Bind 3 turns",
+    "· 회복 +30": "· Heal +30",
+    "· 매 턴 회복": "· Heal every turn",
+    "· 상태이상 해제": "· Cleanse status",
+    "· 대미지 x2": "· Damage x2",
+    "· 쓰러져도 1회 부활": "· Revives once when downed",
+    "카드 위에서 마우스를 움직여 보세요 · 배경 클릭 또는 ESC로 닫기": "Move your mouse over the card · Click the backdrop or press ESC to close"
+  };
+  const PATTERNS = [];
+  const tr = t => { if (TR[t] != null) return TR[t]; for (const [re,fn] of PATTERNS){ const m = t.match(re); if (m) return fn(m); } return null; };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swap = s => { const t = s.trim(); const r = tr(t); return r != null ? s.replace(t, r) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (tr(n.nodeValue.trim()) != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && tr(n.getAttribute(a).trim()) != null) n.setAttribute(a, tr(n.getAttribute(a).trim())); });
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim()); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

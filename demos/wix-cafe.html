@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>카페 온도 — 오늘의 커피와 따뜻한 한 잔</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Quicksand:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700&display=swap');
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --bg:#fbf3e7; --surface:#fffaf2; --ink:#3a2a1c; --ink-soft:#5b4632; --muted:#8a7360;
+  --line:#ecdcc4; --mocha:#6b4423; --caramel:#c8905b; --accent:#b06a35; --accent-soft:#f3e0c4;
+  --radius:22px;
+}
+html{ scroll-behavior:smooth; }
+body{ font-family:'Quicksand','Noto Sans KR',sans-serif; background:var(--bg); color:var(--ink);
+  -webkit-font-smoothing:antialiased; line-height:1.65; overflow-x:hidden; }
+.display{ font-family:'Fraunces','Noto Sans KR',serif; }
+.wrap{ max-width:1160px; margin:0 auto; padding:0 26px; }
+a{ color:inherit; text-decoration:none; }
+img{ display:block; max-width:100%; }
+.eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:700;
+  letter-spacing:.04em; color:var(--accent); background:var(--accent-soft); padding:7px 16px; border-radius:30px; }
+.btn{ display:inline-flex; align-items:center; gap:8px; font-weight:700; font-size:15px;
+  padding:14px 26px; border-radius:30px; border:2px solid transparent; cursor:pointer;
+  transition:transform .18s, background .2s, border-color .2s, box-shadow .2s; font-family:inherit; }
+.btn:active{ transform:translateY(1px) scale(.98); }
+.btn-primary{ background:var(--mocha); color:#fff9ef; box-shadow:0 14px 30px -14px rgba(107,68,35,.55); }
+.btn-primary:hover{ background:#57371c; box-shadow:0 18px 34px -14px rgba(107,68,35,.65); }
+.btn-ghost{ background:#fff; border-color:var(--line); color:var(--ink); }
+.btn-ghost:hover{ border-color:var(--mocha); }
+.btn-light{ background:rgba(255,255,255,.14); border-color:rgba(255,255,255,.7); color:#fff9ef; backdrop-filter:blur(4px); }
+.btn-light:hover{ background:#fff9ef; color:var(--mocha); }
+.section{ padding:100px 0; }
+.section-head{ max-width:600px; margin:0 0 48px; }
+.section-head.center{ margin-left:auto; margin-right:auto; text-align:center; }
+.section-head h2{ margin-top:14px; font-size:clamp(28px,4.2vw,44px); font-weight:700; letter-spacing:-.01em; }
+.section-head p{ margin-top:14px; color:var(--muted); font-size:16px; word-break:keep-all; }
+
+/* ── reveal ─────────────────────────────────────── */
+.reveal{ opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s cubic-bezier(.16,.8,.24,1); }
+.reveal.in{ opacity:1; transform:translateY(0); }
+.reveal.d1{ transition-delay:.1s; } .reveal.d2{ transition-delay:.2s; } .reveal.d3{ transition-delay:.3s; }
+
+/* ── 내비게이션 ─────────────────────────────────── */
+.nav{ position:fixed; top:0; left:0; right:0; z-index:100; padding:20px 0; transition:background .3s, padding .3s, box-shadow .3s; }
+.nav .wrap{ display:flex; align-items:center; justify-content:space-between; }
+.nav.on{ background:rgba(251,243,231,.92); backdrop-filter:blur(10px); padding:12px 0; box-shadow:0 8px 24px -18px rgba(58,42,28,.4); }
+.brand{ display:flex; align-items:center; gap:9px; font-family:'Fraunces',serif; font-weight:700; font-size:22px; color:#fff9ef; }
+.brand .mark{ width:34px; height:34px; border-radius:50%; background:#fff9ef; color:var(--mocha); display:grid; place-items:center; font-size:16px; }
+.nav.on .brand{ color:var(--mocha); }
+.nav.on .brand .mark{ background:var(--mocha); color:#fff9ef; }
+.nav-links{ display:flex; gap:32px; }
+.nav-links a{ font-size:15px; font-weight:600; color:#fff9ef; opacity:.92; transition:opacity .2s; }
+.nav.on .nav-links a{ color:var(--ink-soft); }
+.nav-links a:hover{ opacity:1; }
+.nav-right{ display:flex; align-items:center; gap:14px; }
+.lang-btn{ background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.7); color:#fff9ef; font:inherit; font-weight:700; font-size:12px;
+  cursor:pointer; padding:8px 13px; border-radius:20px; transition:background .2s, color .2s; }
+.nav.on .lang-btn{ background:var(--accent-soft); border-color:var(--line); color:var(--mocha); }
+.lang-btn:hover{ background:var(--mocha); color:#fff9ef; }
+.hamburger{ display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:6px; z-index:210; }
+.hamburger span{ width:24px; height:3px; border-radius:3px; background:#fff9ef; transition:transform .3s, opacity .3s, background .3s; }
+.nav.on .hamburger span{ background:var(--mocha); }
+.hamburger.open span:nth-child(1){ transform:translateY(8px) rotate(45deg); }
+.hamburger.open span:nth-child(2){ opacity:0; }
+.hamburger.open span:nth-child(3){ transform:translateY(-8px) rotate(-45deg); }
+@media(max-width:860px){ .nav-links{ display:none; } .hamburger{ display:flex; } }
+
+.nav-overlay{ position:fixed; inset:0; background:var(--mocha); z-index:150; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:30px; opacity:0; visibility:hidden; transition:opacity .35s ease; }
+.nav-overlay.open{ opacity:1; visibility:visible; }
+.nav-overlay a{ font-family:'Fraunces',serif; font-size:30px; font-weight:600; color:#fff9ef; }
+.nav-overlay a:hover{ color:var(--caramel); }
+
+/* ── 히어로 ──────────────────────────────────────── */
+.hero{ position:relative; height:100vh; min-height:600px; display:flex; align-items:center; overflow:hidden; background:#3a2a1c; }
+.hero .imgwrap{ position:absolute; inset:0; }
+.hero img{ width:100%; height:100%; object-fit:cover; }
+.hero::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(40,27,15,.55) 0%, rgba(40,27,15,.72) 100%); }
+.hero-content{ position:relative; z-index:2; color:#fff9ef; text-align:center; width:100%; }
+.steam{ display:flex; justify-content:center; margin-bottom:6px; }
+.steam svg{ width:64px; height:64px; overflow:visible; }
+.steam path{ stroke:#fff9ef; stroke-width:3; fill:none; stroke-linecap:round; opacity:.85;
+  stroke-dasharray:40; animation:rise 3.2s ease-in-out infinite; }
+.steam path:nth-child(2){ animation-delay:.5s; } .steam path:nth-child(3){ animation-delay:1s; }
+@keyframes rise{ 0%{ stroke-dashoffset:40; opacity:0; transform:translateY(6px);} 30%{ opacity:.9;} 100%{ stroke-dashoffset:0; opacity:0; transform:translateY(-14px);} }
+.hero-content .eyebrow{ background:rgba(255,249,239,.18); color:#fff9ef; }
+.hero-content h1{ margin-top:18px; font-size:clamp(40px,7vw,78px); font-weight:700; letter-spacing:-.01em; line-height:1.06; }
+.hero-content p{ margin:18px auto 0; max-width:480px; font-size:17px; color:#f3e6d3; word-break:keep-all; }
+.hero-content .actions{ margin-top:32px; display:flex; gap:14px; justify-content:center; flex-wrap:wrap; }
+
+/* ── 메뉴 ────────────────────────────────────────── */
+.menu{ background:var(--surface); }
+.menu-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:26px; }
+.mcard{ background:var(--bg); border-radius:var(--radius); overflow:hidden; box-shadow:0 20px 40px -30px rgba(58,42,28,.35);
+  transition:transform .3s cubic-bezier(.2,.8,.3,1.2), box-shadow .3s; }
+.mcard:hover{ transform:translateY(-8px) rotate(-.4deg); box-shadow:0 26px 48px -24px rgba(58,42,28,.45); }
+.mcard .thumb{ height:190px; position:relative; overflow:hidden; background:var(--accent-soft); }
+.mcard .thumb img{ width:100%; height:100%; object-fit:cover; transition:transform .5s; }
+.mcard:hover .thumb img{ transform:scale(1.06); }
+.mcard .thumb.food1{ background:radial-gradient(circle at 30% 30%, #e8b784, #a9683f 75%); }
+.mcard .thumb.food2{ background:radial-gradient(circle at 70% 30%, #f0d3a0, #b06a35 75%); }
+.mcard .thumb.food3{ background:radial-gradient(circle at 40% 60%, #dba86b, #7c4f28 75%); }
+.mcard .body{ padding:22px 22px 26px; }
+.mcard .row{ display:flex; justify-content:space-between; align-items:baseline; gap:10px; }
+.mcard h3{ font-family:'Fraunces',serif; font-size:19px; font-weight:600; }
+.mcard .price{ font-weight:700; color:var(--accent); font-size:15px; white-space:nowrap; }
+.mcard p{ margin-top:8px; font-size:14px; color:var(--muted); word-break:keep-all; }
+.mcard .badge{ display:inline-block; margin-top:12px; font-size:11px; font-weight:700; color:var(--mocha);
+  background:var(--accent-soft); padding:4px 10px; border-radius:20px; }
+@media(max-width:900px){ .menu-grid{ grid-template-columns:repeat(2,1fr); } }
+@media(max-width:600px){ .menu-grid{ grid-template-columns:1fr; } }
+
+/* ── 우리 이야기 ─────────────────────────────────── */
+.story{ background:var(--bg); }
+.story .grid{ display:grid; grid-template-columns:1fr 1fr; gap:70px; align-items:center; }
+.story-visual{ position:relative; border-radius:var(--radius); overflow:hidden; aspect-ratio:5/4; box-shadow:0 30px 60px -30px rgba(58,42,28,.4); }
+.story-visual img{ width:100%; height:100%; object-fit:cover; }
+.story-visual .chip{ position:absolute; left:20px; bottom:20px; background:#fff9efcc; backdrop-filter:blur(6px);
+  border-radius:16px; padding:12px 18px; font-family:'Fraunces',serif; font-weight:600; font-size:14px; color:var(--mocha); }
+.story-copy p{ margin-top:16px; color:var(--ink-soft); font-size:16px; word-break:keep-all; }
+.story-copy p:first-of-type{ margin-top:18px; }
+@media(max-width:900px){ .story .grid{ grid-template-columns:1fr; gap:36px; } }
+
+/* ── 갤러리 ──────────────────────────────────────── */
+.gallery{ background:var(--surface); padding:80px 0; }
+.gal-strip{ display:grid; grid-template-columns:repeat(5,1fr); gap:14px; }
+.gal-tile{ aspect-ratio:1/1; border-radius:16px; overflow:hidden; position:relative; }
+.gal-tile img{ width:100%; height:100%; object-fit:cover; transition:transform .5s; }
+.gal-tile:hover img{ transform:scale(1.08); }
+.gt1{ background:radial-gradient(circle at 35% 35%, #f0d3a0, #a9683f 80%); }
+.gt2{ background:radial-gradient(circle at 60% 40%, #e8c290, #7c4f28 80%); }
+.gt3{ background:radial-gradient(circle at 50% 60%, #dba86b, #573719 80%); }
+@media(max-width:820px){ .gal-strip{ grid-template-columns:repeat(3,1fr); } .gal-tile:nth-child(n+4){ display:none; } }
+
+/* ── 영업시간 & 오시는 길 ────────────────────────── */
+.hours{ background:var(--bg); }
+.hours .grid{ display:grid; grid-template-columns:1fr 1fr; gap:70px; align-items:start; }
+.map{ position:relative; aspect-ratio:4/3; border-radius:var(--radius); overflow:hidden; background:
+  linear-gradient(#f3e6d3,#f3e6d3) , repeating-linear-gradient(0deg, #e6d3b4 0 2px, transparent 2px 34px),
+  repeating-linear-gradient(90deg, #e6d3b4 0 2px, transparent 2px 34px); box-shadow:inset 0 0 0 1px var(--line); }
+.map .pin{ position:absolute; left:50%; top:46%; transform:translate(-50%,-100%); display:flex; flex-direction:column; align-items:center; }
+.map .pin .dot{ width:20px; height:20px; border-radius:50% 50% 50% 0; background:var(--accent); transform:rotate(-45deg);
+  box-shadow:0 6px 14px -4px rgba(58,42,28,.5); animation:bob 2.2s ease-in-out infinite; }
+@keyframes bob{ 0%,100%{ transform:rotate(-45deg) translateY(0);} 50%{ transform:rotate(-45deg) translateY(-6px);} }
+.map .pin .ring{ margin-top:6px; width:38px; height:10px; border-radius:50%; background:rgba(58,42,28,.18); }
+.map .road{ position:absolute; left:0; right:0; top:60%; height:22px; background:#fff9ef; opacity:.6; }
+.map .road.v{ left:38%; right:auto; top:0; bottom:0; width:22px; height:auto; }
+.hours-table{ width:100%; border-collapse:collapse; margin-top:6px; }
+.hours-table tr{ border-bottom:1px solid var(--line); }
+.hours-table td{ padding:14px 4px; font-size:15px; }
+.hours-table td:first-child{ color:var(--muted); font-weight:600; }
+.hours-table td:last-child{ text-align:right; font-weight:600; }
+.hours-table tr.today td{ color:var(--accent); }
+.addr-box{ margin-top:26px; padding:20px; background:var(--surface); border-radius:16px; border:1px solid var(--line); }
+.addr-box .k{ font-size:12px; font-weight:700; letter-spacing:.04em; color:var(--muted); text-transform:uppercase; }
+.addr-box .v{ margin-top:6px; font-size:16px; color:var(--ink-soft); font-weight:600; }
+@media(max-width:900px){ .hours .grid{ grid-template-columns:1fr; gap:36px; } }
+
+/* ── 예약 문의 ───────────────────────────────────── */
+.reserve{ background:var(--mocha); color:#fff9ef; }
+.reserve .grid{ display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+.reserve .section-head .eyebrow{ background:rgba(255,249,239,.16); color:#fff9ef; }
+.reserve .section-head p{ color:#e4d2b8; }
+.rform{ background:#fff9ef; border-radius:var(--radius); padding:32px; color:var(--ink); box-shadow:0 30px 60px -24px rgba(0,0,0,.4); }
+.rfield{ margin-bottom:16px; }
+.rfield label{ display:block; font-size:12px; font-weight:700; color:var(--muted); margin-bottom:6px; }
+.rfield input, .rfield select, .rfield textarea{ width:100%; border:1.5px solid var(--line); border-radius:12px;
+  padding:12px 14px; font:inherit; font-size:14px; color:var(--ink); background:#fff; transition:border-color .2s; }
+.rfield input:focus, .rfield select:focus, .rfield textarea:focus{ outline:none; border-color:var(--accent); }
+.rfield-row{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.rform button{ width:100%; margin-top:6px; justify-content:center; }
+@media(max-width:900px){ .reserve .grid{ grid-template-columns:1fr; gap:36px; } }
+@media(max-width:480px){ .rfield-row{ grid-template-columns:1fr; gap:0; } }
+
+.toast{ position:fixed; left:50%; bottom:32px; transform:translate(-50%,20px); background:var(--mocha); color:#fff9ef;
+  padding:15px 28px; border-radius:30px; font-size:14px; font-weight:600; box-shadow:0 18px 40px -14px rgba(0,0,0,.5);
+  opacity:0; pointer-events:none; transition:opacity .3s, transform .3s; z-index:300; display:flex; align-items:center; gap:8px; }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+
+/* ── 푸터 ────────────────────────────────────────── */
+footer{ background:#2a1d12; color:#d9c4a6; padding:60px 0 30px; }
+footer .cols{ display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; padding-bottom:40px; border-bottom:1px solid #46331f; }
+footer .about-f{ max-width:290px; }
+footer .brand{ color:#fff9ef; }
+footer .about-f p{ margin-top:14px; font-size:14px; line-height:1.7; word-break:keep-all; }
+footer .fcol h4{ font-size:12px; font-weight:700; letter-spacing:.08em; color:#a48c6b; text-transform:uppercase; margin-bottom:14px; }
+footer .fcol a{ display:block; font-size:14px; color:#eaddc7; margin-bottom:10px; opacity:.85; }
+footer .fcol a:hover{ opacity:1; color:var(--caramel); }
+footer .copy{ margin-top:24px; font-size:12px; color:#a48c6b; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<!-- 내비게이션 -->
+<nav class="nav" id="nav">
+  <div class="wrap">
+    <a href="#" class="brand"><span class="mark">☕</span>카페 온도</a>
+    <div class="nav-links">
+      <a href="#menu" data-i18n>메뉴</a>
+      <a href="#story" data-i18n>이야기</a>
+      <a href="#gallery" data-i18n>갤러리</a>
+      <a href="#hours" data-i18n>오시는 길</a>
+      <a href="#reserve" data-i18n>예약문의</a>
+    </div>
+    <div class="nav-right">
+      <button class="lang-btn" id="lang">EN</button>
+      <button class="hamburger" id="hamburger" aria-label="메뉴 열기"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- 모바일 내비 오버레이 -->
+<div class="nav-overlay" id="navOverlay">
+  <a href="#menu" data-i18n>메뉴</a>
+  <a href="#story" data-i18n>이야기</a>
+  <a href="#gallery" data-i18n>갤러리</a>
+  <a href="#hours" data-i18n>오시는 길</a>
+  <a href="#reserve" data-i18n>예약문의</a>
+</div>
+
+<!-- 히어로 -->
+<header class="hero" id="hero">
+  <div class="imgwrap">
+    <img src="../assets/gen/wix-cafe-hero.jpg" alt="카페 온도 내부 전경" onerror="this.parentElement.style.background='linear-gradient(135deg,#6b4423,#2a1d12)'; this.remove();">
+  </div>
+  <div class="wrap hero-content">
+    <div class="steam" aria-hidden="true">
+      <svg viewBox="0 0 60 60"><path d="M20 50 C20 40, 30 40, 30 30 C30 20, 20 20, 20 10"></path><path d="M40 50 C40 40, 30 40, 30 30 C30 20, 40 20, 40 10" style="animation-delay:.7s"></path></svg>
+    </div>
+    <span class="eyebrow" data-i18n>오늘의 커피</span>
+    <h1 class="display" data-i18n>느긋한 오후,<br>카페 온도</h1>
+    <p data-i18n>직접 로스팅한 원두와 매일 굽는 페이스트리로 채우는 따뜻한 한 잔의 시간.</p>
+    <div class="actions">
+      <a href="#reserve" class="btn btn-primary" data-i18n>예약하기</a>
+      <a href="#hours" class="btn btn-ghost btn-light" data-i18n>오시는 길</a>
+    </div>
+  </div>
+</header>
+
+<!-- 시그니처 메뉴 -->
+<section class="section menu" id="menu">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <span class="eyebrow" data-i18n>시그니처 메뉴</span>
+      <h2 class="display" data-i18n>오늘 마시기 좋은 메뉴</h2>
+      <p data-i18n>매일 아침 볶은 원두와 갓 구운 베이커리로 완성한 카페 온도의 대표 메뉴입니다.</p>
+    </div>
+    <div class="menu-grid">
+      <div class="mcard reveal">
+        <div class="thumb"><img src="../assets/gen/wix-cafe-2.jpg" alt="카페라떼와 크루아상" onerror="this.parentElement.style.background='radial-gradient(circle at 30% 30%, #e8b784, #a9683f 75%)'; this.remove();"></div>
+        <div class="body">
+          <div class="row"><h3 data-i18n>카페 온도 라떼</h3><span class="price">₩ 6,000</span></div>
+          <p data-i18n>직접 로스팅한 원두와 부드러운 스팀 밀크의 균형.</p>
+          <span class="badge" data-i18n>시그니처</span>
+        </div>
+      </div>
+      <div class="mcard reveal d1">
+        <div class="thumb food1"></div>
+        <div class="body">
+          <div class="row"><h3 data-i18n>버터 크루아상</h3><span class="price">₩ 4,800</span></div>
+          <p data-i18n>겹겹이 결이 살아있는 프랑스식 버터 크루아상.</p>
+          <span class="badge" data-i18n>매일 굽는 빵</span>
+        </div>
+      </div>
+      <div class="mcard reveal d2">
+        <div class="thumb food2"></div>
+        <div class="body">
+          <div class="row"><h3 data-i18n>바닐라 빈 라떼</h3><span class="price">₩ 6,500</span></div>
+          <p data-i18n>마다가스카르 바닐라빈을 우려낸 은은한 단맛.</p>
+          <span class="badge" data-i18n>인기</span>
+        </div>
+      </div>
+      <div class="mcard reveal">
+        <div class="thumb food3"></div>
+        <div class="body">
+          <div class="row"><h3 data-i18n>다크 초콜릿 스콘</h3><span class="price">₩ 5,200</span></div>
+          <p data-i18n>진한 다크초콜릿이 콕콕 박힌 촉촉한 스콘.</p>
+          <span class="badge" data-i18n>비건 옵션</span>
+        </div>
+      </div>
+      <div class="mcard reveal d1">
+        <div class="thumb food1"></div>
+        <div class="body">
+          <div class="row"><h3 data-i18n>콜드브루</h3><span class="price">₩ 5,500</span></div>
+          <p data-i18n>18시간 저온 추출로 부드럽고 깔끔한 목넘김.</p>
+          <span class="badge" data-i18n>여름 한정</span>
+        </div>
+      </div>
+      <div class="mcard reveal d2">
+        <div class="thumb food2"></div>
+        <div class="body">
+          <div class="row"><h3 data-i18n>얼그레이 마들렌</h3><span class="price">₩ 3,800</span></div>
+          <p data-i18n>은은한 베르가못 향이 퍼지는 촉촉한 마들렌.</p>
+          <span class="badge" data-i18n>티타임 추천</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 우리 이야기 -->
+<section class="section story" id="story">
+  <div class="wrap grid">
+    <div class="story-visual reveal">
+      <img src="../assets/gen/wix-cafe-hero.jpg" alt="카페 온도 내부" onerror="this.parentElement.style.background='linear-gradient(135deg,#6b4423,#2a1d12)'; this.querySelector('img')?.remove();">
+      <div class="chip" data-i18n>2019년부터, 성수동</div>
+    </div>
+    <div class="story-copy">
+      <span class="eyebrow reveal" data-i18n>우리 이야기</span>
+      <h2 class="display reveal" data-i18n>천천히,<br>정성으로 내리는 커피</h2>
+      <p class="reveal d1" data-i18n>카페 온도는 작은 로스터리에서 시작했습니다. 좋은 원두를 고르고, 알맞은 온도로 내리는 일 — 그 단순한 원칙 하나로 오늘까지 왔습니다.</p>
+      <p class="reveal d2" data-i18n>매일 아침 문을 열며 그날의 원두 컨디션을 확인하고, 손님 한 분 한 분께 어울리는 한 잔을 권합니다. 머무는 동안만큼은 온전히 쉬어가시길 바랍니다.</p>
+    </div>
+  </div>
+</section>
+
+<!-- 갤러리 -->
+<section class="gallery" id="gallery">
+  <div class="wrap">
+    <div class="section-head center reveal">
+      <span class="eyebrow" data-i18n>갤러리</span>
+      <h2 class="display" data-i18n>공간의 순간들</h2>
+    </div>
+    <div class="gal-strip">
+      <div class="gal-tile gt1 reveal"></div>
+      <div class="gal-tile reveal d1"><img src="../assets/gen/wix-cafe-2.jpg" alt="라떼와 크루아상" onerror="this.parentElement.classList.add('gt2'); this.remove();"></div>
+      <div class="gal-tile gt3 reveal d2"></div>
+      <div class="gal-tile gt2 reveal d3"></div>
+      <div class="gal-tile reveal"><img src="../assets/gen/wix-cafe-hero.jpg" alt="카페 내부" onerror="this.parentElement.classList.add('gt1'); this.remove();"></div>
+    </div>
+  </div>
+</section>
+
+<!-- 영업시간 & 오시는 길 -->
+<section class="section hours" id="hours">
+  <div class="wrap grid">
+    <div class="reveal">
+      <div class="map">
+        <div class="road"></div>
+        <div class="road v"></div>
+        <div class="pin"><div class="dot"></div><div class="ring"></div></div>
+      </div>
+      <div class="addr-box">
+        <div class="k" data-i18n>주소</div>
+        <div class="v" data-i18n>서울시 성동구 연무장길 25</div>
+      </div>
+    </div>
+    <div class="reveal d1">
+      <span class="eyebrow" data-i18n>영업시간</span>
+      <h2 class="display" style="margin-top:14px;font-size:clamp(26px,3.6vw,36px);" data-i18n>매일, 같은 온도로</h2>
+      <table class="hours-table">
+        <tr><td data-i18n>월요일</td><td data-i18n>정기 휴무</td></tr>
+        <tr><td data-i18n>화 – 금</td><td>08:00 – 21:00</td></tr>
+        <tr class="today"><td data-i18n>토요일</td><td>09:00 – 22:00</td></tr>
+        <tr><td data-i18n>일요일</td><td>09:00 – 20:00</td></tr>
+      </table>
+      <div class="addr-box" style="margin-top:24px;">
+        <div class="k" data-i18n>문의</div>
+        <div class="v">02-467-3312</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 예약 문의 -->
+<section class="section reserve" id="reserve">
+  <div class="wrap grid">
+    <div>
+      <div class="section-head reveal">
+        <span class="eyebrow" data-i18n>예약 문의</span>
+        <h2 class="display" data-i18n>모임과 촬영,<br>공간이 필요하다면</h2>
+        <p data-i18n>단체석 예약이나 소규모 모임, 촬영 대관 문의를 남겨주세요. 확인 후 빠르게 안내드립니다.</p>
+      </div>
+    </div>
+    <form id="reserveForm" class="rform reveal d1">
+      <div class="rfield-row">
+        <div class="rfield"><label data-i18n>이름</label><input type="text" placeholder="홍길동" required></div>
+        <div class="rfield"><label data-i18n>연락처</label><input type="tel" placeholder="010-0000-0000" required></div>
+      </div>
+      <div class="rfield-row">
+        <div class="rfield"><label data-i18n>날짜</label><input type="date" required></div>
+        <div class="rfield"><label data-i18n>인원</label><select><option data-i18n>2인</option><option data-i18n>4인</option><option data-i18n>6인 이상</option></select></div>
+      </div>
+      <div class="rfield"><label data-i18n>요청 사항</label><textarea rows="3" placeholder="예: 창가 자리로 부탁드려요"></textarea></div>
+      <button type="submit" class="btn btn-primary" data-i18n>예약 문의 보내기</button>
+    </form>
+  </div>
+</section>
+
+<div class="toast" id="toast"><span data-i18n>예약 문의가 접수되었습니다. 곧 연락드릴게요.</span></div>
+
+<!-- 푸터 -->
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div class="about-f">
+        <div class="brand display" style="font-size:20px;">☕ 카페 온도</div>
+        <p data-i18n>성수동 골목의 작은 카페. 직접 로스팅한 원두와 매일 굽는 빵으로 하루를 채웁니다.</p>
+      </div>
+      <div class="fcol"><h4 data-i18n>둘러보기</h4><a href="#menu" data-i18n>메뉴</a><a href="#story" data-i18n>이야기</a><a href="#gallery" data-i18n>갤러리</a></div>
+      <div class="fcol"><h4 data-i18n>안내</h4><a href="#hours" data-i18n>영업시간</a><a href="#hours" data-i18n>오시는 길</a><a href="#reserve" data-i18n>예약문의</a></div>
+      <div class="fcol"><h4 data-i18n>연락처</h4><a href="#">02-467-3312</a><a href="#">hello@cafeondo.kr</a></div>
+    </div>
+    <div class="copy">
+      <span>© 2026 hyunaeee · 카페 온도 template</span>
+      <span data-i18n>MIT 라이선스로 배포됩니다</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* 스크롤 상태에 따른 내비게이션 전환 */
+const navEl = document.getElementById('nav');
+function updateNav(){ navEl.classList.toggle('on', window.scrollY > 40); }
+window.addEventListener('scroll', updateNav, { passive:true });
+updateNav();
+
+/* 모바일 햄버거 메뉴 */
+const hamburger = document.getElementById('hamburger');
+const navOverlay = document.getElementById('navOverlay');
+function closeOverlay(){ hamburger.classList.remove('open'); navOverlay.classList.remove('open'); }
+hamburger.addEventListener('click', ()=>{
+  hamburger.classList.toggle('open');
+  navOverlay.classList.toggle('open');
+});
+navOverlay.querySelectorAll('a').forEach(a=>a.addEventListener('click', closeOverlay));
+
+/* 스크롤 리빌 (IntersectionObserver) */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){ entry.target.classList.add('in'); io.unobserve(entry.target); }
+  });
+}, { threshold:0.15, rootMargin:'0px 0px -40px 0px' });
+revealEls.forEach(el=>io.observe(el));
+
+/* 예약 폼 제출 → 토스트 */
+const form = document.getElementById('reserveForm');
+const toast = document.getElementById('toast');
+let toastTimer = null;
+form.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  toast.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 2800);
+  form.reset();
+});
+
+/* 언어 (?lang=en + 토글) */
+const STR={
+  '메뉴':'Menu','이야기':'Story','갤러리':'Gallery','오시는 길':'Location','예약문의':'Reserve','예약 문의':'Reservation',
+  '오늘의 커피':'Coffee of the Day',
+  '느긋한 오후,<br>카페 온도':'A slow afternoon<br>at Café Ondo',
+  '직접 로스팅한 원두와 매일 굽는 페이스트리로 채우는 따뜻한 한 잔의 시간.':
+    'A warm cup filled with house-roasted beans and pastries baked fresh every day.',
+  '예약하기':'Make a reservation',
+  '시그니처 메뉴':'Signature Menu',
+  '오늘 마시기 좋은 메뉴':'Good to drink today',
+  '매일 아침 볶은 원두와 갓 구운 베이커리로 완성한 카페 온도의 대표 메뉴입니다.':
+    'Café Ondo’s signature picks, made with beans roasted each morning and fresh-baked pastries.',
+  '카페 온도 라떼':'Ondo Signature Latte',
+  '직접 로스팅한 원두와 부드러운 스팀 밀크의 균형.':'A balance of house-roasted espresso and silky steamed milk.',
+  '시그니처':'Signature',
+  '버터 크루아상':'Butter Croissant',
+  '겹겹이 결이 살아있는 프랑스식 버터 크루아상.':'A French butter croissant with vivid, flaky layers.',
+  '매일 굽는 빵':'Baked daily',
+  '바닐라 빈 라떼':'Vanilla Bean Latte',
+  '마다가스카르 바닐라빈을 우려낸 은은한 단맛.':'Gentle sweetness steeped from Madagascar vanilla beans.',
+  '인기':'Popular',
+  '다크 초콜릿 스콘':'Dark Chocolate Scone',
+  '진한 다크초콜릿이 콕콕 박힌 촉촉한 스콘.':'A moist scone studded with rich dark chocolate.',
+  '비건 옵션':'Vegan option',
+  '콜드브루':'Cold Brew',
+  '18시간 저온 추출로 부드럽고 깔끔한 목넘김.':'Smooth, clean finish from an 18-hour slow steep.',
+  '여름 한정':'Summer only',
+  '얼그레이 마들렌':'Earl Grey Madeleine',
+  '은은한 베르가못 향이 퍼지는 촉촉한 마들렌.':'A moist madeleine with a gentle waft of bergamot.',
+  '티타임 추천':'Tea-time pick',
+  '2019년부터, 성수동':'In Seongsu since 2019',
+  '우리 이야기':'Our Story',
+  '천천히,<br>정성으로 내리는 커피':'Coffee brewed<br>slowly, with care',
+  '카페 온도는 작은 로스터리에서 시작했습니다. 좋은 원두를 고르고, 알맞은 온도로 내리는 일 — 그 단순한 원칙 하나로 오늘까지 왔습니다.':
+    'Café Ondo began as a small roastery. Choosing good beans and brewing at the right temperature — one simple principle has carried us this far.',
+  '매일 아침 문을 열며 그날의 원두 컨디션을 확인하고, 손님 한 분 한 분께 어울리는 한 잔을 권합니다. 머무는 동안만큼은 온전히 쉬어가시길 바랍니다.':
+    'Every morning we check the beans’ condition and recommend a cup suited to each guest. We hope you can fully rest while you stay.',
+  '공간의 순간들':'Moments in the Space',
+  '주소':'Address','서울시 성동구 연무장길 25':'25 Yeonmujang-gil, Seongdong-gu, Seoul',
+  '영업시간':'Hours','매일, 같은 온도로':'Every day, the same warmth',
+  '월요일':'Monday','정기 휴무':'Closed','화 – 금':'Tue – Fri','토요일':'Saturday','일요일':'Sunday',
+  '문의':'Contact',
+  '모임과 촬영,<br>공간이 필요하다면':'Need the space<br>for a gathering or shoot?',
+  '단체석 예약이나 소규모 모임, 촬영 대관 문의를 남겨주세요. 확인 후 빠르게 안내드립니다.':
+    'Leave a note for group seating, small gatherings, or shoot rentals — we’ll get back to you quickly.',
+  '이름':'Name','연락처':'Phone','날짜':'Date','인원':'Guests',
+  '2인':'2 guests','4인':'4 guests','6인 이상':'6+ guests',
+  '요청 사항':'Special requests','예약 문의 보내기':'Send reservation request',
+  '예약 문의가 접수되었습니다. 곧 연락드릴게요.':'Your reservation request has been received. We’ll be in touch soon.',
+  '둘러보기':'Explore','안내':'Info',
+  '성수동 골목의 작은 카페. 직접 로스팅한 원두와 매일 굽는 빵으로 하루를 채웁니다.':
+    'A small café tucked in a Seongsu alley, filling each day with house-roasted beans and fresh-baked bread.',
+  'MIT 라이선스로 배포됩니다':'Released under the MIT License'
+};
+let EN=new URLSearchParams(location.search).get('lang')==='en';
+const orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if(!orig.has(el)) orig.set(el,el.innerHTML);
+    const ko=orig.get(el).trim();
+    el.innerHTML=EN?(STR[ko]??orig.get(el)):orig.get(el);
+  });
+  document.documentElement.lang=EN?'en':'ko';
+  document.getElementById('lang').textContent = EN ? 'KO' : 'EN';
+  if(EN) document.title='Café Ondo — Coffee of the Day, a Warm Cup';
+  else document.title='카페 온도 — 오늘의 커피와 따뜻한 한 잔';
+}
+document.getElementById('lang').addEventListener('click', ()=>{ EN=!EN; applyLang(); });
+applyLang();
+</script>
+</body>
+</html>

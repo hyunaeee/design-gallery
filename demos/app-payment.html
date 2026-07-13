@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앱 · 주문/결제 — 라디오 카드 & 완료 애니메이션</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ──────────────────────────────────────────────
+   WWIT 분류
+   카테고리: 커머스  |  패턴: 주문, 결제  |  컴포넌트: 라디오 카드, 바텀시트, 체크박스, 금액 요약
+   실제로 동작: 결제수단 라디오 선택 → 쿠폰 바텀시트 → 할인 실시간 재계산 →
+   전체 동의 일괄 토글 → 결제 버튼 스피너 1초 → SVG 체크마크 완료 화면
+   ────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --navy: #1e45d6; --navy-tint: #f0f4ff; --bg: #f4f5f9; --card: #ffffff;
+        --ink: #141c3d; --sub: #8a91a8; --line: #edeff5; --red: #f04452; --radio-off: #e1e4ee; }
+body { font-family: "Noto Sans KR", sans-serif; min-height: 100vh; display: flex; align-items: center;
+       justify-content: center; gap: 64px; padding: 40px 24px;
+       background: linear-gradient(160deg, #e5eaf9, #f0f1f6); -webkit-font-smoothing: antialiased; }
+
+/* ── 아이폰 프레임 ── */
+.phone { position: relative; width: 375px; height: 780px; flex-shrink: 0;
+         border-radius: 54px; background: #0b0c0e; padding: 10px;
+         box-shadow: 0 50px 100px -24px rgba(25,31,40,.45), inset 0 0 0 2px #3a3d42; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden;
+          background: var(--bg); display: flex; flex-direction: column; }
+.island { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 110px;
+          height: 30px; background: #0b0c0e; border-radius: 99px; z-index: 50; }
+.statusbar { position: absolute; top: 0; left: 0; right: 0; z-index: 40; display: flex;
+             justify-content: space-between; padding: 20px 30px 0; font-size: 14px;
+             font-weight: 700; color: var(--ink); }
+.home-bar { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 130px;
+            height: 5px; border-radius: 99px; background: #0b0c0e; z-index: 60; opacity: .85; }
+
+/* ── 화면 전환 ── */
+.view { position: absolute; inset: 0; display: flex; flex-direction: column; padding-top: 54px;
+        background: var(--bg);
+        transition: transform .45s cubic-bezier(.7,0,.24,1), opacity .45s; }
+.view.gone { transform: translateX(-12%); opacity: 0; pointer-events: none; }
+.view.waiting { transform: translateX(12%); opacity: 0; pointer-events: none; }
+
+.pay-head { display: flex; align-items: center; padding: 8px 14px; }
+.pay-head .back { border: none; background: none; font-size: 24px; color: var(--ink);
+                  cursor: pointer; padding: 2px 8px; line-height: 1; }
+.pay-head h2 { flex: 1; text-align: center; font-size: 16.5px; font-weight: 700; color: var(--ink);
+               margin-right: 38px; }
+
+.body-scroll { flex: 1; overflow-y: auto; padding: 6px 16px 120px; scrollbar-width: none; }
+.body-scroll::-webkit-scrollbar { display: none; }
+.sec { background: var(--card); border-radius: 18px; padding: 18px; margin-bottom: 12px; }
+.sec h3 { font-size: 15px; font-weight: 700; color: var(--ink); margin-bottom: 4px; }
+
+/* 주문 상품 */
+.item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--line); }
+.item:last-of-type { border-bottom: none; padding-bottom: 2px; }
+.item .thumb { width: 56px; height: 56px; border-radius: 12px; flex-shrink: 0; display: flex;
+               align-items: center; justify-content: center; font-size: 26px; }
+.item .info { flex: 1; min-width: 0; }
+.item .nm { font-size: 13.5px; font-weight: 500; color: var(--ink); }
+.item .opt { margin-top: 2px; font-size: 12px; color: var(--sub); }
+.item .pr { margin-top: 4px; font-size: 14.5px; font-weight: 800; color: var(--ink);
+            font-variant-numeric: tabular-nums; }
+
+/* 배송지 */
+.addr { display: flex; align-items: flex-start; gap: 10px; margin-top: 8px; }
+.addr .info { flex: 1; }
+.addr .who { font-size: 14px; font-weight: 700; color: var(--ink); }
+.addr .who .badge { display: inline-block; margin-left: 6px; font-size: 10.5px; font-weight: 700;
+                    color: var(--navy); background: var(--navy-tint); border-radius: 99px;
+                    padding: 2.5px 8px; vertical-align: 1px; }
+.addr .where { margin-top: 4px; font-size: 12.5px; color: var(--sub); line-height: 1.55; }
+.addr .chg { border: 1px solid var(--radio-off); background: none; font-family: inherit;
+             font-size: 12px; font-weight: 700; color: var(--ink); border-radius: 10px;
+             padding: 7px 12px; cursor: pointer; transition: background .15s; flex-shrink: 0; }
+.addr .chg:active { background: var(--bg); }
+
+/* 결제수단 라디오 카드 */
+.pays { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 12px; }
+.pay-card { display: flex; align-items: center; gap: 8px; border: 1.5px solid var(--radio-off);
+            border-radius: 14px; padding: 14px 13px; cursor: pointer; background: #fff;
+            font-size: 13.5px; font-weight: 500; color: var(--ink);
+            transition: border-color .2s, background .2s, box-shadow .2s; }
+.pay-card .mk { font-size: 17px; }
+.pay-card input { display: none; }
+.pay-card:has(input:checked) { border-color: var(--navy); background: var(--navy-tint);
+                               font-weight: 700; box-shadow: 0 0 0 1px var(--navy) inset; }
+
+/* 쿠폰 행 */
+.coupon-row { display: flex; align-items: center; justify-content: space-between; margin-top: 8px;
+              cursor: pointer; padding: 6px 0 2px; }
+.coupon-row .lbl { font-size: 13.5px; color: var(--sub); }
+.coupon-row .val { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.coupon-row .val.on { color: var(--navy); }
+.coupon-row .go { color: #c3c8d8; font-size: 15px; margin-left: 8px; }
+
+/* 약관 체크박스 */
+.cb-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; cursor: pointer;
+          font-size: 13px; color: var(--sub); }
+.cb-row.all { font-size: 14.5px; font-weight: 700; color: var(--ink); border-bottom: 1px solid var(--line);
+              padding-bottom: 13px; margin-bottom: 5px; }
+.cb-row input { display: none; }
+.cb-row .box { width: 21px; height: 21px; border-radius: 50%; border: 1.5px solid var(--radio-off);
+               display: flex; align-items: center; justify-content: center; font-size: 11px;
+               color: #fff; flex-shrink: 0; transition: background .18s, border-color .18s; }
+.cb-row:has(input:checked) .box { background: var(--navy); border-color: var(--navy); }
+
+/* 금액 요약 */
+.sum-row { display: flex; justify-content: space-between; padding: 5.5px 0; font-size: 13.5px;
+           color: var(--sub); font-variant-numeric: tabular-nums; }
+.sum-row b { font-weight: 500; color: var(--ink); }
+.sum-row .disc { color: var(--red); font-weight: 700; }
+.sum-row.total { border-top: 1px solid var(--line); margin-top: 8px; padding-top: 13px;
+                 font-size: 14.5px; font-weight: 700; color: var(--ink); }
+.sum-row.total b { font-size: 18px; font-weight: 900; color: var(--navy); }
+
+/* 하단 고정 결제 버튼 */
+.paybar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 30; padding: 12px 16px 30px;
+          background: linear-gradient(to top, var(--bg) 75%, transparent); }
+.pay-btn { position: relative; width: 100%; border: none; font-family: inherit; background: var(--navy);
+           color: #fff; font-size: 16px; font-weight: 700; padding: 16px; border-radius: 16px;
+           cursor: pointer; transition: filter .15s, transform .1s, background .2s; }
+.pay-btn:active { filter: brightness(.9); transform: scale(.985); }
+.pay-btn:disabled { background: #c3c8d8; cursor: not-allowed; transform: none; filter: none; }
+.pay-btn .spinner { display: none; width: 20px; height: 20px; margin: 0 auto;
+                    border: 2.5px solid rgba(255,255,255,.35); border-top-color: #fff;
+                    border-radius: 50%; animation: spin .7s linear infinite; }
+.pay-btn.loading .spinner { display: block; }
+.pay-btn.loading .txt { display: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── 쿠폰 바텀시트 ── */
+.dim { position: absolute; inset: 0; z-index: 80; background: rgba(20,28,61,.5); opacity: 0;
+       pointer-events: none; transition: opacity .3s; }
+.sheet { position: absolute; z-index: 90; left: 0; right: 0; bottom: 0; background: #fff;
+         border-radius: 24px 24px 0 0; padding: 12px 20px 34px; transform: translateY(105%);
+         transition: transform .38s cubic-bezier(.2,.8,.2,1); }
+.screen.sheet-open .dim { opacity: 1; pointer-events: auto; }
+.screen.sheet-open .sheet { transform: none; }
+.sheet .grab { width: 44px; height: 5px; border-radius: 99px; background: var(--line); margin: 0 auto 16px; }
+.sheet h3 { font-size: 17px; font-weight: 900; color: var(--ink); margin-bottom: 12px; }
+.cp { display: flex; align-items: center; gap: 12px; border: 1.5px solid var(--radio-off);
+      border-radius: 14px; padding: 14px; margin-bottom: 9px; cursor: pointer;
+      transition: border-color .2s, background .2s; }
+.cp.on { border-color: var(--navy); background: var(--navy-tint); }
+.cp .amt { font-size: 16px; font-weight: 900; color: var(--navy); min-width: 62px; }
+.cp .info { flex: 1; }
+.cp .nm { font-size: 13.5px; font-weight: 700; color: var(--ink); }
+.cp .cond { margin-top: 2px; font-size: 11.5px; color: var(--sub); }
+
+/* ── 완료 화면 ── */
+.done-wrap { flex: 1; display: flex; flex-direction: column; align-items: center;
+             justify-content: center; padding: 0 34px 60px; text-align: center; }
+.done-wrap svg { width: 96px; height: 96px; }
+.ring { stroke-dasharray: 208; stroke-dashoffset: 208; }
+.check { stroke-dasharray: 44; stroke-dashoffset: 44; }
+.view.play .ring { animation: draw .55s .1s cubic-bezier(.4,0,.2,1) forwards; }
+.view.play .check { animation: draw .4s .55s cubic-bezier(.4,0,.2,1) forwards; }
+@keyframes draw { to { stroke-dashoffset: 0; } }
+.done-wrap h2 { margin-top: 26px; font-size: 22px; font-weight: 900; color: var(--ink);
+                letter-spacing: -.5px; }
+.done-wrap p { margin-top: 9px; font-size: 13.5px; color: var(--sub); line-height: 1.7; }
+.done-wrap .ordno { display: inline-block; margin-top: 16px; font-family: "JetBrains Mono", monospace;
+                    font-size: 12.5px; color: var(--navy); background: var(--navy-tint);
+                    border-radius: 10px; padding: 8px 14px; }
+.done-wrap .paid { margin-top: 22px; font-size: 15px; color: var(--ink); }
+.done-wrap .paid b { font-size: 24px; font-weight: 900; color: var(--navy); margin-left: 6px; }
+.done-foot { padding: 0 26px 46px; }
+.done-foot .ok { width: 100%; border: none; font-family: inherit; background: var(--navy); color: #fff;
+                 font-size: 16px; font-weight: 700; padding: 16px; border-radius: 16px; cursor: pointer;
+                 transition: filter .15s, transform .1s; }
+.done-foot .ok:active { filter: brightness(.9); transform: scale(.985); }
+
+/* ── WWIT 스타일 명세 패널 ── */
+.specs { max-width: 360px; }
+.specs .pill { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+               color: #4b5aa0; border: 1.5px solid #bcc7ea; border-radius: 99px; padding: 6px 16px; }
+.specs h1 { margin-top: 18px; font-size: 34px; font-weight: 900; letter-spacing: -1px; color: #141c3d; }
+.specs .desc { margin-top: 12px; font-size: 14.5px; line-height: 1.75; color: #4e5968; word-break: keep-all; }
+.spec-group { margin-top: 22px; }
+.spec-group h4 { font-size: 11.5px; font-weight: 700; letter-spacing: 2px; color: #8a91a8; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.tags span { font-size: 12.5px; font-weight: 600; background: #fff; border: 1px solid #dde2f0;
+             padding: 6px 13px; border-radius: 99px; color: #333d4b; }
+.tokens { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.tk { display: flex; align-items: center; gap: 7px; font-family: "JetBrains Mono", monospace;
+      font-size: 11px; color: #6b7684; background: #fff; border: 1px solid #dde2f0;
+      border-radius: 10px; padding: 7px 11px; }
+.tk i { width: 15px; height: 15px; border-radius: 5px; }
+.hint { margin-top: 24px; font-size: 12.5px; color: #8a91a8; line-height: 1.7; }
+.hint b { color: #1e45d6; }
+
+@media (max-width: 900px) { body { flex-direction: column; gap: 32px; } .specs { max-width: 375px; } }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="screen" id="screen">
+    <div class="statusbar"><span>9:41</span><span>􀙇 􀙈 􀛨</span></div>
+
+    <!-- 결제 화면 -->
+    <div class="view" id="payView">
+      <div class="pay-head"><button class="back">‹</button><h2>주문/결제</h2></div>
+      <div class="body-scroll">
+
+        <div class="sec">
+          <h3>주문 상품 2건</h3>
+          <div class="item">
+            <div class="thumb" style="background:#eef4ff">🧴</div>
+            <div class="info"><div class="nm">센텔라 수분 진정 크림 50ml</div>
+              <div class="opt">단품 · 1개</div><div class="pr">24,900원</div></div>
+          </div>
+          <div class="item">
+            <div class="thumb" style="background:#f3f0ff">👟</div>
+            <div class="info"><div class="nm">데일리 러닝화 클라우드 화이트</div>
+              <div class="opt">270mm · 1개</div><div class="pr">59,000원</div></div>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h3>배송지</h3>
+          <div class="addr">
+            <div class="info">
+              <div class="who" id="addrWho">루나 <span class="badge">기본</span></div>
+              <div class="where" id="addrWhere">서울 성동구 왕십리로 83-21, 101동 1204호<br>010-1234-5678</div>
+            </div>
+            <button class="chg" id="addrChg">변경</button>
+          </div>
+        </div>
+
+        <div class="sec">
+          <h3>결제 수단</h3>
+          <div class="pays">
+            <label class="pay-card"><input type="radio" name="pay" value="신용카드" checked>
+              <span class="mk">💳</span>신용카드</label>
+            <label class="pay-card"><input type="radio" name="pay" value="네이버페이">
+              <span class="mk" style="color:#03c75a;font-weight:900">N</span>네이버페이</label>
+            <label class="pay-card"><input type="radio" name="pay" value="카카오페이">
+              <span class="mk">💬</span>카카오페이</label>
+            <label class="pay-card"><input type="radio" name="pay" value="토스페이">
+              <span class="mk">💸</span>토스페이</label>
+          </div>
+          <div class="coupon-row" id="couponRow">
+            <span class="lbl">쿠폰</span>
+            <span><span class="val" id="couponVal">사용 안 함</span><span class="go">›</span></span>
+          </div>
+        </div>
+
+        <div class="sec">
+          <label class="cb-row all"><input type="checkbox" id="cbAll">
+            <span class="box">✓</span>전체 동의</label>
+          <label class="cb-row"><input type="checkbox" class="cb-child" data-req>
+            <span class="box">✓</span>[필수] 구매조건 확인 및 결제 진행 동의</label>
+          <label class="cb-row"><input type="checkbox" class="cb-child" data-req>
+            <span class="box">✓</span>[필수] 개인정보 제3자 제공 동의</label>
+          <label class="cb-row"><input type="checkbox" class="cb-child">
+            <span class="box">✓</span>[선택] 마케팅 정보 수신 동의</label>
+        </div>
+
+        <div class="sec">
+          <h3>결제 금액</h3>
+          <div class="sum-row"><span>상품 금액</span><b id="sumGoods">83,900원</b></div>
+          <div class="sum-row"><span>배송비</span><b id="sumShip">3,000원</b></div>
+          <div class="sum-row"><span>쿠폰 할인</span><b class="disc" id="sumDisc">0원</b></div>
+          <div class="sum-row total"><span>총 결제 금액</span><b id="sumTotal">86,900원</b></div>
+        </div>
+      </div>
+
+      <div class="paybar">
+        <button class="pay-btn" id="payBtn" disabled>
+          <span class="txt" id="payBtnTxt">86,900원 결제하기</span>
+          <span class="spinner"></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- 완료 화면 -->
+    <div class="view waiting" id="doneView">
+      <div class="done-wrap">
+        <svg viewBox="0 0 72 72">
+          <circle class="ring" cx="36" cy="36" r="33" fill="none" stroke="#1e45d6" stroke-width="3"
+                  stroke-linecap="round" transform="rotate(-90 36 36)"/>
+          <path class="check" d="M22 37 l10 10 l19 -21" fill="none" stroke="#1e45d6" stroke-width="4.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h2>결제가 완료됐어요</h2>
+        <p>주문 내역은 마이페이지에서<br>확인할 수 있어요</p>
+        <span class="ordno" id="ordNo">ORD-20260710-0001</span>
+        <div class="paid">결제 금액<b id="paidAmt">86,900원</b></div>
+      </div>
+      <div class="done-foot"><button class="ok" id="okBtn">확인</button></div>
+    </div>
+
+    <!-- 쿠폰 바텀시트 -->
+    <div class="dim" data-close></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <h3>쿠폰 선택</h3>
+      <div class="cp on" data-c="none"><span class="amt">—</span>
+        <div class="info"><div class="nm">사용 안 함</div></div></div>
+      <div class="cp" data-c="c3000"><span class="amt">3,000원</span>
+        <div class="info"><div class="nm">신규가입 감사 쿠폰</div><div class="cond">2만원 이상 구매 시</div></div></div>
+      <div class="cp" data-c="c10p"><span class="amt">10%</span>
+        <div class="info"><div class="nm">여름 세일 쿠폰</div><div class="cond">최대 8,000원 할인</div></div></div>
+      <div class="cp" data-c="cship"><span class="amt">배송비</span>
+        <div class="info"><div class="nm">무료배송 쿠폰</div><div class="cond">배송비 3,000원 무료</div></div></div>
+    </div>
+
+    <div class="home-bar"></div>
+  </div>
+</div>
+
+<aside class="specs">
+  <span class="pill">APP REFERENCE</span>
+  <h1>주문/결제<br>— 원페이지 체크아웃</h1>
+  <p class="desc">커머스 결제의 핵심 컴포넌트를 한 화면에 담았습니다. <b>라디오 카드로 결제수단</b>을
+  고르고, 쿠폰은 바텀시트에서 선택하면 <b>금액이 실시간 재계산</b>됩니다. 전체 동의 일괄 토글,
+  결제 스피너 1초, <b>stroke-dashoffset 체크마크</b> 완료 화면까지 전부 동작합니다.</p>
+
+  <div class="spec-group"><h4>카테고리</h4>
+    <div class="tags"><span>커머스</span></div></div>
+  <div class="spec-group"><h4>패턴</h4>
+    <div class="tags"><span>주문</span><span>결제</span><span>완료 피드백</span></div></div>
+  <div class="spec-group"><h4>컴포넌트</h4>
+    <div class="tags"><span>라디오 카드</span><span>바텀시트</span><span>체크박스</span><span>금액 요약</span><span>고정 CTA</span></div></div>
+  <div class="spec-group"><h4>디자인 토큰</h4>
+    <div class="tokens">
+      <span class="tk"><i style="background:#1e45d6"></i>#1E45D6</span>
+      <span class="tk"><i style="background:#f0f4ff;border:1px solid #dde2f0"></i>#F0F4FF</span>
+      <span class="tk"><i style="background:#141c3d"></i>#141C3D</span>
+    </div>
+    <div class="tokens"><span class="tk">radius 14~18px</span><span class="tk">spinner 1s</span><span class="tk">Noto Sans KR</span></div></div>
+
+  <p class="hint">💡 라디오 카드와 체크박스는 <b>:has(input:checked)</b> 순수 CSS 셀렉터로 스타일이
+  바뀌고, JS는 금액 재계산과 화면 전환만 담당합니다. 필수 약관을 모두 체크해야 버튼이 활성화됩니다.</p>
+</aside>
+
+<script>
+/* ── 금액 상태 ── */
+const GOODS = 83900, SHIP = 3000;
+const COUPONS = {
+  none:  { label: '사용 안 함',            disc: 0,    ship: SHIP },
+  c3000: { label: '신규가입 3,000원',      disc: 3000, ship: SHIP },
+  c10p:  { label: '여름 세일 10%',         disc: Math.min(Math.round(GOODS * 0.1), 8000), ship: SHIP },
+  cship: { label: '무료배송',              disc: 0,    ship: 0 },
+};
+let coupon = 'none';
+const won = n => n.toLocaleString('ko-KR') + '원';
+const screen = document.getElementById('screen');
+const payBtn = document.getElementById('payBtn');
+
+/* ── 금액 실시간 재계산 ── */
+function recalc() {
+  const c = COUPONS[coupon];
+  const total = GOODS + c.ship - c.disc;
+  document.getElementById('sumShip').textContent = c.ship ? won(c.ship) : '무료';
+  document.getElementById('sumDisc').textContent = (c.disc ? '-' : '') + won(c.disc);
+  document.getElementById('sumTotal').textContent = won(total);
+  document.getElementById('payBtnTxt').textContent = won(total) + ' 결제하기';
+  document.getElementById('paidAmt').textContent = won(total);
+  const cv = document.getElementById('couponVal');
+  cv.textContent = c.label;
+  cv.classList.toggle('on', coupon !== 'none');
+}
+
+/* ── 쿠폰 바텀시트 ── */
+document.getElementById('couponRow').addEventListener('click', () => screen.classList.add('sheet-open'));
+document.querySelectorAll('[data-close]').forEach(el =>
+  el.addEventListener('click', () => screen.classList.remove('sheet-open')));
+document.querySelectorAll('.cp').forEach(cp => cp.addEventListener('click', () => {
+  document.querySelectorAll('.cp').forEach(x => x.classList.remove('on'));
+  cp.classList.add('on');
+  coupon = cp.dataset.c;
+  recalc();
+  setTimeout(() => screen.classList.remove('sheet-open'), 180);
+}));
+
+/* ── 배송지 변경 (두 주소 토글) ── */
+const ADDRS = [
+  { who: '루나 <span class="badge">기본</span>', where: '서울 성동구 왕십리로 83-21, 101동 1204호<br>010-1234-5678' },
+  { who: '루나 (회사)', where: '서울 강남구 테헤란로 152, 18층<br>010-1234-5678' },
+];
+let addrIdx = 0;
+document.getElementById('addrChg').addEventListener('click', () => {
+  addrIdx = 1 - addrIdx;
+  document.getElementById('addrWho').innerHTML = ADDRS[addrIdx].who;
+  document.getElementById('addrWhere').innerHTML = ADDRS[addrIdx].where;
+});
+
+/* ── 약관: 전체 동의 ↔ 하위 3개 동기화, 필수 체크 시 버튼 활성화 ── */
+const cbAll = document.getElementById('cbAll');
+const children = [...document.querySelectorAll('.cb-child')];
+cbAll.addEventListener('change', () => {
+  children.forEach(c => c.checked = cbAll.checked);
+  syncPayBtn();
+});
+children.forEach(c => c.addEventListener('change', () => {
+  cbAll.checked = children.every(x => x.checked);
+  syncPayBtn();
+}));
+function syncPayBtn() {
+  payBtn.disabled = !children.filter(c => c.hasAttribute('data-req')).every(c => c.checked);
+}
+
+/* ── 결제: 스피너 1초 → 완료 화면 (SVG 체크 드로잉) ── */
+const payView = document.getElementById('payView');
+const doneView = document.getElementById('doneView');
+payBtn.addEventListener('click', () => {
+  if (payBtn.classList.contains('loading')) return;
+  payBtn.classList.add('loading');
+  setTimeout(() => {
+    document.getElementById('ordNo').textContent =
+      'ORD-20260710-' + String(Math.floor(1000 + Math.random() * 9000));
+    payView.classList.add('gone');
+    doneView.classList.remove('waiting');
+    doneView.classList.remove('play');
+    void doneView.offsetWidth;            /* 리플로우 → 체크 드로잉 애니메이션 재시작 */
+    doneView.classList.add('play');
+  }, 1000);
+});
+
+/* ── 확인 → 결제 화면 복귀 ── */
+document.getElementById('okBtn').addEventListener('click', () => {
+  doneView.classList.add('waiting');
+  payView.classList.remove('gone');
+  payBtn.classList.remove('loading');
+});
+
+recalc();
+</script>
+
+<script>
+/* ── English mode (?lang=en) — translation layer only, no logic changes ── */
+(function(){
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "앱 · 주문/결제 — 라디오 카드 & 완료 애니메이션": "App · Order & Checkout — Radio Cards & Completion Animation",
+    "주문/결제": "Order & Payment",
+    "주문 상품 2건": "2 Items Ordered",
+    "센텔라 수분 진정 크림 50ml": "Centella Hydrating Soothing Cream 50ml",
+    "단품 · 1개": "Single · 1 ea",
+    "데일리 러닝화 클라우드 화이트": "Daily Running Shoes Cloud White",
+    "270mm · 1개": "270mm · 1 ea",
+    "배송지": "Shipping Address",
+    "루나": "Luna",
+    "기본": "Default",
+    "서울 성동구 왕십리로 83-21, 101동 1204호": "83-21 Wangsimni-ro, Seongdong-gu, Seoul, Bldg 101 #1204",
+    "루나 (회사)": "Luna (Work)",
+    "서울 강남구 테헤란로 152, 18층": "152 Teheran-ro, Gangnam-gu, Seoul, 18F",
+    "변경": "Change",
+    "결제 수단": "Payment Method",
+    "신용카드": "Credit Card",
+    "네이버페이": "Naver Pay",
+    "카카오페이": "Kakao Pay",
+    "토스페이": "Toss Pay",
+    "쿠폰": "Coupon",
+    "사용 안 함": "Not Used",
+    "전체 동의": "Agree to All",
+    "[필수] 구매조건 확인 및 결제 진행 동의": "[Required] Confirm order terms and agree to payment",
+    "[필수] 개인정보 제3자 제공 동의": "[Required] Agree to third-party data sharing",
+    "[선택] 마케팅 정보 수신 동의": "[Optional] Agree to receive marketing info",
+    "결제 금액": "Payment Amount",
+    "상품 금액": "Item Total",
+    "배송비": "Shipping",
+    "쿠폰 할인": "Coupon Discount",
+    "총 결제 금액": "Total",
+    "무료": "Free",
+    "결제가 완료됐어요": "Payment complete",
+    "주문 내역은 마이페이지에서": "Your order details are available",
+    "확인할 수 있어요": "in My Page.",
+    "확인": "Confirm",
+    "쿠폰 선택": "Select Coupon",
+    "신규가입 감사 쿠폰": "Welcome Coupon",
+    "2만원 이상 구매 시": "On orders over 20,000 KRW",
+    "여름 세일 쿠폰": "Summer Sale Coupon",
+    "최대 8,000원 할인": "Up to 8,000 KRW off",
+    "무료배송 쿠폰": "Free Shipping Coupon",
+    "배송비 3,000원 무료": "3,000 KRW shipping free",
+    "신규가입 3,000원": "New Member 3,000 KRW",
+    "여름 세일 10%": "Summer Sale 10%",
+    "무료배송": "Free Shipping",
+    "— 원페이지 체크아웃": "— One-Page Checkout",
+    "커머스 결제의 핵심 컴포넌트를 한 화면에 담았습니다.": "The core components of commerce checkout, all on one screen.",
+    "라디오 카드로 결제수단": "Pick a payment method with radio cards",
+    "을 고르고, 쿠폰은 바텀시트에서 선택하면": ", and choose a coupon from the bottom sheet, so",
+    "금액이 실시간 재계산": "the amount recalculates in real time",
+    "됩니다. 전체 동의 일괄 토글, 결제 스피너 1초,": ". Agree-to-all toggle, a 1-second payment spinner,",
+    "stroke-dashoffset 체크마크": "a stroke-dashoffset checkmark",
+    "완료 화면까지 전부 동작합니다.": "completion screen — it all works.",
+    "카테고리": "Category",
+    "패턴": "Pattern",
+    "컴포넌트": "Component",
+    "디자인 토큰": "Design Tokens",
+    "커머스": "Commerce",
+    "주문": "Order",
+    "결제": "Payment",
+    "완료 피드백": "Completion Feedback",
+    "라디오 카드": "Radio Card",
+    "바텀시트": "Bottom Sheet",
+    "체크박스": "Checkbox",
+    "금액 요약": "Amount Summary",
+    "고정 CTA": "Fixed CTA",
+    "💡 라디오 카드와 체크박스는": "💡 Radio cards and checkboxes",
+    "순수 CSS 셀렉터로 스타일이 바뀌고, JS는 금액 재계산과 화면 전환만 담당합니다. 필수 약관을 모두 체크해야 버튼이 활성화됩니다.": "change style via a pure-CSS selector, while JS only handles amount recalculation and screen transitions. The button activates only once all required terms are checked."
+  };
+  const RE = [
+    [/^([\d,]+)원 결제하기$/, "Pay $1 KRW"],
+    [/^-([\d,]+)원$/, "-$1 KRW"],
+    [/^([\d,]+)원$/, "$1 KRW"]
+  ];
+  const tr = t => {
+    if (TR[t] != null) return TR[t];
+    for (const [re, rep] of RE) { if (re.test(t)) return t.replace(re, rep); }
+    return null;
+  };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const raw = n.nodeValue, t = raw.trim().replace(/\s+/g,' ');
+      if (t) { const out = tr(t); if (out != null) {
+        const lead = (raw.match(/^\s*/)||[''])[0], trail = (raw.match(/\s*$/)||[''])[0];
+        n.nodeValue = lead + out + trail;
+      }}
+      return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) {
+      const out = tr(n.getAttribute(a).trim().replace(/\s+/g,' ')); if (out != null) n.setAttribute(a, out);
+    }});
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim().replace(/\s+/g,' ')); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

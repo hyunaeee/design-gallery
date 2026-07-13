@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vercel 스타일 — 흑백 미니멀 랜딩</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: #000; color: #fff;
+       -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+nav { position: sticky; top: 0; z-index: 20; display: flex; align-items: center; gap: 26px;
+      padding: 14px 28px; border-bottom: 1px solid #1f1f1f; background: rgba(0,0,0,.75);
+      backdrop-filter: blur(14px); }
+.logo { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 17px; letter-spacing: -.4px; }
+.tri { width: 0; height: 0; border-left: 10px solid transparent; border-right: 10px solid transparent;
+       border-bottom: 17px solid #fff; }
+nav a { color: #888; text-decoration: none; font-size: 13.5px; font-weight: 500; transition: color .15s; }
+nav a:hover { color: #fff; }
+.nav-right { margin-left: auto; display: flex; gap: 10px; }
+.btn-outline { border: 1px solid #333; color: #fff; background: #000; padding: 7px 15px;
+               border-radius: 8px; font-size: 13.5px; cursor: pointer; transition: border-color .2s; font-family: inherit; }
+.btn-outline:hover { border-color: #888; }
+.btn-white { background: #fff; color: #000; border: 1px solid #fff; padding: 7px 15px;
+             border-radius: 8px; font-size: 13.5px; font-weight: 600; cursor: pointer; font-family: inherit; }
+.btn-white:hover { background: #ccc; }
+
+/* ── 히어로: 그리드 + 흐르는 빔 ── */
+.hero { position: relative; text-align: center; padding: 108px 24px 60px; overflow: hidden; }
+.gridbg { position: absolute; left: 50%; top: 0; transform: translateX(-50%); width: 900px; height: 560px;
+          pointer-events: none;
+          background:
+            linear-gradient(#151515 1px, transparent 1px) 0 0 / 100% 44px,
+            linear-gradient(90deg, #151515 1px, transparent 1px) 0 0 / 44px 100%;
+          -webkit-mask-image: radial-gradient(ellipse 60% 55% at 50% 40%, #000 30%, transparent 75%);
+          mask-image: radial-gradient(ellipse 60% 55% at 50% 40%, #000 30%, transparent 75%); }
+.beam { position: absolute; width: 190px; height: 1px; top: 176px; left: 50%; margin-left: -450px;
+        background: linear-gradient(90deg, transparent, #00dfd8, transparent);
+        animation: beamX 5s linear infinite; }
+.beam.b2 { top: 308px; animation-delay: 2.2s;
+           background: linear-gradient(90deg, transparent, #ff0080, transparent); }
+.beam.v { width: 1px; height: 170px; top: 40px; left: 50%; margin-left: 154px;
+          background: linear-gradient(180deg, transparent, #7928ca, transparent);
+          animation: beamY 6s linear infinite 1s; }
+@keyframes beamX { from { transform: translateX(0); } to { transform: translateX(900px); } }
+@keyframes beamY { from { transform: translateY(0); } to { transform: translateY(420px); } }
+
+h1 { position: relative; font-size: clamp(52px, 9vw, 92px); font-weight: 800; letter-spacing: -.055em;
+     line-height: 1.06; }
+h1 span { display: inline-block; background-size: 200% 100%;
+          -webkit-background-clip: text; background-clip: text; color: transparent;
+          animation: hueShift 8s ease-in-out infinite; }
+.g1 { background-image: linear-gradient(90deg, #007cf0, #00dfd8, #007cf0); }
+.g2 { background-image: linear-gradient(90deg, #7928ca, #ff0080, #7928ca); animation-delay: .4s; }
+.g3 { background-image: linear-gradient(90deg, #ff4d4d, #f9cb28, #ff4d4d); animation-delay: .8s; }
+@keyframes hueShift { 0%,100% { background-position: 0% 0; } 50% { background-position: 100% 0; } }
+
+.sub { position: relative; margin: 30px auto 0; max-width: 600px; color: #999;
+       font-size: 18px; line-height: 1.65; word-break: keep-all; }
+.hero-actions { position: relative; margin-top: 40px; display: flex; gap: 14px; justify-content: center; }
+.btn-lg-white { display: inline-flex; align-items: center; gap: 9px; background: #fff; color: #000;
+                border: none; padding: 15px 30px; border-radius: 99px; font-size: 15.5px; font-weight: 600;
+                cursor: pointer; font-family: inherit; transition: transform .15s, box-shadow .2s; }
+.btn-lg-white:hover { transform: translateY(-1px); box-shadow: 0 12px 40px -8px rgba(255,255,255,.4); }
+.btn-lg-white .tri-s { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent;
+                       border-bottom: 10px solid #000; }
+.btn-lg-dark { background: #000; color: #fff; border: 1px solid #333; padding: 15px 30px;
+               border-radius: 99px; font-size: 15.5px; cursor: pointer; font-family: inherit; transition: border-color .2s; }
+.btn-lg-dark:hover { border-color: #888; }
+
+/* ── 배포 파이프라인 터미널 ── */
+.terminal { position: relative; max-width: 680px; margin: 68px auto 0; text-align: left;
+            border: 1px solid #2a2a2a; border-radius: 14px; background: #0a0a0a;
+            box-shadow: 0 0 80px -20px rgba(0,124,240,.25); overflow: hidden; }
+.term-bar { display: flex; align-items: center; gap: 8px; padding: 13px 18px; border-bottom: 1px solid #1e1e1e; }
+.tdot { width: 11px; height: 11px; border-radius: 50%; background: #2a2a2a; }
+.term-bar span { margin-left: 8px; color: #666; font-size: 12.5px; font-family: "JetBrains Mono", monospace; }
+.terminal pre { padding: 22px 24px; font-family: "JetBrains Mono", monospace; font-size: 13.5px;
+                line-height: 2; color: #ddd; min-height: 216px; }
+.dim { color: #565656; } .cyan { color: #00dfd8; } .ok { color: #50e3c2; } .mag { color: #ff0080; }
+.cursor { display: inline-block; width: 8px; height: 15px; background: #fff; vertical-align: -2px;
+          animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ── 파이프라인 스텝 ── */
+.pipeline { display: flex; justify-content: center; align-items: center; gap: 0; max-width: 760px;
+            margin: 80px auto 0; padding: 0 24px; }
+.pstep { flex: 1; text-align: center; position: relative; }
+.pstep .dot { width: 46px; height: 46px; margin: 0 auto; border-radius: 50%; border: 1px solid #333;
+              background: #0a0a0a; display: flex; align-items: center; justify-content: center;
+              font-size: 18px; position: relative; z-index: 1; transition: border-color .3s, box-shadow .3s; }
+.pstep.active .dot { border-color: #fff; box-shadow: 0 0 24px rgba(255,255,255,.35); }
+.pstep b { display: block; margin-top: 14px; font-size: 14.5px; }
+.pstep span { display: block; margin-top: 4px; font-size: 12.5px; color: #777; }
+.pline { flex: 1; height: 1px; background: #222; position: relative; top: -24px; overflow: hidden; }
+.pline::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+                background: linear-gradient(90deg, transparent, #00dfd8, transparent); }
+.pline.flow::after { animation: flowLine 1.4s ease-in-out infinite; }
+@keyframes flowLine { to { transform: translateX(100%); } }
+
+/* ── 스탯 ── */
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); max-width: 1100px;
+         margin: 100px auto 0; border-top: 1px solid #1f1f1f; }
+.stat { padding: 52px 24px; text-align: center; border-right: 1px solid #1f1f1f; }
+.stat:last-child { border-right: none; }
+.stat b { display: block; font-size: 52px; font-weight: 800; letter-spacing: -2px; font-variant-numeric: tabular-nums; }
+.stat span { display: block; margin-top: 6px; color: #888; font-size: 14px; }
+
+/* ── 로고 마퀴 ── */
+.brands { border-top: 1px solid #1f1f1f; padding: 54px 0; overflow: hidden;
+          -webkit-mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent);
+          mask-image: linear-gradient(90deg, transparent, #000 15%, #000 85%, transparent); }
+.brand-track { display: flex; gap: 84px; width: max-content; animation: marq 30s linear infinite; }
+.brand-track span { font-size: 19px; font-weight: 700; color: #555; white-space: nowrap;
+                    letter-spacing: -.3px; transition: color .3s; }
+.brand-track span:hover { color: #fff; }
+@keyframes marq { to { transform: translateX(-50%); } }
+
+footer { border-top: 1px solid #1f1f1f; padding: 34px 24px; text-align: center; color: #555; font-size: 13px; }
+
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .9s cubic-bezier(.2,.6,.2,1), transform .9s cubic-bezier(.2,.6,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 760px) {
+  nav a:not([class]) { display: none; }
+  .stats { grid-template-columns: 1fr; }
+  .stat { border-right: none; border-bottom: 1px solid #1f1f1f; }
+  .pipeline { flex-direction: column; gap: 30px; } .pline { display: none; }
+}
+</style>
+</head>
+<body>
+<nav>
+  <div class="logo"><span class="tri"></span> deployo</div>
+  <a href="#">제품</a><a href="#">솔루션</a><a href="#">템플릿</a><a href="#">문서</a><a href="#">가격</a>
+  <div class="nav-right">
+    <button class="btn-outline">로그인</button>
+    <button class="btn-white">회원가입</button>
+  </div>
+</nav>
+
+<section class="hero">
+  <div class="gridbg"></div>
+  <div class="beam"></div><div class="beam b2"></div><div class="beam v"></div>
+  <h1>
+    <span class="g1">개발하고.</span><br>
+    <span class="g2">미리보고.</span><br>
+    <span class="g3">배포하세요.</span>
+  </h1>
+  <p class="sub">deployo는 웹의 개발자 경험을 새로 정의합니다. git push 한 번이면
+  전 세계 엣지 네트워크로 즉시 배포됩니다 — 설정 없이, 기다림 없이.</p>
+  <div class="hero-actions">
+    <button class="btn-lg-white"><span class="tri-s"></span> 배포 시작하기</button>
+    <button class="btn-lg-dark">데모 요청 →</button>
+  </div>
+
+  <div class="terminal reveal in">
+    <div class="term-bar">
+      <span class="tdot"></span><span class="tdot"></span><span class="tdot"></span>
+      <span>~/my-project</span>
+    </div>
+    <pre id="term"></pre>
+  </div>
+</section>
+
+<div class="pipeline reveal">
+  <div class="pstep" data-step="0"><div class="dot">⌨</div><b>개발</b><span>git push origin main</span></div>
+  <div class="pline" data-line="0"></div>
+  <div class="pstep" data-step="1"><div class="dot">🔍</div><b>미리보기</b><span>PR마다 고유 URL 생성</span></div>
+  <div class="pline" data-line="1"></div>
+  <div class="pstep" data-step="2"><div class="dot">🌍</div><b>배포</b><span>글로벌 엣지에 즉시 반영</span></div>
+</div>
+
+<section class="stats reveal">
+  <div class="stat"><b data-count="28" data-suffix="ms">0ms</b><span>평균 엣지 응답 속도 (p75)</span></div>
+  <div class="stat"><b data-count="99.99" data-suffix="%">0%</b><span>지난 12개월 가동률</span></div>
+  <div class="stat"><b data-count="150" data-suffix="+">0+</b><span>글로벌 엣지 리전</span></div>
+</section>
+
+<div class="brands">
+  <div class="brand-track">
+    <span>under armour</span><span>ebay</span><span>NINTENDO</span><span>notion</span><span>The Washington Post</span><span>zapier</span><span>stripe</span><span>adobe</span>
+    <span>under armour</span><span>ebay</span><span>NINTENDO</span><span>notion</span><span>The Washington Post</span><span>zapier</span><span>stripe</span><span>adobe</span>
+  </div>
+</div>
+
+<footer>© 2026 deployo — Vercel 스타일 재현 데모</footer>
+
+<script>
+/* 터미널 타이핑 시퀀스 */
+const lines = [
+  ['<span class="dim">$</span> deployo <span class="cyan">deploy</span>', 500],
+  ['<span class="dim">›</span> 프로젝트 분석 중... <span class="dim">프레임워크: Next.js</span>', 700],
+  ['<span class="ok">✓</span> 빌드 완료 <span class="dim">(2.4s)</span>', 900],
+  ['<span class="ok">✓</span> 엣지 함수 12개 번들링 <span class="dim">(0.8s)</span>', 700],
+  ['<span class="ok">✓</span> 150개 리전에 배포됨', 800],
+  ['<span class="dim">›</span> <span class="mag">https://my-project.deployo.app</span>', 600],
+];
+const term = document.getElementById('term');
+(async () => {
+  while (true) {
+    term.innerHTML = '';
+    for (const [html, delay] of lines) {
+      const div = document.createElement('div');
+      div.innerHTML = html;
+      term.appendChild(div);
+      await new Promise(r => setTimeout(r, delay));
+    }
+    const c = document.createElement('span'); c.className = 'cursor'; term.appendChild(c);
+    await new Promise(r => setTimeout(r, 3500));
+  }
+})();
+
+/* 파이프라인 스텝 순환 */
+let step = 0;
+setInterval(() => {
+  document.querySelectorAll('.pstep').forEach((s, i) => s.classList.toggle('active', i === step));
+  document.querySelectorAll('.pline').forEach((l, i) => l.classList.toggle('flow', i === step));
+  step = (step + 1) % 3;
+}, 1600);
+
+/* 리빌 + 카운트업 */
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('in');
+  e.target.querySelectorAll('[data-count]').forEach(el => {
+    if (el.dataset.done) return; el.dataset.done = 1;
+    const target = parseFloat(el.dataset.count), sfx = el.dataset.suffix || '';
+    const dec = el.dataset.count.includes('.') ? 2 : 0;
+    const t0 = performance.now();
+    (function tick(t) {
+      const p = Math.min((t - t0) / 1500, 1), ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = (target * ease).toFixed(dec) + sfx;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+}), { threshold: .2 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+<script>
+/* English mode: ?lang=en swaps every visible Korean string to English. Adds only — no markup/CSS/logic changed. */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "Vercel 스타일 — 흑백 미니멀 랜딩": "Vercel Style — Black & White Minimal Landing",
+    "제품": "Products",
+    "솔루션": "Solutions",
+    "템플릿": "Templates",
+    "문서": "Docs",
+    "가격": "Pricing",
+    "로그인": "Log In",
+    "회원가입": "Sign Up",
+    "개발하고.": "Develop.",
+    "미리보고.": "Preview.",
+    "배포하세요.": "Deploy.",
+    "deployo는 웹의 개발자 경험을 새로 정의합니다. git push 한 번이면 전 세계 엣지 네트워크로 즉시 배포됩니다 — 설정 없이, 기다림 없이.": "deployo redefines the developer experience for the web. One git push deploys instantly to a global edge network — no config, no waiting.",
+    "배포 시작하기": "Start Deploying",
+    "데모 요청 →": "Request a Demo →",
+    "개발": "Develop",
+    "미리보기": "Preview",
+    "PR마다 고유 URL 생성": "A unique URL for every PR",
+    "배포": "Deploy",
+    "글로벌 엣지에 즉시 반영": "Instantly live on the global edge",
+    "평균 엣지 응답 속도 (p75)": "Average edge response time (p75)",
+    "지난 12개월 가동률": "Uptime over the last 12 months",
+    "글로벌 엣지 리전": "Global edge regions",
+    "© 2026 deployo — Vercel 스타일 재현 데모": "© 2026 deployo — A Vercel-Style Recreation Demo",
+    "프로젝트 분석 중...": "Analyzing project...",
+    "프레임워크: Next.js": "Framework: Next.js",
+    "빌드 완료": "Build complete",
+    "엣지 함수 12개 번들링": "Bundling 12 edge functions",
+    "150개 리전에 배포됨": "Deployed to 150 regions"
+  };
+  const norm = s => s.replace(/\s+/g,' ').trim();
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swapText = n => {
+    const raw = n.nodeValue, key = norm(raw);
+    if (!key || TR[key] == null) return;
+    n.nodeValue = raw.match(/^\s*/)[0] + TR[key] + raw.match(/\s*$/)[0];
+  };
+  const walk = n => {
+    if (n.nodeType === 3) { swapText(n); return; }
+    if (n.nodeType !== 1) return;
+    for (const a of ATTRS) {
+      if (n.hasAttribute && n.hasAttribute(a)) {
+        const k = norm(n.getAttribute(a));
+        if (TR[k] != null) n.setAttribute(a, TR[k]);
+      }
+    }
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(ms => ms.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = norm(document.title);
+  if (TR[dt] != null) document.title = TR[dt];
+})();
+</script>
+</body>
+</html>

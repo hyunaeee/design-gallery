@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앱 · 배달 홈 — 배민 스타일</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ──────────────────────────────────────────────
+   WWIT 분류
+   카테고리: 배달  |  패턴: 홈, 검색  |  컴포넌트: 카테고리 그리드, 캐러셀 배너, 카드
+   ────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --mint: #2ac1bc; --ink: #1c1c1e; --sub: #8e8e93; --line: #f2f2f7; }
+body { font-family: "Noto Sans KR", sans-serif; min-height: 100vh; display: flex; align-items: center;
+       justify-content: center; gap: 64px; padding: 40px 24px;
+       background: linear-gradient(160deg, #e2f6f5, #f0f4ee); -webkit-font-smoothing: antialiased; }
+
+.phone { position: relative; width: 375px; height: 780px; flex-shrink: 0; border-radius: 54px;
+         background: #0b0c0e; padding: 10px;
+         box-shadow: 0 50px 100px -24px rgba(0,60,55,.4), inset 0 0 0 2px #3a3d42; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden;
+          background: #fff; display: flex; flex-direction: column; }
+.island { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 110px;
+          height: 30px; background: #0b0c0e; border-radius: 99px; z-index: 50; }
+
+.head-zone { background: var(--mint); padding-bottom: 18px; }
+.statusbar { display: flex; justify-content: space-between; padding: 20px 30px 8px; font-size: 14px;
+             font-weight: 700; color: #fff; }
+.addr { display: flex; align-items: center; gap: 6px; padding: 6px 20px 0; color: #fff;
+        font-size: 16.5px; font-weight: 900; }
+.addr i { font-style: normal; font-size: 11px; opacity: .9; }
+.search { margin: 14px 18px 0; display: flex; align-items: center; gap: 10px; background: #fff;
+          border-radius: 14px; padding: 13px 16px; color: var(--sub); font-size: 14.5px;
+          box-shadow: 0 4px 14px rgba(0,0,0,.08); cursor: pointer; }
+.search b { color: var(--mint); font-size: 16px; }
+
+.body-scroll { flex: 1; overflow-y: auto; padding-bottom: 88px; scrollbar-width: none; }
+.body-scroll::-webkit-scrollbar { display: none; }
+
+/* 카테고리 그리드 */
+.cats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 16px 6px; padding: 20px 16px 8px; }
+.cat { display: flex; flex-direction: column; align-items: center; gap: 7px; font-size: 11.5px;
+       font-weight: 500; color: #3a3a3c; cursor: pointer; border: none; background: none; font-family: inherit; }
+.cat .ic { width: 52px; height: 52px; border-radius: 18px; display: flex; align-items: center;
+           justify-content: center; font-size: 25px; background: #f7f8fa;
+           transition: transform .18s cubic-bezier(.2,.8,.3,1.4); }
+.cat:active .ic { transform: scale(.86); }
+
+/* 프로모 배너 캐러셀 */
+.banner-wrap { position: relative; margin: 14px 16px 0; border-radius: 16px; overflow: hidden; }
+.banner-track { display: flex; transition: transform .5s cubic-bezier(.2,.7,.2,1); }
+.banner { flex: 0 0 100%; padding: 20px 22px; min-height: 96px; color: #fff; position: relative; }
+.banner small { font-size: 12px; opacity: .9; font-weight: 500; }
+.banner b { display: block; font-size: 18px; font-weight: 900; margin-top: 4px; letter-spacing: -.3px; }
+.banner .emo { position: absolute; right: 18px; bottom: 12px; font-size: 42px; }
+.banner-dots { position: absolute; right: 12px; bottom: 10px; display: flex; gap: 5px; }
+.banner-dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.45); }
+.banner-dots i.on { background: #fff; }
+
+.sec-h { display: flex; justify-content: space-between; align-items: baseline; padding: 26px 18px 12px; }
+.sec-h b { font-size: 17px; font-weight: 900; letter-spacing: -.3px; }
+.sec-h span { font-size: 12.5px; color: var(--sub); }
+
+/* 가게 가로 카드 */
+.shops { display: flex; gap: 12px; padding: 0 16px 10px; overflow-x: auto; scrollbar-width: none; }
+.shops::-webkit-scrollbar { display: none; }
+.shop { flex: 0 0 168px; cursor: pointer; }
+.shop .ph { position: relative; height: 108px; border-radius: 14px; overflow: hidden;
+            background: var(--fb, #f2f2f7); }
+.shop .ph img { width: 100%; height: 100%; object-fit: cover; }
+.shop .ph .emo { position: absolute; inset: 0; display: none; align-items: center; justify-content: center;
+                 font-size: 40px; }
+.shop .ph.noimg .emo { display: flex; }
+.shop .cpn { position: absolute; left: 8px; top: 8px; background: var(--ink); color: #fff; font-size: 10.5px;
+             font-weight: 700; padding: 3.5px 8px; border-radius: 7px; }
+.shop .nm { margin-top: 9px; font-size: 14px; font-weight: 700; }
+.shop .inf { margin-top: 3px; font-size: 12px; color: var(--sub); }
+.shop .inf .star { color: #ffc400; font-weight: 700; }
+
+/* 주문 현황 플로팅 바 */
+.order-bar { position: absolute; z-index: 40; left: 14px; right: 14px; bottom: 92px; display: flex;
+             align-items: center; gap: 12px; background: var(--ink); color: #fff; border-radius: 16px;
+             padding: 13px 16px; box-shadow: 0 14px 30px rgba(0,0,0,.35); cursor: pointer; }
+.order-bar .spin { width: 22px; height: 22px; border-radius: 50%; border: 2.5px solid rgba(255,255,255,.25);
+                   border-top-color: var(--mint); animation: sp 1s linear infinite; flex-shrink: 0; }
+@keyframes sp { to { transform: rotate(360deg); } }
+.order-bar .txt { flex: 1; font-size: 13px; font-weight: 500; }
+.order-bar .txt b { display: block; font-size: 14px; font-weight: 700; }
+.order-bar .eta { font-size: 15px; font-weight: 900; color: var(--mint); }
+
+.tabbar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 40; display: flex;
+          background: rgba(255,255,255,.96); backdrop-filter: blur(14px);
+          border-top: 1px solid var(--line); padding: 8px 6px 22px; }
+.tab { flex: 1; border: none; background: none; font-family: inherit; display: flex; flex-direction: column;
+       align-items: center; gap: 3px; font-size: 10.5px; color: #b0b8c1; cursor: pointer; font-weight: 500; }
+.tab i { font-style: normal; font-size: 20px; filter: grayscale(1) opacity(.5); }
+.tab.on { color: var(--mint); font-weight: 700; }
+.tab.on i { filter: none; }
+.home-bar { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 130px;
+            height: 5px; border-radius: 99px; background: #0b0c0e; z-index: 60; opacity: .85; }
+
+/* ── WWIT 명세 패널 ── */
+.specs { max-width: 360px; }
+.specs .pill { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+               color: #3d8a86; border: 1.5px solid #a9d8d5; border-radius: 99px; padding: 6px 16px; }
+.specs h1 { margin-top: 18px; font-size: 34px; font-weight: 900; letter-spacing: -1px; color: #1c1c1e; }
+.specs .desc { margin-top: 12px; font-size: 14.5px; line-height: 1.75; color: #4b5553; word-break: keep-all; }
+.spec-group { margin-top: 22px; }
+.spec-group h4 { font-size: 11.5px; font-weight: 700; letter-spacing: 2px; color: #8fa5a2; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.tags span { font-size: 12.5px; font-weight: 600; background: #fff; border: 1px solid #d5e8e6;
+             padding: 6px 13px; border-radius: 99px; color: #37504d; }
+.tokens { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.tk { display: flex; align-items: center; gap: 7px; font-family: "JetBrains Mono", monospace; font-size: 11px;
+      color: #61807c; background: #fff; border: 1px solid #d5e8e6; border-radius: 10px; padding: 7px 11px; }
+.tk i { width: 15px; height: 15px; border-radius: 5px; }
+.hint { margin-top: 24px; font-size: 12.5px; color: #8fa5a2; line-height: 1.7; }
+.hint b { color: #2ac1bc; }
+
+@media (max-width: 900px) { body { flex-direction: column; gap: 32px; } .specs { max-width: 375px; } }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="screen">
+    <div class="head-zone">
+      <div class="statusbar"><span>9:41</span><span>􀙇 􀙈 􀛨</span></div>
+      <div class="addr">📍 테헤란로 427 <i>▼</i></div>
+      <div class="search"><b>⌕</b> 오늘 뭐 먹지? 치킨 어때요</div>
+    </div>
+
+    <div class="body-scroll">
+      <div class="cats">
+        <button class="cat"><span class="ic">🍗</span>치킨</button>
+        <button class="cat"><span class="ic">🍕</span>피자</button>
+        <button class="cat"><span class="ic">🍜</span>중식</button>
+        <button class="cat"><span class="ic">🍣</span>회·초밥</button>
+        <button class="cat"><span class="ic">🍔</span>버거</button>
+        <button class="cat"><span class="ic">🥘</span>한식</button>
+        <button class="cat"><span class="ic">🌮</span>양식</button>
+        <button class="cat"><span class="ic">🍰</span>카페·디저트</button>
+        <button class="cat"><span class="ic">🥡</span>분식</button>
+        <button class="cat"><span class="ic">🌙</span>야식</button>
+      </div>
+
+      <div class="banner-wrap">
+        <div class="banner-track" id="btrack">
+          <div class="banner" style="background:linear-gradient(120deg,#2ac1bc,#1a9a95)">
+            <small>7월 한정</small><b>첫 주문 8,000원 쿠폰팩</b><span class="emo">🎁</span></div>
+          <div class="banner" style="background:linear-gradient(120deg,#5f27cd,#8854d0)">
+            <small>한집배달</small><b>지금은 피크타임 할인 중</b><span class="emo">⚡</span></div>
+          <div class="banner" style="background:linear-gradient(120deg,#ff793f,#ffb142)">
+            <small>장보기·쇼핑</small><b>수박 반통 오늘 도착</b><span class="emo">🍉</span></div>
+        </div>
+        <div class="banner-dots" id="bdots"><i class="on"></i><i></i><i></i></div>
+      </div>
+
+      <div class="sec-h"><b>우리 동네 인기 맛집</b><span>전체보기 ›</span></div>
+      <div class="shops">
+        <div class="shop">
+          <div class="ph" style="--fb:linear-gradient(135deg,#ffe8d6,#ffd3a8)">
+            <img src="https://picsum.photos/id/292/340/220" alt="" loading="lazy"
+                 onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="emo">🍗</span>
+            <span class="cpn">3,000원 쿠폰</span>
+          </div>
+          <div class="nm">교촌 허니콤보 강남점</div>
+          <div class="inf"><span class="star">★ 4.9</span> (2,841) · 15~25분</div>
+        </div>
+        <div class="shop">
+          <div class="ph" style="--fb:linear-gradient(135deg,#ffe0e0,#ffc9c9)">
+            <img src="https://picsum.photos/id/1060/340/220" alt="" loading="lazy"
+                 onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="emo">🍕</span>
+          </div>
+          <div class="nm">피자헤븐 시카고딥디쉬</div>
+          <div class="inf"><span class="star">★ 4.7</span> (912) · 배달비 무료</div>
+        </div>
+        <div class="shop">
+          <div class="ph" style="--fb:linear-gradient(135deg,#e0f2fe,#bae6fd)">
+            <img src="https://picsum.photos/id/429/340/220" alt="" loading="lazy"
+                 onerror="this.parentElement.classList.add('noimg');this.remove()"><span class="emo">🍣</span>
+            <span class="cpn">신규 오픈</span>
+          </div>
+          <div class="nm">스시오마카세 도시락</div>
+          <div class="inf"><span class="star">★ 5.0</span> (188) · 20~30분</div>
+        </div>
+      </div>
+
+      <div class="sec-h"><b>이럴 때 배민 B마트</b><span>전체보기 ›</span></div>
+      <div class="shops" style="padding-bottom:24px">
+        <div class="shop">
+          <div class="ph noimg" style="--fb:linear-gradient(135deg,#d4fc79,#96e6a1)"><span class="emo">🧺</span></div>
+          <div class="nm">장보기 30분 배달</div>
+          <div class="inf">과일·정육·생필품</div>
+        </div>
+        <div class="shop">
+          <div class="ph noimg" style="--fb:linear-gradient(135deg,#a1c4fd,#c2e9fb)"><span class="emo">💊</span></div>
+          <div class="nm">새벽 안전상비약</div>
+          <div class="inf">24시간 · 즉시 배달</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="order-bar">
+      <span class="spin"></span>
+      <span class="txt"><b>교촌 허니콤보 배달 중</b>라이더가 음식을 픽업했어요</span>
+      <span class="eta">12분</span>
+    </div>
+
+    <div class="tabbar">
+      <button class="tab on"><i>🏠</i>홈</button>
+      <button class="tab"><i>🔍</i>검색</button>
+      <button class="tab"><i>🧾</i>주문내역</button>
+      <button class="tab"><i>❤️</i>찜</button>
+      <button class="tab"><i>👤</i>마이배민</button>
+    </div>
+    <div class="home-bar"></div>
+  </div>
+</div>
+
+<aside class="specs">
+  <span class="pill">APP REFERENCE</span>
+  <h1>배달 홈<br>— 배민 스타일</h1>
+  <p class="desc">브랜드 컬러 헤더 + 검색바, 이모지 카테고리 그리드, <b>자동 순환 프로모 캐러셀</b>,
+  가로 스크롤 가게 카드, 그리고 라이브 <b>주문 현황 플로팅 바</b>까지 — 배달 앱 홈의 전체 구성.</p>
+
+  <div class="spec-group"><h4>카테고리</h4>
+    <div class="tags"><span>배달</span><span>커머스</span></div></div>
+  <div class="spec-group"><h4>패턴</h4>
+    <div class="tags"><span>홈</span><span>검색</span><span>주문 현황</span></div></div>
+  <div class="spec-group"><h4>컴포넌트</h4>
+    <div class="tags"><span>카테고리 그리드</span><span>캐러셀</span><span>가로 카드</span><span>플로팅 바</span><span>탭바</span></div></div>
+  <div class="spec-group"><h4>디자인 토큰</h4>
+    <div class="tokens">
+      <span class="tk"><i style="background:#2ac1bc"></i>#2AC1BC</span>
+      <span class="tk"><i style="background:#1c1c1e"></i>#1C1C1E</span>
+      <span class="tk"><i style="background:#ffc400"></i>#FFC400</span>
+    </div>
+    <div class="tokens"><span class="tk">radius 14~16px</span><span class="tk">grid 5col</span></div></div>
+
+  <p class="hint">💡 캐러셀은 transform 트랙 + setInterval 20줄이 전부입니다.
+  <b>주문 현황 바</b>는 라이브 액티비티 UI로 그대로 활용하세요.</p>
+</aside>
+
+<script>
+/* 배너 캐러셀 자동 순환 */
+const track = document.getElementById('btrack');
+const dots = document.querySelectorAll('#bdots i');
+let bi = 0;
+setInterval(() => {
+  if (window.__paused) return;
+  bi = (bi + 1) % 3;
+  track.style.transform = `translateX(-${bi * 100}%)`;
+  dots.forEach((d, i) => d.classList.toggle('on', i === bi));
+}, 3200);
+
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on')); t.classList.add('on');
+}));
+</script>
+<script>
+/* ── EN mode (?lang=en) — additive, non-destructive ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "앱 · 배달 홈 — 배민 스타일": "App · Delivery Home — Baemin Style",
+    "📍 테헤란로 427": "📍 Teheran-ro 427",
+    "오늘 뭐 먹지? 치킨 어때요": "What to eat today? How about chicken",
+    "치킨": "Chicken",
+    "피자": "Pizza",
+    "중식": "Chinese",
+    "회·초밥": "Sashimi · Sushi",
+    "버거": "Burgers",
+    "한식": "Korean",
+    "양식": "Western",
+    "카페·디저트": "Cafe · Dessert",
+    "분식": "Snacks",
+    "야식": "Late night",
+    "7월 한정": "July only",
+    "첫 주문 8,000원 쿠폰팩": "8,000 KRW coupon pack for your first order",
+    "한집배달": "Solo delivery",
+    "지금은 피크타임 할인 중": "Peak-time discount on now",
+    "장보기·쇼핑": "Groceries · Shopping",
+    "수박 반통 오늘 도착": "Half a watermelon delivered today",
+    "우리 동네 인기 맛집": "Popular spots in your area",
+    "전체보기 ›": "See all ›",
+    "이럴 때 배민 B마트": "When you need it: Baemin B-Mart",
+    "3,000원 쿠폰": "3,000 KRW coupon",
+    "교촌 허니콤보 강남점": "Kyochon Honey Combo Gangnam",
+    "(2,841) · 15~25분": "(2,841) · 15–25 min",
+    "피자헤븐 시카고딥디쉬": "Pizza Heaven Chicago Deep Dish",
+    "(912) · 배달비 무료": "(912) · Free delivery",
+    "신규 오픈": "New",
+    "스시오마카세 도시락": "Sushi Omakase Bento",
+    "(188) · 20~30분": "(188) · 20–30 min",
+    "장보기 30분 배달": "Groceries in 30 min",
+    "과일·정육·생필품": "Fruit · Meat · Essentials",
+    "새벽 안전상비약": "Late-night meds",
+    "24시간 · 즉시 배달": "24h · Instant delivery",
+    "교촌 허니콤보 배달 중": "Kyochon Honey Combo on the way",
+    "라이더가 음식을 픽업했어요": "Your rider picked up the food",
+    "12분": "12 min",
+    "홈": "Home",
+    "검색": "Search",
+    "주문내역": "Orders",
+    "찜": "Saved",
+    "마이배민": "My Baemin",
+    "배달 홈": "Delivery Home",
+    "— 배민 스타일": "— Baemin style",
+    "브랜드 컬러 헤더 + 검색바, 이모지 카테고리 그리드,": "Brand-color header + search bar, emoji category grid,",
+    "자동 순환 프로모 캐러셀": "an auto-rotating promo carousel",
+    ",\n  가로 스크롤 가게 카드, 그리고 라이브": ", horizontally scrolling shop cards, and a live",
+    "주문 현황 플로팅 바": "order-status floating bar",
+    "까지 — 배달 앱 홈의 전체 구성.": " — the full layout of a delivery app home.",
+    "카테고리": "Category",
+    "패턴": "Pattern",
+    "컴포넌트": "Component",
+    "디자인 토큰": "Design tokens",
+    "배달": "Delivery",
+    "커머스": "Commerce",
+    "주문 현황": "Order status",
+    "카테고리 그리드": "Category grid",
+    "캐러셀": "Carousel",
+    "가로 카드": "Horizontal card",
+    "플로팅 바": "Floating bar",
+    "탭바": "Tab bar",
+    "💡 캐러셀은 transform 트랙 + setInterval 20줄이 전부입니다.": "💡 The carousel is just a transform track + 20 lines of setInterval.",
+    "주문 현황 바": "order-status bar",
+    "는 라이브 액티비티 UI로 그대로 활용하세요.": " works as-is for a Live Activity UI."
+  };
+  const swap = s => { const t = s.trim(); return TR[t] != null ? s.replace(t, TR[t]) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (TR[n.nodeValue.trim()] != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ['placeholder','title','alt','aria-label'].forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && TR[n.getAttribute(a).trim()] != null) n.setAttribute(a, TR[n.getAttribute(a).trim()]); });
+    n.childNodes.forEach(walk);
+  };
+  walk(document.body);
+  if (TR[document.title.trim()]) document.title = TR[document.title.trim()];
+})();
+</script>
+</body>
+</html>

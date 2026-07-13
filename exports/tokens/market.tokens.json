@@ -1,0 +1,35 @@
+{
+  "market": {
+    "color": {
+      "primary":        { "value": "#FF6F0F", "type": "color", "description": "브랜드 오렌지 — FAB, 뱃지" },
+      "background":     { "value": "#FFFFFF", "type": "color" },
+      "text-primary":   { "value": "#212124", "type": "color" },
+      "text-secondary": { "value": "#868B94", "type": "color" },
+      "divider":        { "value": "#F1F3F5", "type": "color" },
+      "chip-border":    { "value": "#E9ECEF", "type": "color" },
+      "reserved":       { "value": "#1D7D45", "type": "color", "description": "예약중 뱃지" }
+    },
+    "radius": {
+      "thumbnail": { "value": "12", "type": "borderRadius" },
+      "chip":      { "value": "999", "type": "borderRadius" },
+      "fab":       { "value": "999", "type": "borderRadius" },
+      "badge":     { "value": "5", "type": "borderRadius" }
+    },
+    "spacing": {
+      "screen-x":  { "value": "18", "type": "spacing" },
+      "cell-y":    { "value": "16", "type": "spacing" },
+      "cell-gap":  { "value": "14", "type": "spacing" }
+    },
+    "typography": {
+      "item-title": { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "400", "fontSize": "15" }, "type": "typography" },
+      "price":      { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "900", "fontSize": "16" }, "type": "typography" },
+      "meta":       { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "400", "fontSize": "12.5" }, "type": "typography" },
+      "location":   { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "900", "fontSize": "18" }, "type": "typography" }
+    },
+    "component": {
+      "thumbnail-size": { "value": "108", "type": "sizing" },
+      "fab-height":     { "value": "54", "type": "sizing" },
+      "chip-height":    { "value": "34", "type": "sizing" }
+    }
+  }
+}

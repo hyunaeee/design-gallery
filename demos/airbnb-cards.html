@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Airbnb 스타일 — 숙소 카드 그리드</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: #fff; color: #222;
+       -webkit-font-smoothing: antialiased; }
+
+/* ── 헤더: 필 검색바 + 카테고리 바 ── */
+header { position: sticky; top: 0; z-index: 20; background: rgba(255,255,255,.92);
+         backdrop-filter: blur(12px); border-bottom: 1px solid #ebebeb; padding: 15px 40px 0; }
+.header-top { display: flex; align-items: center; justify-content: space-between;
+              max-width: 1360px; margin: 0 auto; padding-bottom: 15px; }
+.logo { display: flex; align-items: center; gap: 7px; color: #ff385c; font-weight: 800;
+        font-size: 21px; letter-spacing: -.5px; }
+.logo svg { width: 30px; height: 30px; fill: #ff385c; }
+.search-pill { display: flex; align-items: center; border: 1px solid #ddd; border-radius: 99px;
+               padding: 7px 7px 7px 22px; gap: 16px; box-shadow: 0 3px 12px rgba(0,0,0,.07);
+               cursor: pointer; transition: box-shadow .2s; font-size: 14px; background: #fff; }
+.search-pill:hover { box-shadow: 0 5px 20px rgba(0,0,0,.15); }
+.search-pill b { font-weight: 600; }
+.search-pill .sep { width: 1px; height: 22px; background: #ddd; }
+.search-pill .muted { color: #717171; }
+.search-btn { width: 34px; height: 34px; border-radius: 50%; background: linear-gradient(90deg, #e61e4d, #d70466);
+              color: #fff; border: none; font-size: 15px; cursor: pointer; display: flex;
+              align-items: center; justify-content: center; }
+.profile { display: flex; align-items: center; gap: 11px; border: 1px solid #ddd;
+           border-radius: 99px; padding: 7px 7px 7px 15px; cursor: pointer; background: #fff;
+           transition: box-shadow .2s; font-size: 15px; }
+.profile:hover { box-shadow: 0 2px 10px rgba(0,0,0,.14); }
+.profile .avatar { width: 30px; height: 30px; border-radius: 50%;
+                   background: linear-gradient(135deg, #717171, #222); }
+
+.cats { display: flex; gap: 36px; max-width: 1360px; margin: 0 auto; overflow-x: auto;
+        scrollbar-width: none; }
+.cats::-webkit-scrollbar { display: none; }
+.cat { display: flex; flex-direction: column; align-items: center; gap: 7px; font-size: 12px;
+       color: #717171; cursor: pointer; padding: 6px 2px 12px; border-bottom: 2px solid transparent;
+       white-space: nowrap; transition: color .2s, border-color .2s; flex-shrink: 0; }
+.cat:hover { color: #222; border-bottom-color: #ddd; }
+.cat.on { color: #222; border-bottom-color: #222; font-weight: 600; }
+.cat .ico { font-size: 23px; filter: grayscale(.35); transition: transform .2s; }
+.cat:hover .ico { transform: scale(1.12); filter: none; }
+
+/* ── 카드 그리드 ── */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(262px, 1fr)); gap: 24px 22px;
+        max-width: 1360px; margin: 26px auto; padding: 0 40px 70px; }
+
+.stay { cursor: pointer; }
+.photo { position: relative; aspect-ratio: 1 / 0.96; border-radius: 16px; overflow: hidden; background: #eee; }
+/* 이미지 로드 실패 시(오프라인 등) 그라디언트 폴백 */
+.photo.noimg { background: var(--fallback, linear-gradient(135deg, #fbc2eb, #a6c1ee)); }
+.photo.noimg .ph-emoji { position: absolute; inset: 0; display: flex; align-items: center;
+  justify-content: center; font-size: 54px; opacity: .85; filter: drop-shadow(0 6px 14px rgba(0,0,0,.25)); }
+.ph-emoji { display: none; }
+.photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+             transition: transform .5s cubic-bezier(.2,.6,.2,1); }
+.stay:hover .photo img { transform: scale(1.07); }
+.photo::after { content: ""; position: absolute; inset: 0;
+                background: linear-gradient(180deg, rgba(0,0,0,.18), transparent 26%); }
+.heart { position: absolute; top: 13px; right: 13px; z-index: 2; width: 26px; height: 26px;
+         border: none; background: none; cursor: pointer; font-size: 22px; line-height: 1;
+         color: rgba(0,0,0,.5); -webkit-text-stroke: 2px #fff; transition: transform .18s; }
+.heart:hover { transform: scale(1.18); }
+.heart.liked { color: #ff385c; -webkit-text-stroke: 0; animation: pop .35s cubic-bezier(.2,.9,.3,1.6); }
+@keyframes pop { 50% { transform: scale(1.4); } }
+.badge { position: absolute; top: 13px; left: 13px; z-index: 2; background: #fff; font-size: 12px;
+         font-weight: 600; padding: 5px 11px; border-radius: 99px; box-shadow: 0 1px 5px rgba(0,0,0,.18); }
+.dots { position: absolute; bottom: 11px; left: 0; right: 0; z-index: 2; display: flex; gap: 5px;
+        justify-content: center; }
+.dots i { width: 6px; height: 6px; border-radius: 50%; background: rgba(255,255,255,.55); }
+.dots i.on { background: #fff; }
+
+.stay .meta { display: flex; justify-content: space-between; gap: 10px; margin-top: 12px; font-size: 15px; }
+.stay .meta b { font-weight: 600; }
+.rating { flex-shrink: 0; color: #222; }
+.rating::before { content: "★ "; font-size: 12px; }
+.stay .sub { color: #717171; font-size: 14px; margin-top: 2px; }
+.stay .price { margin-top: 7px; font-size: 15px; }
+.stay .price b { font-weight: 700; }
+.stay .price span { color: #717171; }
+
+/* 스켈레톤 셔머 (이미지 로드 전) — 이미지가 로드되면 img가 위를 덮는다 */
+.photo::before { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(100deg, #ececec 40%, #f7f7f7 50%, #ececec 60%);
+  background-size: 200% 100%; animation: shimmer 1.4s linear infinite; }
+.photo.noimg::before { display: none; }
+@keyframes shimmer { to { background-position: -200% 0; } }
+
+/* 하단 지도 토글 */
+.map-toggle { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); z-index: 30;
+              display: flex; align-items: center; gap: 9px; background: #222; color: #fff;
+              border: none; font-size: 14px; font-weight: 600; padding: 13px 22px; border-radius: 99px;
+              cursor: pointer; font-family: inherit; box-shadow: 0 8px 24px rgba(0,0,0,.3);
+              transition: transform .2s; }
+.map-toggle:hover { transform: translateX(-50%) scale(1.05); }
+
+@media (max-width: 900px) {
+  header { padding: 12px 20px 0; }
+  .search-pill .hide-m, .search-pill .sep { display: none; }
+  .grid { padding: 0 20px 70px; }
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="header-top">
+    <div class="logo">
+      <svg viewBox="0 0 32 32"><path d="M16 3C9 12 4 19.5 4 24a7 7 0 0 0 12 4.9A7 7 0 0 0 28 24c0-4.5-5-12-12-21zm0 25a4.5 4.5 0 0 1-4.5-4.5C11.5 20 13 16.8 16 12.4c3 4.4 4.5 7.6 4.5 11.1A4.5 4.5 0 0 1 16 28z"/></svg>
+      staybnb
+    </div>
+    <div class="search-pill">
+      <b>어디든지</b><span class="sep"></span>
+      <b class="hide-m">언제든 일주일</b><span class="sep"></span>
+      <span class="muted">게스트 추가</span>
+      <button class="search-btn">⌕</button>
+    </div>
+    <div class="profile">☰ <span class="avatar"></span></div>
+  </div>
+  <div class="cats">
+    <div class="cat on"><span class="ico">🔥</span>인기 급상승</div>
+    <div class="cat"><span class="ico">🏖️</span>해변 바로 앞</div>
+    <div class="cat"><span class="ico">🏔️</span>산속 오두막</div>
+    <div class="cat"><span class="ico">🛖</span>한옥</div>
+    <div class="cat"><span class="ico">🏊</span>멋진 수영장</div>
+    <div class="cat"><span class="ico">🌾</span>시골</div>
+    <div class="cat"><span class="ico">🏙️</span>도심</div>
+    <div class="cat"><span class="ico">⛺</span>캠핑장</div>
+    <div class="cat"><span class="ico">🎨</span>디자인</div>
+    <div class="cat"><span class="ico">🌊</span>호숫가</div>
+    <div class="cat"><span class="ico">❄️</span>스키</div>
+  </div>
+</header>
+
+<main class="grid" id="grid"></main>
+
+<button class="map-toggle">지도 표시 🗺️</button>
+
+<script>
+const STAYS = [
+  { img: 1029, emo: '🌊', fb: 'linear-gradient(135deg,#89f7fe,#66a6ff)', loc: '제주 애월읍', dist: '바다 전망 · 오션뷰 독채', date: '7월 15~20일', price: 185000, rate: 4.92, badge: '게스트 선호' },
+  { img: 1018, emo: '🏔️', fb: 'linear-gradient(135deg,#84fab0,#8fd3f4)', loc: '강원 평창군', dist: '산 전망 · 통나무 캐빈', date: '8월 2~7일', price: 142000, rate: 4.87 },
+  { img: 1040, emo: '🛖', fb: 'linear-gradient(135deg,#f6d365,#fda085)', loc: '전북 전주시', dist: '한옥 스테이 · 온돌방', date: '7월 20~25일', price: 98000, rate: 4.95, badge: '게스트 선호' },
+  { img: 1031, emo: '🏖️', fb: 'linear-gradient(135deg,#a18cd1,#fbc2eb)', loc: '부산 해운대구', dist: '해변 도보 3분 · 시티뷰', date: '8월 1~6일', price: 210000, rate: 4.81 },
+  { img: 1036, emo: '🏊', fb: 'linear-gradient(135deg,#43e97b,#38f9d7)', loc: '경남 남해군', dist: '독채 풀빌라 · 프라이빗', date: '8월 15~20일', price: 320000, rate: 4.9, badge: '인기 숙소' },
+  { img: 1047, emo: '🏙️', fb: 'linear-gradient(135deg,#ff9a9e,#fecfef)', loc: '서울 종로구', dist: '도심 루프탑 · 야경 맛집', date: '7월 30일~8월 4일', price: 167000, rate: 4.88 },
+  { img: 1043, emo: '⛺', fb: 'linear-gradient(135deg,#d4fc79,#96e6a1)', loc: '충남 태안군', dist: '글램핑 · 바베큐 가능', date: '8월 8~13일', price: 125000, rate: 4.79 },
+  { img: 1015, emo: '🛶', fb: 'linear-gradient(135deg,#4facfe,#00f2fe)', loc: '강원 인제군', dist: '계곡 앞 · 카약 무료', date: '8월 10~15일', price: 178000, rate: 4.93, badge: '게스트 선호' },
+  { img: 1016, emo: '🌌', fb: 'linear-gradient(135deg,#30cfd0,#330867)', loc: '경북 문경시', dist: '절벽 전망 · 스타게이징', date: '8월 22~27일', price: 155000, rate: 4.85 },
+  { img: 110,  emo: '🎨', fb: 'linear-gradient(135deg,#e0c3fc,#8ec5fc)', loc: '인천 강화군', dist: '디자인 하우스 · 감성숙소', date: '9월 1~6일', price: 195000, rate: 4.96, badge: '인기 숙소' },
+  { img: 164,  emo: '⛵', fb: 'linear-gradient(135deg,#fa709a,#fee140)', loc: '전남 여수시', dist: '항구 전망 · 요트 투어', date: '8월 18~23일', price: 232000, rate: 4.83 },
+  { img: 1039, emo: '🌲', fb: 'linear-gradient(135deg,#96fbc4,#f9f586)', loc: '강원 속초시', dist: '폭포 트레킹 · 산장', date: '9월 5~10일', price: 138000, rate: 4.89 },
+];
+
+document.getElementById('grid').innerHTML = STAYS.map((s, i) => `
+  <article class="stay">
+    <div class="photo" style="--fallback:${s.fb}">
+      <img src="https://picsum.photos/id/${s.img}/560/540" alt="${s.loc} 숙소 사진" loading="lazy"
+           onerror="this.closest('.photo').classList.add('noimg'); this.remove()">
+      <span class="ph-emoji">${s.emo}</span>
+      ${s.badge ? `<span class="badge">${s.badge}</span>` : ''}
+      <button class="heart" aria-label="위시리스트에 저장">♥</button>
+      <div class="dots"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+    </div>
+    <div class="meta"><b>${s.loc}</b><span class="rating">${s.rate}</span></div>
+    <div class="sub">${s.dist}</div>
+    <div class="sub">${s.date}</div>
+    <div class="price"><b>₩${s.price.toLocaleString()}</b> <span>/ 박</span></div>
+  </article>`).join('');
+
+/* 하트 토글 */
+document.addEventListener('click', e => {
+  const h = e.target.closest('.heart');
+  if (h) { h.classList.toggle('liked'); e.stopPropagation(); }
+});
+
+/* 카테고리 활성 전환 */
+document.querySelectorAll('.cat').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('.cat').forEach(x => x.classList.remove('on'));
+  c.classList.add('on');
+}));
+</script>
+<script>
+/* ── EN mode (?lang=en) — additive, non-destructive ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "Airbnb 스타일 — 숙소 카드 그리드": "Airbnb Style — Stay Card Grid",
+    "어디든지": "Anywhere",
+    "언제든 일주일": "Any week",
+    "게스트 추가": "Add guests",
+    "인기 급상승": "Trending",
+    "해변 바로 앞": "Beachfront",
+    "산속 오두막": "Mountain cabins",
+    "한옥": "Hanok",
+    "멋진 수영장": "Amazing pools",
+    "시골": "Countryside",
+    "도심": "City center",
+    "캠핑장": "Campgrounds",
+    "디자인": "Design",
+    "호숫가": "Lakefront",
+    "스키": "Skiing",
+    "지도 표시 🗺️": "Show map 🗺️",
+    "위시리스트에 저장": "Save to wishlist",
+    "/ 박": "/ night",
+    "게스트 선호": "Guest favorite",
+    "인기 숙소": "Popular",
+    "제주 애월읍": "Aewol, Jeju",
+    "강원 평창군": "Pyeongchang, Gangwon",
+    "전북 전주시": "Jeonju, Jeonbuk",
+    "부산 해운대구": "Haeundae, Busan",
+    "경남 남해군": "Namhae, Gyeongnam",
+    "서울 종로구": "Jongno, Seoul",
+    "충남 태안군": "Taean, Chungnam",
+    "강원 인제군": "Inje, Gangwon",
+    "경북 문경시": "Mungyeong, Gyeongbuk",
+    "인천 강화군": "Ganghwa, Incheon",
+    "전남 여수시": "Yeosu, Jeonnam",
+    "강원 속초시": "Sokcho, Gangwon",
+    "바다 전망 · 오션뷰 독채": "Sea view · Private oceanfront home",
+    "산 전망 · 통나무 캐빈": "Mountain view · Log cabin",
+    "한옥 스테이 · 온돌방": "Hanok stay · Ondol room",
+    "해변 도보 3분 · 시티뷰": "3-min walk to beach · City view",
+    "독채 풀빌라 · 프라이빗": "Private pool villa · Whole home",
+    "도심 루프탑 · 야경 맛집": "City rooftop · Great night views",
+    "글램핑 · 바베큐 가능": "Glamping · BBQ available",
+    "계곡 앞 · 카약 무료": "By the valley stream · Free kayak",
+    "절벽 전망 · 스타게이징": "Cliff view · Stargazing",
+    "디자인 하우스 · 감성숙소": "Design house · Aesthetic stay",
+    "항구 전망 · 요트 투어": "Harbor view · Yacht tour",
+    "폭포 트레킹 · 산장": "Waterfall trek · Mountain lodge",
+    "7월 15~20일": "Jul 15–20",
+    "8월 2~7일": "Aug 2–7",
+    "7월 20~25일": "Jul 20–25",
+    "8월 1~6일": "Aug 1–6",
+    "8월 15~20일": "Aug 15–20",
+    "7월 30일~8월 4일": "Jul 30 – Aug 4",
+    "8월 8~13일": "Aug 8–13",
+    "8월 10~15일": "Aug 10–15",
+    "8월 22~27일": "Aug 22–27",
+    "9월 1~6일": "Sep 1–6",
+    "8월 18~23일": "Aug 18–23",
+    "9월 5~10일": "Sep 5–10",
+    "제주 애월읍 숙소 사진": "Aewol, Jeju stay photo",
+    "강원 평창군 숙소 사진": "Pyeongchang, Gangwon stay photo",
+    "전북 전주시 숙소 사진": "Jeonju, Jeonbuk stay photo",
+    "부산 해운대구 숙소 사진": "Haeundae, Busan stay photo",
+    "경남 남해군 숙소 사진": "Namhae, Gyeongnam stay photo",
+    "서울 종로구 숙소 사진": "Jongno, Seoul stay photo",
+    "충남 태안군 숙소 사진": "Taean, Chungnam stay photo",
+    "강원 인제군 숙소 사진": "Inje, Gangwon stay photo",
+    "경북 문경시 숙소 사진": "Mungyeong, Gyeongbuk stay photo",
+    "인천 강화군 숙소 사진": "Ganghwa, Incheon stay photo",
+    "전남 여수시 숙소 사진": "Yeosu, Jeonnam stay photo",
+    "강원 속초시 숙소 사진": "Sokcho, Gangwon stay photo"
+  };
+  const swap = s => { const t = s.trim(); return TR[t] != null ? s.replace(t, TR[t]) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (TR[n.nodeValue.trim()] != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ['placeholder','title','alt','aria-label'].forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && TR[n.getAttribute(a).trim()] != null) n.setAttribute(a, TR[n.getAttribute(a).trim()]); });
+    n.childNodes.forEach(walk);
+  };
+  walk(document.body);
+  if (TR[document.title.trim()]) document.title = TR[document.title.trim()];
+})();
+</script>
+</body>
+</html>

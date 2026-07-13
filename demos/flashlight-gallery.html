@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>어둠의 전시장 — 손전등으로 발견하는 갤러리</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  font-family: "Noto Serif KR", serif; background: #060504; color: #e9ddc8;
+  -webkit-font-smoothing: antialiased; user-select: none; -webkit-user-select: none;
+  cursor: none;
+}
+
+#scene { position: fixed; inset: 0; overflow: hidden;
+  background:
+    radial-gradient(ellipse at 50% 120%, rgba(64,44,24,.25), transparent 55%),
+    radial-gradient(ellipse at center, #12100c 0%, #0a0806 62%, #050403 100%); }
+body.complete #scene { background:
+    radial-gradient(ellipse at 50% 120%, rgba(94,66,36,.4), transparent 60%),
+    radial-gradient(ellipse at center, #221c13 0%, #15110b 62%, #0b0906 100%); }
+#scene, #dark, #glow { transition: background 2.5s ease; }
+
+/* ── 작품 공통: 액자 ── */
+.art { position: absolute; transform: translate(-50%, -50%); z-index: 5;
+  background: #0f0c08; padding: 14px;
+  border: 11px solid #241b10;
+  box-shadow: 0 0 0 1px rgba(190,150,80,.28), inset 0 0 0 1px rgba(190,150,80,.2),
+              0 24px 60px rgba(0,0,0,.8);
+  transition: filter 1.2s ease, box-shadow 1.2s ease; }
+.art .work { display: block; position: relative; overflow: hidden; }
+.art figcaption { text-align: center; padding: 12px 6px 2px; }
+.art figcaption b { display: block; font-size: 14.5px; font-weight: 700; letter-spacing: .02em; }
+.art figcaption span { display: block; margin-top: 3px; font-family: "JetBrains Mono", monospace;
+  font-size: 9.5px; letter-spacing: 2.5px; color: #9a8a6c; }
+
+/* 발견됨: 어둠 위로 올라와 은은한 스포트 조명 아래 어렴풋이 보인다 */
+.art.found { z-index: 45; filter: brightness(.5) saturate(.85);
+  box-shadow: 0 0 0 1px rgba(190,150,80,.3), inset 0 0 0 1px rgba(190,150,80,.2),
+              0 24px 60px rgba(0,0,0,.8), 0 0 110px 34px rgba(255,180,90,.075); }
+.art.found::before { content: ""; position: absolute; left: 50%; top: 50%; z-index: -1;
+  width: 210%; height: 190%; transform: translate(-50%, -54%);
+  background: radial-gradient(ellipse at center, rgba(255,190,100,.1), transparent 62%);
+  pointer-events: none; }
+body.complete .art { z-index: 45; filter: brightness(1) saturate(1); }
+
+/* ── 작품들 (전부 CSS/SVG) ── */
+/* 1. 일몰의 기억 — 블러 그라디언트 원 */
+.w-orb { width: 240px; height: 200px; background: #171310; }
+.w-orb i { position: absolute; left: 50%; top: 54%; width: 130px; height: 130px;
+  transform: translate(-50%, -50%); border-radius: 50%; filter: blur(2px);
+  background: radial-gradient(circle at 38% 32%, #ffd98a 0%, #f28c4f 38%, #b83a5e 68%, #3d1b3f 100%);
+  box-shadow: 0 0 60px 8px rgba(242,140,79,.4); }
+.w-orb::after { content: ""; position: absolute; left: 0; right: 0; top: 72%; height: 1.5px;
+  background: linear-gradient(90deg, transparent, rgba(255,217,138,.5), transparent); }
+
+/* 2. 구성 IV — 기하 패턴 */
+.w-geo { width: 210px; height: 240px; }
+
+/* 3. 기계의 꿈 — ASCII 아트 */
+.w-ascii { width: 236px; height: 216px; background: #0a0d0a; display: grid; place-items: center; }
+.w-ascii pre { font-family: "JetBrains Mono", monospace; font-size: 12.5px; line-height: 1.3;
+  color: #7fd98a; text-shadow: 0 0 10px rgba(127,217,138,.5); }
+.w-ascii pre b { color: #c8f5ce; font-weight: 400; }
+
+/* 4. 선의 산책 — 네온 선 드로잉 */
+.w-neon { width: 250px; height: 190px; background: #0b0a12; display: grid; place-items: center; }
+
+/* 5. 파동 — 동심원 모아레 */
+.w-wave { width: 210px; height: 210px; background: #0c0e12; display: grid; place-items: center; }
+
+/* 6. 무제 (주황 위 빨강) — 색면 추상 */
+.w-field { width: 200px; height: 250px; padding: 14px; background: #241102; }
+.w-field i { display: block; filter: blur(1.2px); }
+.w-field .f1 { height: 34%; margin-bottom: 8%;
+  background: radial-gradient(ellipse at center, #d94f2b 0%, #a83318 78%, #8c2a12 100%); }
+.w-field .f2 { height: 52%;
+  background: radial-gradient(ellipse at center, #e88f3c 0%, #c96f24 72%, #a95a1c 100%); }
+
+/* 7. 밤의 지도 — 별자리 */
+.w-star { width: 250px; height: 180px; background: linear-gradient(180deg, #0a0d1a, #060810); display: grid; place-items: center; }
+
+/* ── 어둠 오버레이: 커서 주변만 radial 마스크로 뚫린다 ── */
+#dark { position: fixed; inset: 0; z-index: 40; pointer-events: none;
+  background: rgba(3,2,1,.978);
+  -webkit-mask-image: radial-gradient(circle var(--r, 185px) at var(--lx, 50%) var(--ly, 36%),
+    transparent 0%, rgba(0,0,0,.18) 42%, rgba(0,0,0,.72) 74%, #000 100%);
+  mask-image: radial-gradient(circle var(--r, 185px) at var(--lx, 50%) var(--ly, 36%),
+    transparent 0%, rgba(0,0,0,.18) 42%, rgba(0,0,0,.72) 74%, #000 100%);
+  transition: opacity 3s ease; }
+body.complete #dark { opacity: 0; }
+
+/* 앰버 손전등 빛 (스크린 블렌드) */
+#glow { position: fixed; inset: 0; z-index: 46; pointer-events: none; mix-blend-mode: screen;
+  background: radial-gradient(circle calc(var(--r, 185px) * 1.25) at var(--lx, 50%) var(--ly, 36%),
+    rgba(255,196,110,.17) 0%, rgba(255,170,80,.07) 45%, transparent 72%);
+  transition: opacity 2s ease; }
+body.complete #glow { opacity: 0; }
+
+/* 커서 점 (손전등 중심) */
+#dot { position: fixed; z-index: 80; width: 7px; height: 7px; border-radius: 50%;
+  background: #ffe6b8; box-shadow: 0 0 14px 3px rgba(255,210,140,.65);
+  transform: translate(-50%, -50%); pointer-events: none; }
+body.complete #dot { opacity: .35; }
+
+/* ── 도슨트 UI ── */
+header { position: fixed; z-index: 70; top: 26px; left: 50%; transform: translateX(-50%);
+  text-align: center; pointer-events: none; }
+header h1 { font-size: 15px; font-weight: 900; letter-spacing: .42em; text-indent: .42em;
+  color: #cdb98f; }
+header .count { margin-top: 9px; font-family: "JetBrains Mono", monospace; font-size: 11px;
+  letter-spacing: 2px; color: #8a7a5c; }
+header .count b { color: #ffcf87; font-weight: 500; }
+
+.hint { position: fixed; z-index: 70; left: 50%; top: 57%; transform: translateX(-50%);
+  font-size: 14px; letter-spacing: .14em; color: rgba(233,221,200,.6); white-space: nowrap;
+  animation: breathe 3.2s ease-in-out infinite; transition: opacity 1s; pointer-events: none; }
+.hint.hide { opacity: 0; }
+@keyframes breathe { 0%,100% { opacity: .38 } 50% { opacity: .8 } }
+
+/* 발견 토스트 */
+#toast { position: fixed; z-index: 75; left: 50%; bottom: 44px; transform: translate(-50%, 16px);
+  padding: 11px 26px; font-size: 13.5px; letter-spacing: .06em; color: #f2e6cd;
+  background: rgba(26,20,12,.82); border: 1px solid rgba(205,185,143,.3); border-radius: 99px;
+  backdrop-filter: blur(10px); opacity: 0; transition: opacity .45s, transform .45s;
+  pointer-events: none; white-space: nowrap; }
+#toast.show { opacity: 1; transform: translate(-50%, 0); }
+
+/* 엔딩 */
+#ending { position: fixed; z-index: 85; inset: 0; display: grid; place-items: center;
+  opacity: 0; pointer-events: none; transition: opacity 1.6s ease .9s; }
+body.complete #ending { opacity: 1; pointer-events: auto; }
+#ending .panel { text-align: center; padding: 46px 60px;
+  background: rgba(14,11,7,.72); border: 1px solid rgba(205,185,143,.32);
+  backdrop-filter: blur(14px); box-shadow: 0 30px 90px rgba(0,0,0,.6); }
+#ending .eyebrow { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 4px;
+  color: #9a8a6c; }
+#ending h2 { margin-top: 14px; font-size: 27px; font-weight: 900; letter-spacing: .06em;
+  color: #f5e9cf; word-break: keep-all; }
+#ending p { margin-top: 12px; font-size: 13px; color: #b3a480; letter-spacing: .04em; }
+#ending button { margin-top: 26px; font: inherit; font-size: 13px; letter-spacing: .16em;
+  color: #0e0b07; background: #e2cfa2; border: none; padding: 13px 34px; cursor: pointer;
+  transition: background .25s; }
+#ending button:hover { background: #f5e6c2; }
+
+@media (max-width: 1100px) {
+  .art { transform: translate(-50%, -50%) scale(.8); }
+}
+@media (max-width: 800px) {
+  .art { transform: translate(-50%, -50%) scale(.62); }
+  header h1 { font-size: 12.5px; }
+  .hint { font-size: 12px; }
+  #ending .panel { padding: 34px 26px; margin: 0 18px; }
+  #ending h2 { font-size: 21px; }
+}
+</style>
+</head>
+<body>
+
+<div id="scene">
+
+  <figure class="art" style="left:50%; top:36%" data-title="일몰의 기억">
+    <span class="work w-orb"><i></i></span>
+    <figcaption><b>일몰의 기억</b><span>OIL ON VOID · 2024</span></figcaption>
+  </figure>
+
+  <figure class="art" style="left:17%; top:25%" data-title="구성 IV">
+    <span class="work w-geo">
+      <svg width="210" height="240" viewBox="0 0 210 240">
+        <rect width="210" height="240" fill="#e8dfcc"/>
+        <circle cx="66" cy="66" r="46" fill="#c9402a"/>
+        <rect x="112" y="26" width="72" height="72" fill="#1e2a52"/>
+        <path d="M26 226 L 105 122 L 184 226 Z" fill="#d9a521"/>
+        <rect x="24" y="128" width="52" height="14" fill="#191410"/>
+        <circle cx="158" cy="150" r="17" fill="none" stroke="#191410" stroke-width="5"/>
+        <line x1="105" y1="10" x2="105" y2="230" stroke="#191410" stroke-width="2.5"/>
+      </svg>
+    </span>
+    <figcaption><b>구성 IV</b><span>SILKSCREEN · 2023</span></figcaption>
+  </figure>
+
+  <figure class="art" style="left:87%; top:55%" data-title="기계의 꿈">
+    <span class="work w-ascii"><pre>
+ ┌─────────────┐
+ │ <b>◉</b>  _____  <b>◉</b> │
+ │   |░▒▓▒░|   │
+ │   |▓ <b>ω</b> ▓|   │
+ │   |░▒▓▒░|   │
+ └──┬───────┬──┘
+    │ 01101 │
+  ──┴───────┴──
+   <b>dreaming...</b></pre></span>
+    <figcaption><b>기계의 꿈</b><span>ASCII ON CRT · 2025</span></figcaption>
+  </figure>
+
+  <figure class="art" style="left:15%; top:70%" data-title="선의 산책">
+    <span class="work w-neon">
+      <svg width="220" height="160" viewBox="0 0 220 160" fill="none">
+        <path d="M12 118 C 52 24, 88 24, 108 82 S 158 148, 172 74 C 178 44, 198 40, 208 56"
+          stroke="#5ee7df" stroke-width="3" stroke-linecap="round"
+          style="filter: drop-shadow(0 0 7px #5ee7df)"/>
+        <path d="M20 136 C 70 96, 150 132, 202 92"
+          stroke="#f472b6" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 10"
+          style="filter: drop-shadow(0 0 6px #f472b6)"/>
+        <circle cx="12" cy="118" r="4.5" fill="#5ee7df" style="filter: drop-shadow(0 0 7px #5ee7df)"/>
+        <circle cx="208" cy="56" r="4.5" fill="#fbbf24" style="filter: drop-shadow(0 0 7px #fbbf24)"/>
+      </svg>
+    </span>
+    <figcaption><b>선의 산책</b><span>NEON WIRE · 2024</span></figcaption>
+  </figure>
+
+  <figure class="art" style="left:42%; top:80%" data-title="파동">
+    <span class="work w-wave">
+      <svg width="180" height="180" viewBox="0 0 180 180" fill="none">
+        <g stroke="#8fb8d9" stroke-width="1.6">
+          <circle cx="74" cy="90" r="14"/><circle cx="74" cy="90" r="30"/>
+          <circle cx="74" cy="90" r="46"/><circle cx="74" cy="90" r="62"/>
+        </g>
+        <g stroke="#d9b48f" stroke-width="1.6" opacity=".85">
+          <circle cx="112" cy="90" r="14"/><circle cx="112" cy="90" r="30"/>
+          <circle cx="112" cy="90" r="46"/><circle cx="112" cy="90" r="62"/>
+        </g>
+      </svg>
+    </span>
+    <figcaption><b>파동</b><span>INTERFERENCE · 2022</span></figcaption>
+  </figure>
+
+  <figure class="art" style="left:64%; top:80%" data-title="무제 (주황 위 빨강)">
+    <span class="work w-field"><i class="f1"></i><i class="f2"></i></span>
+    <figcaption><b>무제 (주황 위 빨강)</b><span>COLOR FIELD · 2023</span></figcaption>
+  </figure>
+
+  <figure class="art" style="left:80%; top:18%" data-title="밤의 지도">
+    <span class="work w-star">
+      <svg width="220" height="150" viewBox="0 0 220 150" fill="none">
+        <polyline points="24,112 58,58 96,84 132,30 168,64 200,44"
+          stroke="rgba(210,220,255,.4)" stroke-width="1"/>
+        <g fill="#dfe6ff">
+          <circle cx="24" cy="112" r="3"/><circle cx="58" cy="58" r="4.2"/>
+          <circle cx="96" cy="84" r="2.6"/><circle cx="132" cy="30" r="4.6"/>
+          <circle cx="168" cy="64" r="3"/><circle cx="200" cy="44" r="2.4"/>
+          <circle cx="46" cy="24" r="1.4"/><circle cx="150" cy="118" r="1.6"/>
+          <circle cx="190" cy="100" r="1.3"/><circle cx="80" cy="130" r="1.4"/>
+        </g>
+        <circle cx="132" cy="30" r="9" stroke="#dfe6ff" stroke-width=".8" opacity=".5"/>
+      </svg>
+    </span>
+    <figcaption><b>밤의 지도</b><span>STAR CHART · 2025</span></figcaption>
+  </figure>
+
+</div>
+
+<div id="dark"></div>
+<div id="glow"></div>
+<div id="dot"></div>
+
+<header>
+  <h1>어둠의 전시장</h1>
+  <div class="count">발견한 작품 <b id="cnt">0</b> / 7</div>
+</header>
+
+<div class="hint" id="hint">마우스를 움직여 전시를 밝혀보세요</div>
+<div id="toast"></div>
+
+<div id="ending">
+  <div class="panel">
+    <div class="eyebrow">EXHIBITION COMPLETE</div>
+    <h2>관람 완료 — 전시를 밝혔습니다</h2>
+    <p>일곱 점의 작품이 모두 빛 아래 드러났습니다.</p>
+    <button id="againBtn">다시 어둡게 하기</button>
+  </div>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   손전등 갤러리: radial 마스크 손전등 + 발견 메커니즘
+   ───────────────────────────────────────────── */
+const dark = document.getElementById('dark');
+const glow = document.getElementById('glow');
+const dot = document.getElementById('dot');
+const cnt = document.getElementById('cnt');
+const hint = document.getElementById('hint');
+const toast = document.getElementById('toast');
+const arts = [...document.querySelectorAll('.art')];
+const TOTAL = arts.length;
+
+/* 처음 로드: 손전등이 중앙 작품(일몰의 기억) 근처를 이미 비추는 상태 → 썸네일에서도 보임 */
+let tx = innerWidth * 0.5, ty = innerHeight * 0.36;
+let lx = tx, ly = ty;
+let found = 0, toastTimer = null, complete = false;
+let armed = false;                 // 사용자가 움직이기 전에는 발견 판정 안 함
+
+function moveTo(x, y) {
+  tx = x; ty = y; armed = true;
+  if (!hint.classList.contains('hide') && Math.hypot(x - innerWidth/2, y - innerHeight*0.36) > 140)
+    hint.classList.add('hide');
+}
+addEventListener('mousemove', e => moveTo(e.clientX, e.clientY));
+addEventListener('touchmove', e => {
+  const t = e.touches[0]; moveTo(t.clientX, t.clientY);
+}, { passive: true });
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+}
+
+function checkDiscovery() {
+  if (complete || !armed) return;
+  for (const a of arts) {
+    if (a.classList.contains('found')) continue;
+    const r = a.getBoundingClientRect();
+    const d = Math.hypot(lx - (r.left + r.width / 2), ly - (r.top + r.height / 2));
+    if (d < Math.max(150, r.width * 0.55)) {
+      a.classList.add('found');
+      found++;
+      cnt.textContent = found;
+      hint.classList.add('hide');
+      if (found >= TOTAL) {
+        complete = true;
+        showToast('마지막 작품 「' + a.dataset.title + '」 — 모든 조명을 켭니다');
+        setTimeout(() => document.body.classList.add('complete'), 700);
+      } else {
+        showToast('「' + a.dataset.title + '」 을(를) 발견했습니다 · ' + found + ' / ' + TOTAL);
+      }
+    }
+  }
+}
+
+document.getElementById('againBtn').addEventListener('click', () => {
+  complete = false; found = 0;
+  cnt.textContent = 0;
+  arts.forEach(a => a.classList.remove('found'));
+  document.body.classList.remove('complete');
+  hint.classList.remove('hide');
+});
+
+/* ── 루프: 손전등 스무딩 + 미세 플리커 ── */
+let frames = 0;
+(function loop(t) {
+  /* 갤러리 썸네일에서는 몇 프레임만 그리고 저빈도 폴링으로 대기 (window.__paused) */
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+
+  lx += (tx - lx) * 0.16;
+  ly += (ty - ly) * 0.16;
+
+  /* 손전등 플리커: 느린 호흡 + 빠른 미세 떨림 */
+  const r = 185 + Math.sin(t * 0.0016) * 7 + Math.sin(t * 0.013) * 2.4
+              + (Math.random() - 0.5) * 1.6;
+
+  dark.style.setProperty('--lx', lx + 'px');
+  dark.style.setProperty('--ly', ly + 'px');
+  dark.style.setProperty('--r', r + 'px');
+  glow.style.setProperty('--lx', lx + 'px');
+  glow.style.setProperty('--ly', ly + 'px');
+  glow.style.setProperty('--r', r + 'px');
+  dot.style.left = lx + 'px';
+  dot.style.top = ly + 'px';
+
+  checkDiscovery();
+  requestAnimationFrame(loop);
+})(0);
+</script>
+
+<script>
+/* ── English mode (?lang=en) — non-destructive text swap ── */
+(function () {
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "어둠의 전시장 — 손전등으로 발견하는 갤러리": "The Dark Gallery — Discover It with a Flashlight",
+    "어둠의 전시장": "The Dark Gallery",
+    "일몰의 기억": "Memory of Sunset",
+    "구성 IV": "Composition IV",
+    "기계의 꿈": "Dream of the Machine",
+    "선의 산책": "A Walk of Lines",
+    "파동": "Waves",
+    "무제 (주황 위 빨강)": "Untitled (Red over Orange)",
+    "밤의 지도": "Map of the Night",
+    "발견한 작품": "Works found ",
+    "마우스를 움직여 전시를 밝혀보세요": "Move your mouse to light up the exhibition",
+    "관람 완료 — 전시를 밝혔습니다": "Tour Complete — You Lit Up the Exhibition",
+    "일곱 점의 작품이 모두 빛 아래 드러났습니다.": "All seven works now stand revealed in the light.",
+    "다시 어둡게 하기": "Dim it again",
+    "마지막 작품 「": "Final piece 「",
+    "」 — 모든 조명을 켭니다": "」 — turning on every light",
+    "」 을(를) 발견했습니다 · ": "」 discovered · "
+  };
+  const KEYS = Object.keys(TR).sort((a, b) => b.length - a.length);
+  const swap = s => { let o = s; for (const k of KEYS) if (o.indexOf(k) !== -1) o = o.split(k).join(TR[k]); return o; };
+  const ATTRS = ['placeholder', 'title', 'alt', 'aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const v = n.nodeValue; if (!v || !v.trim()) return;
+      const c = v.replace(/\s+/g, ' ').trim();
+      if (TR[c] != null) { if (n.nodeValue !== TR[c]) n.nodeValue = TR[c]; return; }
+      const nv = swap(v); if (nv !== v) n.nodeValue = nv; return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) { const av = n.getAttribute(a); if (av && TR[av.trim()] != null) n.setAttribute(a, TR[av.trim()]); } });
+    if ((n.tagName === 'INPUT' || n.tagName === 'TEXTAREA') && n.value != null && TR[n.value.trim()] != null) n.value = TR[n.value.trim()];
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, { childList: true, subtree: true });
+  walk(document.body);
+  const dt = swap(document.title); if (dt !== document.title) document.title = dt;
+})();
+</script>
+</body>
+</html>

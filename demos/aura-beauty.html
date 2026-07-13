@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AURA — 시그니처 리페어 세럼</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600&family=Playfair+Display:wght@500;600;700&family=Noto+Serif+KR:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap');
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --sand:#f4ece4; --sand-2:#faf5ef; --blush:#e9c9c2; --blush-deep:#c98d82; --charcoal:#2c2621;
+  --muted:#867d72; --line:#e3d7ca; --radius:18px;
+}
+html{ scroll-behavior:smooth; }
+body{ font-family:'Noto Sans KR','Cormorant Garamond',sans-serif; background:var(--sand); color:var(--charcoal);
+  -webkit-font-smoothing:antialiased; line-height:1.6; overflow-x:hidden; }
+.wrap{ max-width:1160px; margin:0 auto; padding:0 28px; }
+a{ color:inherit; text-decoration:none; }
+img{ max-width:100%; display:block; }
+h1,h2,h3{ font-family:'Playfair Display','Noto Serif KR',serif; letter-spacing:-.01em; }
+.serif{ font-family:'Cormorant Garamond','Noto Serif KR',serif; }
+.eyebrow{ display:inline-flex; align-items:center; gap:8px; font-size:12px; font-weight:700; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--blush-deep); }
+.btn{ display:inline-flex; align-items:center; justify-content:center; gap:8px; font-weight:700; font-size:15px;
+  padding:16px 30px; border-radius:999px; border:1px solid transparent; cursor:pointer; transition:transform .2s, background .25s, box-shadow .25s; }
+.btn:active{ transform:translateY(1px) scale(.98); }
+.btn-primary{ background:var(--charcoal); color:var(--sand-2); }
+.btn-primary:hover{ background:#463c33; box-shadow:0 14px 30px -14px rgba(44,38,33,.5); }
+.btn-outline{ background:transparent; border-color:var(--charcoal); color:var(--charcoal); }
+.btn-outline:hover{ background:var(--charcoal); color:var(--sand-2); }
+.section{ padding:100px 0; }
+.section-head{ text-align:center; max-width:600px; margin:0 auto 56px; }
+.section-head h2{ font-size:clamp(28px,4vw,42px); font-weight:700; margin-top:14px; }
+.section-head p{ margin-top:14px; color:var(--muted); font-size:16.5px; word-break:keep-all; }
+
+/* ── 내비게이션 ─────────────────────────────── */
+.nav{ position:sticky; top:0; z-index:50; background:rgba(244,236,228,.86); backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line); }
+.nav .wrap{ display:flex; align-items:center; justify-content:space-between; height:76px; }
+.brand{ font-family:'Playfair Display',serif; font-weight:700; font-size:22px; letter-spacing:.06em; }
+.nav-links{ display:flex; gap:30px; }
+.nav-links a{ font-size:14px; font-weight:600; color:var(--muted); transition:color .25s; }
+.nav-links a:hover{ color:var(--charcoal); }
+@media(max-width:800px){ .nav-links{ display:none; } }
+
+/* ── 히어로 ──────────────────────────────────── */
+.hero{ padding:64px 0 40px; }
+.hero-inner{ display:grid; grid-template-columns:1fr 1fr; gap:60px; align-items:center; }
+.hero-copy .eyebrow{ margin-bottom:18px; }
+.hero-copy h1{ font-size:clamp(38px,5.2vw,60px); font-weight:700; line-height:1.12; }
+.hero-copy .lede{ margin-top:20px; font-family:'Cormorant Garamond','Noto Serif KR',serif; font-style:italic;
+  font-size:22px; color:var(--blush-deep); }
+.hero-copy p.desc{ margin-top:20px; font-size:16px; color:var(--muted); max-width:440px; word-break:keep-all; }
+.price-row{ margin-top:32px; display:flex; align-items:center; gap:18px; }
+.price{ font-family:'Playfair Display',serif; font-size:32px; font-weight:700; }
+.price-old{ font-size:16px; color:var(--muted); text-decoration:line-through; }
+.hero-actions{ margin-top:28px; display:flex; gap:14px; flex-wrap:wrap; align-items:center; }
+.cart-badge{ position:relative; }
+.cart-badge .count{ position:absolute; top:-8px; right:-8px; background:var(--blush-deep); color:#fff; font-size:11px;
+  font-weight:700; width:20px; height:20px; border-radius:50%; display:grid; place-items:center; transform:scale(0);
+  transition:transform .3s cubic-bezier(.34,1.56,.64,1); }
+.cart-badge .count.show{ transform:scale(1); }
+.hero-visual{ position:relative; aspect-ratio:4/5; border-radius:28px; overflow:hidden; background:linear-gradient(160deg,var(--blush),var(--sand-2)); }
+.hero-visual img{ width:100%; height:100%; object-fit:cover; }
+.hero-visual .glow{ position:absolute; inset:0; background:radial-gradient(ellipse at 70% 20%, rgba(255,255,255,.35), transparent 55%); pointer-events:none; }
+@media(max-width:900px){ .hero-inner{ grid-template-columns:1fr; } .hero-visual{ order:-1; max-width:420px; margin:0 auto; } }
+
+/* ── 성분 하이라이트 ─────────────────────────── */
+.ing-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; }
+.ing-card{ background:var(--sand-2); border:1px solid var(--line); border-radius:var(--radius); padding:30px 24px; text-align:center;
+  transition:transform .25s, box-shadow .25s; }
+.ing-card:hover{ transform:translateY(-6px); box-shadow:0 22px 40px -26px rgba(44,38,33,.35); }
+.ing-card .ico{ width:56px; height:56px; margin:0 auto 18px; border-radius:50%; background:var(--blush); display:grid; place-items:center; font-size:24px; }
+.ing-card h3{ font-size:17px; font-weight:700; }
+.ing-card p{ margin-top:8px; font-size:13.5px; color:var(--muted); word-break:keep-all; }
+@media(max-width:920px){ .ing-grid{ grid-template-columns:1fr 1fr; } }
+@media(max-width:520px){ .ing-grid{ grid-template-columns:1fr; } }
+
+/* ── 사용법 3단계 ────────────────────────────── */
+.steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; counter-reset:step; }
+.step{ position:relative; background:var(--sand-2); border-radius:var(--radius); padding:36px 26px; border:1px solid var(--line); }
+.step .num{ font-family:'Playfair Display',serif; font-size:44px; font-weight:700; color:var(--blush); line-height:1; }
+.step h3{ margin-top:16px; font-size:18px; font-weight:700; }
+.step p{ margin-top:10px; font-size:14px; color:var(--muted); word-break:keep-all; }
+@media(max-width:860px){ .steps{ grid-template-columns:1fr; } }
+
+/* ── 리뷰 ───────────────────────────────────── */
+.reviews{ display:grid; grid-template-columns:repeat(3,1fr); gap:22px; }
+.review{ background:var(--sand-2); border:1px solid var(--line); border-radius:var(--radius); padding:28px; }
+.review .stars{ color:var(--blush-deep); letter-spacing:2px; }
+.review p{ margin-top:14px; font-size:15px; color:var(--charcoal); word-break:keep-all; }
+.review .who{ margin-top:18px; font-size:13px; color:var(--muted); font-weight:600; }
+@media(max-width:920px){ .reviews{ grid-template-columns:1fr; } }
+
+/* ── 리빌 ───────────────────────────────────── */
+.reveal{ opacity:0; transform:translateY(26px); transition:opacity .8s ease, transform .8s cubic-bezier(.2,.7,.2,1); }
+.reveal.in{ opacity:1; transform:translateY(0); }
+
+/* ── 스티키 카트 바 ──────────────────────────── */
+.sticky-bar{ position:fixed; left:0; right:0; bottom:0; z-index:55; background:var(--sand-2); border-top:1px solid var(--line);
+  box-shadow:0 -14px 30px -20px rgba(44,38,33,.3); transform:translateY(100%); transition:transform .4s cubic-bezier(.2,.8,.2,1); }
+.sticky-bar.show{ transform:translateY(0); }
+.sticky-bar .wrap{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:14px 28px; }
+.sticky-bar .info{ display:flex; align-items:center; gap:14px; }
+.sticky-bar .thumb{ width:44px; height:44px; border-radius:10px; overflow:hidden; background:var(--blush); flex-shrink:0; }
+.sticky-bar .thumb img{ width:100%; height:100%; object-fit:cover; }
+.sticky-bar .name{ font-weight:700; font-size:14.5px; }
+.sticky-bar .p{ font-size:13px; color:var(--muted); }
+@media(max-width:560px){ .sticky-bar .name{ display:none; } }
+
+/* ── 푸터 ───────────────────────────────────── */
+footer{ border-top:1px solid var(--line); padding:56px 0 100px; }
+footer .cols{ display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; }
+footer .about p{ margin-top:12px; max-width:280px; font-size:14px; color:var(--muted); word-break:keep-all; }
+footer .fcol h4{ font-size:12px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; color:var(--blush-deep); margin-bottom:14px; }
+footer .fcol a{ display:block; font-size:14px; color:var(--charcoal); opacity:.8; margin-bottom:10px; }
+footer .fcol a:hover{ opacity:1; }
+footer .copy{ margin-top:40px; padding-top:22px; border-top:1px solid var(--line); font-size:12.5px; color:var(--muted);
+  display:flex; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+
+/* ── 언어 토글 ──────────────────────────────── */
+.lang-toggle{ position:fixed; right:20px; bottom:88px; z-index:60; width:46px; height:46px; border-radius:50%;
+  background:var(--charcoal); color:var(--sand-2); border:none; font-weight:700; font-size:12px; cursor:pointer;
+  box-shadow:0 12px 26px -12px rgba(44,38,33,.6); transition:transform .2s; }
+.lang-toggle:hover{ transform:translateY(-2px); }
+
+/* ── 토스트 ─────────────────────────────────── */
+.toast{ position:fixed; left:50%; bottom:130px; transform:translate(-50%,20px); z-index:70; background:var(--charcoal);
+  color:var(--sand-2); font-size:14px; padding:14px 22px; border-radius:12px; opacity:0; pointer-events:none;
+  transition:opacity .35s, transform .35s; box-shadow:0 20px 40px -16px rgba(0,0,0,.4); }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="wrap">
+    <div class="brand">AURA</div>
+    <div class="nav-links">
+      <a href="#ingredients" data-i18n>성분</a>
+      <a href="#howto" data-i18n>사용법</a>
+      <a href="#reviews" data-i18n>리뷰</a>
+    </div>
+    <a href="#hero" class="btn btn-outline" id="navCartBtn" data-i18n>장바구니 담기</a>
+  </div>
+</nav>
+
+<header class="hero" id="hero">
+  <div class="wrap">
+    <div class="hero-inner">
+      <div class="hero-copy">
+        <span class="eyebrow" data-i18n>시그니처 리페어 라인</span>
+        <h1 data-i18n>피부가 스스로<br>회복하는 시간</h1>
+        <div class="lede" data-i18n>“하룻밤, 미세한 결의 변화”</div>
+        <p class="desc" data-i18n>고농축 세라마이드와 히알루론산 복합체가 밤사이 피부 장벽을 채우고, 다음 날 아침 한층 매끄러운 결을 만듭니다.</p>
+        <div class="price-row">
+          <span class="price">₩68,000</span>
+          <span class="price-old">₩89,000</span>
+        </div>
+        <div class="hero-actions">
+          <button class="btn btn-primary cart-badge" id="cartBtn" type="button">
+            <span data-i18n>장바구니 담기</span>
+            <span class="count" id="cartCount">1</span>
+          </button>
+          <a href="#howto" class="btn btn-outline" data-i18n>사용법 보기</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="../assets/gen/site-beauty.jpg" alt="" onerror="this.style.display='none'">
+        <div class="glow"></div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- 성분 하이라이트 -->
+<section class="section" id="ingredients">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n>핵심 성분</span>
+      <h2 data-i18n>피부가 먼저 알아보는 성분</h2>
+      <p data-i18n>불필요한 첨가물은 덜어내고, 효과가 검증된 성분만 고농축으로 담았습니다.</p>
+    </div>
+    <div class="ing-grid reveal">
+      <div class="ing-card"><div class="ico">💧</div><h3 data-i18n>히알루론산 5중 복합체</h3><p data-i18n>분자 크기가 다른 다섯 가지 히알루론산이 피부 속까지 수분을 채웁니다.</p></div>
+      <div class="ing-card"><div class="ico">🌿</div><h3 data-i18n>세라마이드 NP</h3><p data-i18n>피부 장벽의 주요 구성 성분을 보충해 외부 자극으로부터 지켜줍니다.</p></div>
+      <div class="ing-card"><div class="ico">✨</div><h3 data-i18n>나이아신아마이드</h3><p data-i18n>결을 정돈하고 톤을 맑게 가꿔주는 저자극 비타민 성분.</p></div>
+      <div class="ing-card"><div class="ico">🌸</div><h3 data-i18n>병풀 추출물</h3><p data-i18n>예민해진 피부를 진정시키고 회복 탄력을 더해줍니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 사용법 3단계 -->
+<section class="section" id="howto" style="background:var(--sand-2)">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n>사용법</span>
+      <h2 data-i18n>세 단계면 충분합니다</h2>
+    </div>
+    <div class="steps reveal">
+      <div class="step"><div class="num">01</div><h3 data-i18n>클렌징 후 결 정돈</h3><p data-i18n>세안 후 물기를 가볍게 닦아내고 토너로 피부결을 정돈합니다.</p></div>
+      <div class="step"><div class="num">02</div><h3 data-i18n>세럼 2–3방울</h3><p data-i18n>손바닥에 덜어 얼굴 전체에 가볍게 펴 바른 뒤 부드럽게 흡수시킵니다.</p></div>
+      <div class="step"><div class="num">03</div><h3 data-i18n>수분 밀봉</h3><p data-i18n>크림으로 마무리해 밤사이 성분이 피부 속에 오래 머물도록 합니다.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- 리뷰 -->
+<section class="section" id="reviews">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n>고객 후기</span>
+      <h2 data-i18n>먼저 사용해 본 분들의 이야기</h2>
+    </div>
+    <div class="reviews reveal">
+      <div class="review">
+        <div class="stars">★★★★★</div>
+        <p data-i18n>“일주일 만에 피부 결이 달라진 게 느껴져요. 자고 일어나면 촉촉함이 오래 갑니다.”</p>
+        <div class="who" data-i18n>김민서 · 건성 피부</div>
+      </div>
+      <div class="review">
+        <div class="stars">★★★★★</div>
+        <p data-i18n>“향도 자극적이지 않고, 끈적임 없이 흡수가 빨라서 매일 쓰게 돼요.”</p>
+        <div class="who" data-i18n>정하율 · 복합성 피부</div>
+      </div>
+      <div class="review">
+        <div class="stars">★★★★★</div>
+        <p data-i18n>“예민한 피부인데도 트러블 없이 잘 맞아요. 재구매 의사 100%.”</p>
+        <div class="who" data-i18n>오수아 · 민감성 피부</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div class="about">
+        <div class="brand">AURA</div>
+        <p data-i18n>피부가 스스로 회복할 시간을 만들어주는, 미니멀 스킨케어 브랜드.</p>
+      </div>
+      <div class="fcol"><h4 data-i18n>제품</h4><a href="#" data-i18n>시그니처 세럼</a><a href="#" data-i18n>수분 크림</a><a href="#" data-i18n>클렌징 밤</a></div>
+      <div class="fcol"><h4 data-i18n>안내</h4><a href="#" data-i18n>배송 정책</a><a href="#" data-i18n>교환 및 환불</a><a href="#" data-i18n>자주 묻는 질문</a></div>
+    </div>
+    <div class="copy">
+      <span>© 2026 AURA Skincare</span>
+      <span data-i18n>모든 권리 보유 · 데모 목적의 가상 브랜드</span>
+    </div>
+  </div>
+</footer>
+
+<!-- 스티키 카트 바 -->
+<div class="sticky-bar" id="stickyBar">
+  <div class="wrap">
+    <div class="info">
+      <div class="thumb"><img src="../assets/gen/site-beauty.jpg" alt="" onerror="this.style.display='none'"></div>
+      <div>
+        <div class="name" data-i18n>시그니처 리페어 세럼</div>
+        <div class="p">₩68,000</div>
+      </div>
+    </div>
+    <button class="btn btn-primary" id="stickyCartBtn" type="button" data-i18n>장바구니 담기</button>
+  </div>
+</div>
+
+<button id="langToggle" class="lang-toggle">EN</button>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ── 언어 (?lang=en + 토글) ── */
+const STR={
+  '성분':'Ingredients','사용법':'How to use','리뷰':'Reviews','장바구니 담기':'Add to cart',
+  '시그니처 리페어 라인':'Signature Repair Line',
+  '피부가 스스로<br>회복하는 시간':'Time for skin<br>to heal itself',
+  '“하룻밤, 미세한 결의 변화”':'“Overnight — a subtle change in texture”',
+  '고농축 세라마이드와 히알루론산 복합체가 밤사이 피부 장벽을 채우고, 다음 날 아침 한층 매끄러운 결을 만듭니다.':
+    'A concentrated ceramide and hyaluronic acid complex refills the skin barrier overnight, leaving a smoother texture by morning.',
+  '사용법 보기':'See how to use',
+  '핵심 성분':'Key Ingredients','피부가 먼저 알아보는 성분':'Ingredients your skin notices first',
+  '불필요한 첨가물은 덜어내고, 효과가 검증된 성분만 고농축으로 담았습니다.':
+    'We left out unnecessary additives and concentrated only the ingredients with proven results.',
+  '히알루론산 5중 복합체':'5-Type Hyaluronic Acid Complex',
+  '분자 크기가 다른 다섯 가지 히알루론산이 피부 속까지 수분을 채웁니다.':
+    'Five hyaluronic acids of different molecular sizes hydrate skin from the surface to deep layers.',
+  '세라마이드 NP':'Ceramide NP',
+  '피부 장벽의 주요 구성 성분을 보충해 외부 자극으로부터 지켜줍니다.':
+    'Replenishes a key component of the skin barrier to protect against outside irritants.',
+  '나이아신아마이드':'Niacinamide',
+  '결을 정돈하고 톤을 맑게 가꿔주는 저자극 비타민 성분.':'A gentle vitamin ingredient that refines texture and brightens tone.',
+  '병풀 추출물':'Centella Asiatica Extract',
+  '예민해진 피부를 진정시키고 회복 탄력을 더해줍니다.':'Soothes sensitized skin and adds resilience for recovery.',
+  '사용법':'How to Use','세 단계면 충분합니다':'Just three simple steps',
+  '클렌징 후 결 정돈':'Cleanse & prep',
+  '세안 후 물기를 가볍게 닦아내고 토너로 피부결을 정돈합니다.':'After washing, pat dry and prep the skin texture with toner.',
+  '세럼 2–3방울':'2–3 drops of serum',
+  '손바닥에 덜어 얼굴 전체에 가볍게 펴 바른 뒤 부드럽게 흡수시킵니다.':'Warm in your palms, smooth over the face, and let it absorb gently.',
+  '수분 밀봉':'Seal in moisture',
+  '크림으로 마무리해 밤사이 성분이 피부 속에 오래 머물도록 합니다.':'Finish with a cream so the ingredients stay in the skin overnight.',
+  '고객 후기':'Customer Reviews','먼저 사용해 본 분들의 이야기':'Stories from those who tried it first',
+  '“일주일 만에 피부 결이 달라진 게 느껴져요. 자고 일어나면 촉촉함이 오래 갑니다.”':
+    '“I noticed a change in my skin texture within a week. The moisture lasts long after waking up.”',
+  '김민서 · 건성 피부':'Minseo Kim · Dry skin',
+  '“향도 자극적이지 않고, 끈적임 없이 흡수가 빨라서 매일 쓰게 돼요.”':
+    '“The scent is mild and it absorbs fast without stickiness — I use it every day now.”',
+  '정하율 · 복합성 피부':'Hayul Jung · Combination skin',
+  '“예민한 피부인데도 트러블 없이 잘 맞아요. 재구매 의사 100%.”':
+    '“Even with sensitive skin I had no trouble with it. Definitely repurchasing.”',
+  '오수아 · 민감성 피부':'Sua Oh · Sensitive skin',
+  '피부가 스스로 회복할 시간을 만들어주는, 미니멀 스킨케어 브랜드.':
+    'A minimal skincare brand that gives skin the time it needs to heal itself.',
+  '제품':'Products','시그니처 세럼':'Signature Serum','수분 크림':'Moisture Cream','클렌징 밤':'Cleansing Balm',
+  '안내':'Info','배송 정책':'Shipping Policy','교환 및 환불':'Returns & Refunds','자주 묻는 질문':'FAQ',
+  '모든 권리 보유 · 데모 목적의 가상 브랜드':'All rights reserved · fictional demo brand',
+  '시그니처 리페어 세럼':'Signature Repair Serum',
+  'AURA — 시그니처 리페어 세럼':'AURA — Signature Repair Serum'
+};
+let EN=new URLSearchParams(location.search).get('lang')==='en';
+const orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if(!orig.has(el)) orig.set(el,el.innerHTML);
+    const ko=orig.get(el).trim();
+    el.innerHTML=EN?(STR[ko]??orig.get(el)):orig.get(el);
+  });
+  document.documentElement.lang=EN?'en':'ko';
+}
+applyLang();
+
+function updateChrome(){
+  if(EN) document.title=STR['AURA — 시그니처 리페어 세럼'];
+  else document.title='AURA — 시그니처 리페어 세럼';
+  document.getElementById('langToggle').textContent = EN?'KO':'EN';
+}
+updateChrome();
+document.getElementById('langToggle').addEventListener('click',()=>{ EN=!EN; applyLang(); updateChrome(); });
+
+/* ── 스크롤 리빌 ── */
+const io=new IntersectionObserver(es=>es.forEach(e=>{
+  if(e.isIntersecting) e.target.classList.add('in');
+}),{ threshold:.16 });
+document.querySelectorAll('.reveal').forEach(el=>io.observe(el));
+
+/* ── 히어로 지나면 등장하는 스티키 카트 바 ── */
+const heroEl=document.getElementById('hero');
+const stickyBar=document.getElementById('stickyBar');
+function onScrollSticky(){
+  const rect=heroEl.getBoundingClientRect();
+  stickyBar.classList.toggle('show', rect.bottom < 0);
+}
+addEventListener('scroll', onScrollSticky, { passive:true });
+onScrollSticky();
+
+/* ── 장바구니 담기: 카운트 배지 + 토스트 ── */
+let cartCount=1;
+const cartCountEl=document.getElementById('cartCount');
+const toastEl=document.getElementById('toast');
+let toastTimer=null;
+function addToCart(){
+  cartCount++;
+  cartCountEl.textContent=cartCount;
+  cartCountEl.classList.add('show');
+  toastEl.textContent = EN ? 'Added to your cart (demo)' : '장바구니에 담았어요 (데모)';
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>toastEl.classList.remove('show'), 2200);
+}
+document.getElementById('cartBtn').addEventListener('click', addToCart);
+document.getElementById('stickyCartBtn').addEventListener('click', addToCart);
+document.getElementById('navCartBtn').addEventListener('click', e=>{ e.preventDefault(); addToCart(); });
+</script>
+</body>
+</html>

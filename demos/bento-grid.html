@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>벤토 그리드 — 다크 피처 쇼케이스</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;600&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --card: #101014; --line: rgba(255,255,255,.09); --dim: #9b9ba4; --vio: #8b5cf6; --pink: #ec4899; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: #0a0a0c; color: #f4f4f5;
+       padding: 70px 24px 90px; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none;
+  background: radial-gradient(46% 36% at 50% 0%, rgba(139,92,246,.16), transparent 70%); }
+
+.head { position: relative; text-align: center; max-width: 680px; margin: 0 auto 56px; }
+.head .eyebrow { display: inline-flex; align-items: center; gap: 7px; font-size: 12.5px; font-weight: 600;
+                 color: #c4b5fd; background: rgba(139,92,246,.14); border: 1px solid rgba(139,92,246,.35);
+                 padding: 6px 16px; border-radius: 99px; }
+.head h1 { font-size: clamp(34px, 5vw, 52px); letter-spacing: -.04em; margin-top: 22px; font-weight: 800;
+           line-height: 1.1; word-break: keep-all;
+           background: linear-gradient(180deg, #fff 55%, rgba(255,255,255,.5));
+           -webkit-background-clip: text; background-clip: text; color: transparent; }
+.head p { margin-top: 18px; color: var(--dim); font-size: 16.5px; line-height: 1.7; word-break: keep-all; }
+
+/* ── 벤토: 스포트라이트 + 그라디언트 보더 ── */
+.bento { position: relative; display: grid; max-width: 1020px; margin: 0 auto;
+         grid-template-columns: repeat(4, 1fr); grid-auto-rows: 156px; gap: 14px; }
+.cell { --mx: 50%; --my: 50%; position: relative; background: var(--card); border: 1px solid var(--line);
+        border-radius: 18px; padding: 26px; overflow: hidden;
+        transition: transform .3s cubic-bezier(.2,.7,.2,1); }
+.cell:hover { transform: translateY(-3px); }
+.cell::before { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .4s; z-index: 0;
+  background: radial-gradient(320px circle at var(--mx) var(--my), rgba(139,92,246,.16), transparent 65%); }
+.cell:hover::before { opacity: 1; }
+.cell::after { content: ""; position: absolute; inset: -1px; border-radius: 18px; padding: 1px; opacity: 0;
+  background: radial-gradient(220px circle at var(--mx) var(--my), rgba(196,181,253,.5), transparent 70%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; transition: opacity .4s; pointer-events: none; }
+.cell:hover::after { opacity: 1; }
+.cell > * { position: relative; z-index: 1; }
+.cell h3 { font-size: 16.5px; font-weight: 700; letter-spacing: -.02em; }
+.cell p { margin-top: 8px; font-size: 13px; line-height: 1.65; color: var(--dim); word-break: keep-all; }
+
+.span-2x2 { grid-column: span 2; grid-row: span 2; }
+.span-2x1 { grid-column: span 2; }
+.span-1x2 { grid-row: span 2; }
+
+/* 대형: 에디터 목업 + 커서 애니메이션 */
+.feature-main { display: flex; flex-direction: column; }
+.editor { flex: 1; margin: -26px -26px 18px; padding: 22px 24px; position: relative; overflow: hidden;
+          background: linear-gradient(160deg, rgba(139,92,246,.2), rgba(236,72,153,.12) 60%, transparent);
+          border-bottom: 1px solid var(--line);
+          font-family: "JetBrains Mono", monospace; font-size: 12.5px; line-height: 2; color: #d4d4d8; }
+.editor .ln { color: #494950; margin-right: 14px; user-select: none; }
+.editor .kw { color: #c4b5fd; } .editor .fn { color: #7dd3fc; } .editor .st { color: #86efac; }
+.type-caret { display: inline-block; width: 7px; height: 14px; background: #c4b5fd; vertical-align: -2px;
+              animation: caret 1s steps(1) infinite; }
+@keyframes caret { 50% { opacity: 0; } }
+.cursor-tag { position: absolute; right: 26px; top: 30px; display: flex; align-items: center; gap: 6px;
+              animation: cursorMove 7s ease-in-out infinite; }
+.cursor-tag svg { width: 14px; height: 14px; fill: var(--pink); }
+.cursor-tag span { background: var(--pink); color: #fff; font-size: 10px; font-weight: 700;
+                   font-family: Inter, sans-serif; padding: 3px 8px; border-radius: 99px 99px 99px 3px; }
+@keyframes cursorMove {
+  0%,100% { transform: translate(0,0); } 25% { transform: translate(-90px,55px); }
+  55% { transform: translate(-30px,110px); } 80% { transform: translate(-130px,30px); }
+}
+
+/* 메트릭 카운트업 */
+.metric { display: flex; flex-direction: column; justify-content: center; }
+.metric b { font-size: 42px; font-weight: 800; letter-spacing: -.05em; font-variant-numeric: tabular-nums;
+            background: linear-gradient(90deg, #c4b5fd, #f0abfc);
+            -webkit-background-clip: text; background-clip: text; color: transparent; }
+.metric span { font-size: 12.5px; color: var(--dim); margin-top: 6px; }
+
+/* 키보드 */
+.kbd-cell { display: flex; flex-direction: column; }
+.keys { display: flex; gap: 8px; margin-top: auto; padding-top: 16px; }
+.key { border: 1px solid rgba(255,255,255,.14); border-bottom: 3px solid rgba(255,255,255,.18);
+       border-radius: 9px; padding: 10px 14px; font-family: "JetBrains Mono", monospace; font-size: 13px;
+       background: rgba(255,255,255,.05); transition: transform .1s, border-bottom-width .1s; }
+.key.pressed { transform: translateY(2px); border-bottom-width: 1px; background: rgba(139,92,246,.25);
+               border-color: rgba(139,92,246,.6); color: #e9d5ff; }
+
+/* 오브 궤도 */
+.orbit-cell { display: flex; flex-direction: column; align-items: center; text-align: center;
+              justify-content: space-between; }
+.orbit { position: relative; width: 120px; height: 120px; margin-top: 6px; }
+.orbit .core { position: absolute; inset: 38px; border-radius: 50%;
+               background: radial-gradient(circle at 35% 30%, #c4b5fd, #7c3aed 70%);
+               box-shadow: 0 0 34px rgba(139,92,246,.75); }
+.orbit .ring { position: absolute; inset: 0; border: 1px dashed rgba(255,255,255,.18); border-radius: 50%;
+               animation: rot 9s linear infinite; }
+.orbit .ring i { position: absolute; top: -4.5px; left: 50%; width: 9px; height: 9px; border-radius: 50%;
+                 background: #f0abfc; box-shadow: 0 0 10px #f0abfc; }
+.orbit .ring.r2 { inset: 14px; animation-duration: 6s; animation-direction: reverse; }
+.orbit .ring.r2 i { background: #7dd3fc; box-shadow: 0 0 10px #7dd3fc; }
+@keyframes rot { to { transform: rotate(360deg); } }
+
+/* 통합 로고 스택 */
+.integr { display: flex; flex-direction: column; }
+.int-icons { display: flex; gap: 10px; margin-top: auto; padding-top: 14px; }
+.int-icons span { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center;
+                  justify-content: center; font-size: 17px; background: rgba(255,255,255,.06);
+                  border: 1px solid var(--line); transition: transform .25s, background .25s; }
+.int-icons span:hover { transform: translateY(-5px) rotate(-6deg); background: rgba(255,255,255,.12); }
+
+/* 스파크라인 */
+.spark-cell { display: flex; flex-direction: column; }
+.spark { margin-top: auto; }
+.spark svg { width: 100%; height: 54px; display: block; }
+.spark .sline { fill: none; stroke: #86efac; stroke-width: 2; stroke-linecap: round;
+                filter: drop-shadow(0 0 6px rgba(134,239,172,.6)); }
+
+/* 아바타 팀 */
+.avatars { display: flex; margin-top: auto; padding-top: 14px; }
+.avatars span { width: 38px; height: 38px; border-radius: 50%; border: 3px solid var(--card);
+                margin-left: -12px; transition: transform .2s; }
+.avatars span:hover { transform: translateY(-4px); }
+.avatars span:first-child { margin-left: 0; }
+.avatars .more { display: flex; align-items: center; justify-content: center; background: rgba(255,255,255,.1);
+                 font-size: 11px; font-weight: 700; color: var(--dim); }
+
+.foot-note { text-align: center; margin-top: 46px; color: #55555e; font-size: 13px; }
+
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .8s cubic-bezier(.2,.6,.2,1), transform .8s cubic-bezier(.2,.6,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 820px) { .bento { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px) {
+  .bento { grid-template-columns: 1fr; grid-auto-rows: auto; }
+  .span-2x2, .span-2x1, .span-1x2 { grid-column: span 1; grid-row: span 1; }
+  .cell { min-height: 170px; } .editor { min-height: 190px; }
+}
+</style>
+</head>
+<body>
+<div class="head reveal in">
+  <span class="eyebrow">✦ BENTO GRID</span>
+  <h1>필요한 모든 기능을<br>한눈에 담다</h1>
+  <p>크기가 다른 타일을 격자에 맞물려 정보 위계를 만드는 벤토 박스 레이아웃.
+  마우스를 올리면 빛이 따라오는 스포트라이트 보더가 핵심 디테일입니다.</p>
+</div>
+
+<div class="bento reveal in">
+  <div class="cell span-2x2 feature-main">
+    <div class="editor">
+      <div><span class="ln">1</span><span class="kw">export function</span> <span class="fn">collab</span>() {</div>
+      <div><span class="ln">2</span>&nbsp;&nbsp;<span class="kw">const</span> doc = <span class="fn">useSync</span>(<span class="st">'design-room'</span>)</div>
+      <div><span class="ln">3</span>&nbsp;&nbsp;<span class="kw">return</span> doc.<span class="fn">merge</span>(edits)<span class="type-caret"></span></div>
+      <div><span class="ln">4</span>}</div>
+      <div class="cursor-tag">
+        <svg viewBox="0 0 24 24"><path d="M4 2l16 8-7 2-3 7z"/></svg>
+        <span>지수</span>
+      </div>
+    </div>
+    <h3>실시간 협업 에디터</h3>
+    <p>팀원의 커서가 실시간으로 보이고, 변경 사항은 CRDT로 충돌 없이 병합됩니다. 오프라인 편집도 자연스럽게 동기화.</p>
+  </div>
+
+  <div class="cell metric">
+    <b data-count="4.9" data-suffix="x">0x</b>
+    <span>작업 처리 속도 향상</span>
+  </div>
+
+  <div class="cell span-1x2 kbd-cell">
+    <h3>키보드 우선</h3>
+    <p>모든 기능에 단축키가 있습니다. 커맨드 팔레트 하나로 어디든 이동하세요.</p>
+    <div class="keys"><span class="key" id="k1">⌘</span><span class="key" id="k2">K</span></div>
+  </div>
+
+  <div class="cell orbit-cell">
+    <h3>엣지 동기화</h3>
+    <div class="orbit">
+      <div class="core"></div>
+      <div class="ring"><i></i></div>
+      <div class="ring r2"><i></i></div>
+    </div>
+  </div>
+
+  <div class="cell span-2x1 integr">
+    <h3>200+ 통합</h3>
+    <p>쓰던 도구를 그대로 연결하세요. 슬랙 알림부터 깃허브 자동화까지.</p>
+    <div class="int-icons">
+      <span>💬</span><span>📝</span><span>🐙</span><span>📅</span><span>🎨</span><span>⚙️</span>
+    </div>
+  </div>
+
+  <div class="cell spark-cell">
+    <h3>주간 활성 팀</h3>
+    <p style="margin-top:4px"><b style="font-size:22px;color:#86efac">+128%</b></p>
+    <div class="spark">
+      <svg viewBox="0 0 200 54" preserveAspectRatio="none">
+        <path class="sline" d="M0,44 C20,42 28,34 44,36 C60,38 68,26 84,28 C100,30 108,18 124,20 C140,22 150,10 166,12 C180,13 192,6 200,4"/>
+      </svg>
+    </div>
+  </div>
+
+  <div class="cell">
+    <h3>함께 만드는 팀</h3>
+    <p>동료를 초대하고 실시간으로 작업하세요.</p>
+    <div class="avatars">
+      <span style="background:linear-gradient(135deg,#f59e0b,#ef4444)"></span>
+      <span style="background:linear-gradient(135deg,#8b5cf6,#ec4899)"></span>
+      <span style="background:linear-gradient(135deg,#10b981,#3b82f6)"></span>
+      <span style="background:linear-gradient(135deg,#f472b6,#c084fc)"></span>
+      <span class="more">+9</span>
+    </div>
+  </div>
+</div>
+
+<p class="foot-note">벤토 그리드 패턴 재현 데모 — 타일 위에서 마우스를 움직여 보세요.</p>
+
+<script>
+/* 스포트라이트: 커서를 CSS 변수로 전달 */
+document.querySelectorAll('.cell').forEach(c => c.addEventListener('mousemove', e => {
+  const r = c.getBoundingClientRect();
+  c.style.setProperty('--mx', (e.clientX - r.left) + 'px');
+  c.style.setProperty('--my', (e.clientY - r.top) + 'px');
+}));
+
+/* ⌘K 키가 주기적으로 눌리는 연출 */
+setInterval(() => {
+  const k1 = document.getElementById('k1'), k2 = document.getElementById('k2');
+  k1.classList.add('pressed');
+  setTimeout(() => k2.classList.add('pressed'), 160);
+  setTimeout(() => { k1.classList.remove('pressed'); k2.classList.remove('pressed'); }, 800);
+}, 3200);
+
+const io = new IntersectionObserver(es => es.forEach(e => {
+  if (!e.isIntersecting) return;
+  e.target.classList.add('in');
+  e.target.querySelectorAll('[data-count]').forEach(el => {
+    if (el.dataset.done) return; el.dataset.done = 1;
+    const target = parseFloat(el.dataset.count), sfx = el.dataset.suffix || '';
+    const t0 = performance.now();
+    (function tick(t) {
+      const p = Math.min((t - t0) / 1400, 1), ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = (target * ease).toFixed(1) + sfx;
+      if (p < 1) requestAnimationFrame(tick);
+    })(t0);
+  });
+}), { threshold: .15 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+<script>
+/* ── English mode (?lang=en) — translation layer only, no logic changes ── */
+(function(){
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "벤토 그리드 — 다크 피처 쇼케이스": "Bento Grid — Dark Feature Showcase",
+    "필요한 모든 기능을": "Every feature you need",
+    "한눈에 담다": "at a glance",
+    "크기가 다른 타일을 격자에 맞물려 정보 위계를 만드는 벤토 박스 레이아웃. 마우스를 올리면 빛이 따라오는 스포트라이트 보더가 핵심 디테일입니다.": "A bento box layout that interlocks tiles of different sizes into a grid to build information hierarchy. The spotlight border that follows your cursor is the key detail.",
+    "지수": "Jisoo",
+    "실시간 협업 에디터": "Real-time Collaborative Editor",
+    "팀원의 커서가 실시간으로 보이고, 변경 사항은 CRDT로 충돌 없이 병합됩니다. 오프라인 편집도 자연스럽게 동기화.": "See teammates' cursors live, and changes merge conflict-free via CRDT. Offline edits sync seamlessly too.",
+    "작업 처리 속도 향상": "Faster task throughput",
+    "키보드 우선": "Keyboard First",
+    "모든 기능에 단축키가 있습니다. 커맨드 팔레트 하나로 어디든 이동하세요.": "Every action has a shortcut. Jump anywhere with a single command palette.",
+    "엣지 동기화": "Edge Sync",
+    "200+ 통합": "200+ Integrations",
+    "쓰던 도구를 그대로 연결하세요. 슬랙 알림부터 깃허브 자동화까지.": "Connect the tools you already use — from Slack alerts to GitHub automation.",
+    "주간 활성 팀": "Weekly Active Teams",
+    "함께 만드는 팀": "Build Together",
+    "동료를 초대하고 실시간으로 작업하세요.": "Invite teammates and work in real time.",
+    "벤토 그리드 패턴 재현 데모 — 타일 위에서 마우스를 움직여 보세요.": "A bento grid pattern recreation demo — move your mouse over the tiles."
+  };
+  const RE = [];
+  const tr = t => {
+    if (TR[t] != null) return TR[t];
+    for (const [re, rep] of RE) { if (re.test(t)) return t.replace(re, rep); }
+    return null;
+  };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const raw = n.nodeValue, t = raw.trim().replace(/\s+/g,' ');
+      if (t) { const out = tr(t); if (out != null) {
+        const lead = (raw.match(/^\s*/)||[''])[0], trail = (raw.match(/\s*$/)||[''])[0];
+        n.nodeValue = lead + out + trail;
+      }}
+      return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) {
+      const out = tr(n.getAttribute(a).trim().replace(/\s+/g,' ')); if (out != null) n.setAttribute(a, out);
+    }});
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim().replace(/\s+/g,' ')); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

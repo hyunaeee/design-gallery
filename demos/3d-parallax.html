@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D 패럴랙스 — 깊이의 공간</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: #030308; color: #fff;
+       -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+
+/* ── 씬: 원근 컨테이너 ── */
+.scene { position: relative; height: 100vh; overflow: hidden; perspective: 1100px; }
+.scene::before { content: ""; position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background: radial-gradient(ellipse 70% 55% at 50% 45%, transparent 40%, #030308 100%); }
+
+/* 원근 격자 바닥 */
+.floor { position: absolute; left: -40%; right: -40%; bottom: -32%; height: 70%; z-index: 0;
+  background:
+    linear-gradient(rgba(120,140,255,.22) 1.5px, transparent 1.5px) 0 0 / 100% 52px,
+    linear-gradient(90deg, rgba(120,140,255,.22) 1.5px, transparent 1.5px) 0 0 / 52px 100%;
+  transform: rotateX(72deg);
+  -webkit-mask-image: linear-gradient(transparent, #000 45%);
+  mask-image: linear-gradient(transparent, #000 45%);
+  animation: floorMove 3.2s linear infinite; }
+@keyframes floorMove { to { background-position: 0 52px, 0 0; } }
+
+/* 떠다니는 레이어 (JS가 마우스 기반 3D 변환) */
+.layer { position: absolute; will-change: transform; }
+.orb { border-radius: 50%; filter: blur(2px); }
+.orb.o1 { width: 190px; height: 190px; left: 12%; top: 16%;
+  background: radial-gradient(circle at 32% 28%, #8fd0ff, #2a5bd7 55%, #101a4d 90%);
+  box-shadow: 0 0 90px rgba(70,110,255,.55); }
+.orb.o2 { width: 90px; height: 90px; right: 16%; top: 12%;
+  background: radial-gradient(circle at 32% 28%, #ffc9ec, #d74fa4 55%, #4d1038 90%);
+  box-shadow: 0 0 60px rgba(255,110,200,.5); }
+.orb.o3 { width: 58px; height: 58px; right: 24%; bottom: 22%;
+  background: radial-gradient(circle at 32% 28%, #c1ffe8, #2fbf8f 55%, #0e4d38 90%);
+  box-shadow: 0 0 46px rgba(60,255,180,.45); }
+
+/* 유리 파편 패널 */
+.shard { border-radius: 18px; background: linear-gradient(135deg, rgba(255,255,255,.14), rgba(255,255,255,.03));
+         border: 1px solid rgba(255,255,255,.22); backdrop-filter: blur(10px);
+         box-shadow: 0 24px 60px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.25); }
+.shard.s1 { width: 210px; height: 132px; left: 7%; bottom: 24%; }
+.shard.s2 { width: 140px; height: 190px; right: 8%; top: 30%; }
+.shard.s3 { width: 110px; height: 76px; left: 27%; top: 13%; }
+.shard .sh-label { font-family: "JetBrains Mono", monospace; font-size: 10px; letter-spacing: 2px;
+                   color: rgba(255,255,255,.6); padding: 14px 16px; display: block; }
+.shard .sh-bar { margin: 4px 16px; height: 5px; border-radius: 99px; background: rgba(255,255,255,.14); }
+.shard .sh-bar i { display: block; height: 100%; border-radius: 99px;
+                   background: linear-gradient(90deg, #6d8dff, #ff6dd8); }
+
+/* 중앙 타이포: 크로매틱 어보레이션 */
+.title-wrap { position: absolute; inset: 0; z-index: 2; display: flex; flex-direction: column;
+              align-items: center; justify-content: center; text-align: center; }
+.sup { font-family: "JetBrains Mono", monospace; font-size: 12px; letter-spacing: 6px;
+       color: rgba(255,255,255,.65); }
+.big-title { margin-top: 20px; font-size: clamp(54px, 10.5vw, 136px); font-weight: 900;
+             line-height: .96; letter-spacing: -.05em;
+             text-shadow: 3px 0 0 rgba(255,60,120,.55), -3px 0 0 rgba(60,200,255,.55); }
+.big-title .thin { display: block; font-weight: 400; font-size: .52em; letter-spacing: -.02em;
+                   color: rgba(255,255,255,.85); }
+.enter { margin-top: 5vh; display: inline-flex; align-items: center; gap: 12px; padding: 15px 34px;
+         border-radius: 99px; border: 1px solid rgba(255,255,255,.35); font-size: 14px; font-weight: 700;
+         letter-spacing: 3px; color: #fff; text-decoration: none; background: rgba(255,255,255,.05);
+         backdrop-filter: blur(10px); transition: background .3s, gap .3s, box-shadow .3s; }
+.enter:hover { background: rgba(255,255,255,.95); color: #030308; gap: 20px;
+               box-shadow: 0 0 60px rgba(255,255,255,.35); }
+
+.coords { position: absolute; z-index: 4; bottom: 26px; left: 30px; font-family: "JetBrains Mono", monospace;
+          font-size: 10.5px; letter-spacing: 1.5px; color: rgba(255,255,255,.45); line-height: 1.9; }
+.hud-r { position: absolute; z-index: 4; bottom: 26px; right: 30px; font-family: "JetBrains Mono", monospace;
+         font-size: 10.5px; letter-spacing: 1.5px; color: rgba(255,255,255,.45); text-align: right; line-height: 1.9; }
+
+/* ── 틸트 카드 섹션 ── */
+.cards-sec { position: relative; padding: 14vh 5vw 16vh; background: #030308; }
+.cards-sec h2 { text-align: center; font-size: clamp(28px, 4.4vw, 46px); font-weight: 900;
+                letter-spacing: -.04em; word-break: keep-all; }
+.cards-sec .csub { text-align: center; margin-top: 14px; color: rgba(255,255,255,.55); font-size: 15.5px; }
+.tilt-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 26px; max-width: 1060px;
+             margin: 8vh auto 0; perspective: 900px; }
+.tilt { position: relative; border-radius: 20px; padding: 34px 28px; min-height: 300px;
+        background: linear-gradient(160deg, #0d0d18, #07070e);
+        border: 1px solid rgba(255,255,255,.1); transform-style: preserve-3d;
+        transition: transform .18s ease-out, border-color .3s; overflow: hidden;
+        display: flex; flex-direction: column; }
+.tilt::before { content: ""; position: absolute; inset: 0; opacity: 0; transition: opacity .35s;
+  background: radial-gradient(400px circle at var(--gx,50%) var(--gy,50%), rgba(120,140,255,.18), transparent 65%); }
+.tilt:hover::before { opacity: 1; }
+.tilt:hover { border-color: rgba(140,160,255,.4); }
+.tilt .t-num { font-family: "JetBrains Mono", monospace; font-size: 60px; font-weight: 500;
+               color: transparent; -webkit-text-stroke: 1.5px rgba(255,255,255,.28);
+               transform: translateZ(40px); }
+.tilt h3 { margin-top: auto; font-size: 20px; font-weight: 800; letter-spacing: -.02em;
+           transform: translateZ(30px); }
+.tilt p { margin-top: 10px; font-size: 13.5px; line-height: 1.7; color: rgba(255,255,255,.6);
+          word-break: keep-all; transform: translateZ(20px); }
+
+footer { text-align: center; padding: 0 24px 6vh; font-family: "JetBrains Mono", monospace;
+         font-size: 11px; letter-spacing: 2px; color: rgba(255,255,255,.4); }
+
+@media (max-width: 820px) {
+  .tilt-grid { grid-template-columns: 1fr; }
+  .shard.s2, .orb.o3 { display: none; }
+}
+</style>
+</head>
+<body>
+<section class="scene" id="scene">
+  <div class="floor layer" data-depth="0.25"></div>
+
+  <div class="layer orb o1" data-depth="1.6"></div>
+  <div class="layer orb o2" data-depth="2.4"></div>
+  <div class="layer orb o3" data-depth="3.2"></div>
+
+  <div class="layer shard s1" data-depth="2.0">
+    <span class="sh-label">RENDER — 60FPS</span>
+    <div class="sh-bar"><i style="width:78%"></i></div>
+    <div class="sh-bar"><i style="width:46%"></i></div>
+  </div>
+  <div class="layer shard s2" data-depth="1.2">
+    <span class="sh-label">DEPTH FIELD</span>
+    <div class="sh-bar"><i style="width:64%"></i></div>
+  </div>
+  <div class="layer shard s3" data-depth="2.9"></div>
+
+  <div class="title-wrap layer" data-depth="0.55">
+    <div class="sup">INTERACTIVE 3D SPACE</div>
+    <h1 class="big-title">DEPTH
+      <span class="thin">마우스로 공간을 밀어보세요</span>
+    </h1>
+    <a class="enter" href="#">ENTER →</a>
+  </div>
+
+  <div class="coords">X — <span id="cx">0.000</span><br>Y — <span id="cy">0.000</span></div>
+  <div class="hud-r">SCENE 01 / VOID<br>PERSPECTIVE 1100PX</div>
+</section>
+
+<section class="cards-sec">
+  <h2>레이어가 만드는 깊이</h2>
+  <p class="csub">각 요소는 서로 다른 깊이 계수로 마우스에 반응합니다 — 카드 위에서도 움직여 보세요.</p>
+  <div class="tilt-grid">
+    <div class="tilt">
+      <div class="t-num">01</div>
+      <h3>마우스 패럴랙스</h3>
+      <p>커서 좌표를 lerp로 부드럽게 보간해 각 레이어를 깊이 계수만큼 translate3d + rotate합니다.</p>
+    </div>
+    <div class="tilt">
+      <div class="t-num">02</div>
+      <h3>틸트 카드</h3>
+      <p>카드 내부 좌표로 rotateX/Y를 계산하고, 자식들은 translateZ로 띄워 진짜 입체감을 만듭니다.</p>
+    </div>
+    <div class="tilt">
+      <div class="t-num">03</div>
+      <h3>크로매틱 타이포</h3>
+      <p>RGB 채널을 살짝 어긋낸 text-shadow로 렌즈 색수차 느낌을 냅니다. 값은 3px이면 충분합니다.</p>
+    </div>
+  </div>
+</section>
+
+<footer>DEPTH — CSS PERSPECTIVE + JS LERP · NO LIBRARY</footer>
+
+<script>
+/* ── 마우스 패럴랙스 (lerp) ── */
+const layers = document.querySelectorAll('.layer');
+const cx = document.getElementById('cx'), cy = document.getElementById('cy');
+let tx = 0, ty = 0, x = 0, y = 0, idleT = 0;
+
+addEventListener('mousemove', e => {
+  tx = (e.clientX / innerWidth - .5) * 2;
+  ty = (e.clientY / innerHeight - .5) * 2;
+});
+
+(function loop() {
+  if (window.__paused) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  {
+    /* 입력이 없어도 은은히 떠다니는 오토 드리프트 */
+    idleT += 0.008;
+    const ax = tx + Math.sin(idleT) * .07, ay = ty + Math.cos(idleT * 1.3) * .07;
+    x += (ax - x) * .06; y += (ay - y) * .06;
+    layers.forEach(l => {
+      const d = parseFloat(l.dataset.depth);
+      l.style.transform =
+        (l.classList.contains('floor') ? 'rotateX(72deg) ' : '') +
+        `translate3d(${(-x * 26 * d).toFixed(2)}px, ${(-y * 18 * d).toFixed(2)}px, 0)` +
+        (l.classList.contains('title-wrap') ? ` rotateY(${(x * 4).toFixed(2)}deg) rotateX(${(-y * 4).toFixed(2)}deg)` : '');
+    });
+    cx.textContent = x.toFixed(3); cy.textContent = y.toFixed(3);
+  }
+  requestAnimationFrame(loop);
+})();
+
+/* ── 틸트 카드 ── */
+document.querySelectorAll('.tilt').forEach(card => {
+  card.addEventListener('mousemove', e => {
+    const r = card.getBoundingClientRect();
+    const px = (e.clientX - r.left) / r.width - .5;
+    const py = (e.clientY - r.top) / r.height - .5;
+    card.style.transform = `rotateY(${px * 14}deg) rotateX(${-py * 12}deg)`;
+    card.style.setProperty('--gx', ((px + .5) * 100) + '%');
+    card.style.setProperty('--gy', ((py + .5) * 100) + '%');
+  });
+  card.addEventListener('mouseleave', () => { card.style.transform = 'rotateY(0) rotateX(0)'; });
+});
+</script>
+<script>
+/* ── EN mode (?lang=en) — additive, non-destructive ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "3D 패럴랙스 — 깊이의 공간": "3D Parallax — A Space of Depth",
+    "마우스로 공간을 밀어보세요": "Push the space with your mouse",
+    "레이어가 만드는 깊이": "Depth Built From Layers",
+    "각 요소는 서로 다른 깊이 계수로 마우스에 반응합니다 — 카드 위에서도 움직여 보세요.": "Each element responds to the mouse with its own depth factor — try moving over the cards too.",
+    "마우스 패럴랙스": "Mouse Parallax",
+    "커서 좌표를 lerp로 부드럽게 보간해 각 레이어를 깊이 계수만큼 translate3d + rotate합니다.": "Cursor coordinates are smoothly interpolated with lerp, then each layer is translate3d + rotated by its depth factor.",
+    "틸트 카드": "Tilt Card",
+    "카드 내부 좌표로 rotateX/Y를 계산하고, 자식들은 translateZ로 띄워 진짜 입체감을 만듭니다.": "rotateX/Y is computed from the coordinates inside the card, and its children are lifted with translateZ for real depth.",
+    "크로매틱 타이포": "Chromatic Typography",
+    "RGB 채널을 살짝 어긋낸 text-shadow로 렌즈 색수차 느낌을 냅니다. 값은 3px이면 충분합니다.": "A slightly offset RGB text-shadow gives a lens chromatic-aberration look. 3px is plenty."
+  };
+  const swap = s => { const t = s.trim(); return TR[t] != null ? s.replace(t, TR[t]) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (TR[n.nodeValue.trim()] != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ['placeholder','title','alt','aria-label'].forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && TR[n.getAttribute(a).trim()] != null) n.setAttribute(a, TR[n.getAttribute(a).trim()]); });
+    n.childNodes.forEach(walk);
+  };
+  walk(document.body);
+  if (TR[document.title.trim()]) document.title = TR[document.title.trim()];
+})();
+</script>
+</body>
+</html>

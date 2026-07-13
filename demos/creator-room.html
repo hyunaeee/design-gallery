@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>STUDIO HOURS — 시간이 흐르는 작업실 포트폴리오</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+/* AI로 만든 같은 방의 낮/노을/밤 이미지를 전환하고(시간대 모드), 램프를 눌러 불을 켜고 끈다.
+   방 안 오브젝트(모니터·책장·화분)를 클릭하면 캐릭터가 말풍선으로 반응하며 하단 시트가 열린다.
+   커서 패럴랙스로 방과 캐릭터가 다른 깊이로 기운다. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root{
+  --bg1:#171a38; --bg2:#0c0e20; --edge:#06070f;
+  --text:#cdd3f5; --dim:#8f97c8; --accent:#8a7cff; --line:rgba(205,211,245,.15);
+}
+body.mode-sunset{ --bg1:#2a1a14; --bg2:#160c08; --edge:#0b0705; --text:#f4e6d8; --dim:#c39a84; --accent:#ff9a5c; --line:rgba(244,230,216,.15); }
+body.mode-day{ --bg1:#212831; --bg2:#0b0e12; --edge:#070a0d; --text:#e2ecf5; --dim:#93a3b5; --accent:#5fb0da; --line:rgba(226,236,245,.15); }
+html,body{ height:100%; }
+body{
+  font-family:'Space Grotesk','Noto Sans KR',sans-serif; color:var(--text);
+  background:radial-gradient(130% 100% at 50% 22%, var(--bg1) 0%, var(--bg2) 48%, var(--edge) 100%), var(--edge);
+  overflow:hidden; -webkit-font-smoothing:antialiased; transition:background .8s ease, color .8s ease; }
+.wrap{ position:relative; width:100%; height:100vh; overflow:hidden; }
+
+/* ── 무대 ── */
+.scene{ position:absolute; inset:0; z-index:2; display:grid; place-items:center; }
+.parallax{ position:relative; width:min(80vh,660px); aspect-ratio:1/1; }
+.layer{ position:absolute; inset:0; will-change:transform; transition:transform .12s ease-out; }
+.room{ z-index:1; }
+.roomimg{ position:absolute; inset:0; width:100%; height:100%; object-fit:contain; display:block;
+  filter:drop-shadow(0 46px 74px rgba(0,0,0,.66)) brightness(.92); opacity:0; transition:opacity .7s ease, filter .7s ease; }
+.roomimg.on{ opacity:1; }
+.room.lit .roomimg.on{ filter:drop-shadow(0 46px 74px rgba(0,0,0,.66)) brightness(1.06); }
+.room::before{ content:""; position:absolute; left:50%; top:53%; width:64%; height:34%;
+  transform:translate(-50%,-50%); border-radius:50%; z-index:-1;
+  background:radial-gradient(closest-side, color-mix(in srgb, var(--accent) 30%, transparent), transparent 72%);
+  filter:blur(10px); transition:background .8s; }
+
+/* 불(램프·창문 따뜻한 글로우) — .lit 일 때만 */
+.glow{ position:absolute; border-radius:50%; pointer-events:none; opacity:0;
+  transition:opacity .6s ease; mix-blend-mode:screen; z-index:2; }
+.room.lit .glow{ opacity:1; }
+.glow.lamp{ left:52%; top:44%; width:26%; height:26%; transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(255,196,110,.6), transparent 66%); }
+.glow.win{ left:66%; top:32%; width:34%; height:30%; transform:translate(-50%,-50%);
+  background:radial-gradient(circle, rgba(255,210,150,.4), transparent 68%); }
+
+/* ── 클릭 오브젝트 핫스팟 ── */
+.hot{ position:absolute; z-index:4; width:0; height:0; cursor:pointer; }
+.hot .dot{ position:absolute; left:0; top:0; width:26px; height:26px; margin:-13px 0 0 -13px;
+  border-radius:50%; border:2px solid #fff; background:rgba(255,255,255,.18);
+  box-shadow:0 0 0 0 rgba(255,255,255,.5); animation:ping 2.4s ease-out infinite;
+  transition:transform .2s, background .2s; }
+.hot:hover .dot{ transform:scale(1.25); background:var(--accent); }
+.hot .dot::after{ content:""; position:absolute; left:50%; top:50%; width:6px; height:6px; margin:-3px 0 0 -3px;
+  border-radius:50%; background:#fff; }
+@keyframes ping{ 0%{ box-shadow:0 0 0 0 rgba(255,255,255,.45);} 70%,100%{ box-shadow:0 0 0 16px rgba(255,255,255,0);} }
+.hot .lbl{ position:absolute; left:0; top:-16px; transform:translate(-50%,-100%);
+  white-space:nowrap; font-weight:600; font-size:12.5px; letter-spacing:.02em; color:#1a1327;
+  background:linear-gradient(135deg,#fff,#f0eeff); padding:6px 12px; border-radius:20px;
+  box-shadow:0 8px 22px rgba(0,0,0,.4); opacity:0; transition:opacity .2s, top .2s; pointer-events:none; }
+.hot:hover .lbl{ opacity:1; top:-22px; }
+.hot .lbl::after{ content:""; position:absolute; left:50%; bottom:-5px; transform:translateX(-50%);
+  border:6px solid transparent; border-top-color:#f0eeff; border-bottom:0; }
+
+/* 오브젝트 배치(방 로컬 %) */
+#o-lamp{    left:50%;  top:45%; }
+#o-monitor{ left:63%;  top:50%; }
+#o-books{   left:35%;  top:33%; }
+#o-plant{   left:16%;  top:61%; }
+
+/* 캐릭터 */
+.char{ z-index:3; }
+.char .bob{ position:absolute; left:39%; bottom:15%; width:22%;
+  animation:bob 4.2s ease-in-out infinite; cursor:pointer; }
+.char .bob img{ width:100%; display:block; filter:drop-shadow(0 16px 15px rgba(0,0,0,.55)); transition:filter .3s; }
+.char .bob:hover img{ filter:drop-shadow(0 16px 15px rgba(0,0,0,.55)) drop-shadow(0 0 12px color-mix(in srgb,var(--accent) 70%,#fff)); }
+@keyframes bob{ 0%,100%{ transform:translateY(0) rotate(-.6deg);} 50%{ transform:translateY(-8px) rotate(.6deg);} }
+.char .shadow{ position:absolute; left:44%; bottom:14%; width:12%; height:2.2%;
+  background:radial-gradient(closest-side, rgba(0,0,0,.5), transparent 75%); animation:shp 4.2s ease-in-out infinite; }
+@keyframes shp{ 0%,100%{ transform:scaleX(1); opacity:.5;} 50%{ transform:scaleX(.86); opacity:.32;} }
+
+/* 말풍선 */
+.bubble{ position:absolute; left:52%; bottom:58%; z-index:5; max-width:210px;
+  background:linear-gradient(150deg,#fff,#eef0ff); color:#161b38; font-weight:500; font-size:14px;
+  line-height:1.5; padding:12px 15px; border-radius:16px 16px 16px 4px; word-break:keep-all;
+  box-shadow:0 14px 30px rgba(0,0,0,.4); opacity:0; transform:translateY(8px) scale(.96);
+  transform-origin:left bottom; transition:opacity .3s, transform .3s cubic-bezier(.2,.9,.3,1.2); pointer-events:none; }
+.bubble.on{ opacity:1; transform:translateY(0) scale(1); }
+.bubble::after{ content:""; position:absolute; left:-6px; bottom:0; border:8px solid transparent; border-right-color:#eef0ff; border-bottom:0; }
+
+/* ── 텍스트 레이어 ── */
+.cover{ position:absolute; inset:0; z-index:6; pointer-events:none;
+  padding:min(5vh,42px) min(4.5vw,54px); display:flex; flex-direction:column; }
+.masthead{ display:flex; align-items:center; justify-content:space-between; gap:16px;
+  border-bottom:1px solid var(--line); padding-bottom:12px; }
+.brand{ font-family:'Fraunces',serif; font-weight:600; font-size:19px; }
+.brand b{ color:var(--accent); }
+.controls{ display:flex; align-items:center; gap:14px; pointer-events:auto; }
+.seg{ display:flex; gap:3px; padding:3px; border-radius:22px; background:rgba(255,255,255,.06);
+  border:1px solid var(--line); }
+.seg button{ display:flex; align-items:center; gap:6px; padding:7px 13px; border:none; border-radius:18px;
+  background:transparent; color:var(--dim); font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer;
+  transition:background .25s, color .25s; }
+.seg button.on{ background:color-mix(in srgb, var(--accent) 88%, #fff); color:#12101f; }
+.lightbtn{ display:flex; align-items:center; gap:7px; padding:8px 14px; border-radius:20px;
+  border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--text);
+  font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer; transition:.25s; }
+.lightbtn.on{ background:color-mix(in srgb, #ffcf8a 80%, transparent); color:#3a2410; border-color:transparent; }
+.lang{ font-family:inherit; font-weight:600; font-size:12px; letter-spacing:.08em; background:rgba(255,255,255,.05);
+  color:var(--text); border:1px solid var(--line); border-radius:20px; padding:8px 13px; cursor:pointer; }
+@media(max-width:640px){ .seg button span.tx,.lightbtn span.tx{ display:none; } }
+
+.lead{ position:absolute; left:min(4.5vw,54px); top:24%; max-width:min(32vw,320px); }
+.lead .k{ font-family:'Fraunces',serif; font-style:italic; font-weight:500;
+  font-size:clamp(26px,4.2vw,50px); line-height:1.05; color:var(--text); }
+.lead p{ margin-top:14px; font-size:clamp(12px,1.3vw,15px); line-height:1.7; color:var(--dim);
+  max-width:290px; word-break:keep-all; }
+@media(max-width:720px){ .lead{ display:none; } }
+
+/* ── 하단 시트 ── */
+.scrim{ position:fixed; inset:0; z-index:13; background:rgba(4,5,12,.5); opacity:0; pointer-events:none; transition:opacity .35s; }
+.scrim.on{ opacity:1; pointer-events:auto; }
+.sheet{ position:fixed; left:50%; bottom:0; transform:translate(-50%,100%); z-index:14;
+  width:min(680px,94vw); max-height:72vh; overflow-y:auto;
+  background:linear-gradient(180deg, color-mix(in srgb,var(--bg1) 82%,#000), var(--bg2));
+  border:1px solid var(--line); border-bottom:none; border-radius:26px 26px 0 0; padding:12px 30px 40px;
+  box-shadow:0 -20px 60px rgba(0,0,0,.5); transition:transform .42s cubic-bezier(.2,.8,.2,1); }
+.sheet.on{ transform:translate(-50%,0); }
+.handle{ width:44px; height:5px; border-radius:99px; background:rgba(205,211,245,.3); margin:0 auto 20px; }
+.s-sec{ display:none; } .s-sec.on{ display:block; animation:secIn .4s ease; }
+@keyframes secIn{ from{ opacity:0; transform:translateY(12px);} }
+.s-tag{ font-family:'Space Grotesk'; letter-spacing:.2em; font-size:12px; color:var(--accent); }
+.s-sec h2{ font-family:'Fraunces',serif; font-weight:600; font-size:clamp(28px,4.4vw,42px); color:var(--text); margin-top:8px; line-height:1.05; }
+.s-sec h2 em{ font-style:italic; color:var(--accent); }
+.s-sec p{ margin-top:14px; font-size:15px; line-height:1.8; color:var(--text); max-width:460px; word-break:keep-all; }
+.rows{ margin-top:20px; } .rows .row{ display:flex; justify-content:space-between; gap:16px; padding:13px 2px; border-top:1px solid var(--line); font-size:14.5px; }
+.rows .row:last-child{ border-bottom:1px solid var(--line); } .rows .row span{ color:var(--dim); } .rows .row b{ color:var(--text); font-weight:600; }
+.stat3{ margin-top:22px; display:flex; gap:34px; flex-wrap:wrap; }
+.stat3 div span{ display:block; font-size:11.5px; letter-spacing:.1em; color:var(--dim); }
+.stat3 div b{ font-family:'Fraunces',serif; font-size:26px; font-weight:600; color:var(--text); }
+.s-close{ position:absolute; right:22px; top:20px; width:34px; height:34px; border-radius:50%;
+  border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--text); cursor:pointer; font-size:15px; }
+.s-close:hover{ background:rgba(255,255,255,.12); }
+</style>
+</head>
+<body class="mode-night">
+<div class="wrap">
+
+  <!-- 무대 -->
+  <div class="scene">
+    <div class="parallax" id="parallax">
+      <div class="layer room lit" id="room">
+        <img class="roomimg" id="imgDay" src="../assets/gen/room-day.jpg" alt="낮의 작업실">
+        <img class="roomimg" id="imgSunset" src="../assets/gen/room-sunset.jpg" alt="노을의 작업실">
+        <img class="roomimg on" id="imgNight" src="../assets/gen/room-night.jpg" alt="밤의 작업실">
+        <div class="glow lamp"></div>
+        <div class="glow win"></div>
+
+        <!-- 클릭 오브젝트 -->
+        <div class="hot" id="o-lamp"><span class="dot"></span><span class="lbl" data-i18n>불 켜기 / 끄기</span></div>
+        <div class="hot" id="o-monitor" data-sec="work"><span class="dot"></span><span class="lbl" data-i18n>모니터 · 작업</span></div>
+        <div class="hot" id="o-books" data-sec="about"><span class="dot"></span><span class="lbl" data-i18n>책장 · 소개</span></div>
+        <div class="hot" id="o-plant" data-sec="contact"><span class="dot"></span><span class="lbl" data-i18n>화분 · 연락</span></div>
+      </div>
+
+      <div class="layer char" id="char">
+        <div class="shadow"></div>
+        <div class="bob" id="charBob"><img src="../assets/gen/cr-char.png" alt="캐릭터"></div>
+        <div class="bubble" id="bubble"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 텍스트 & 컨트롤 -->
+  <div class="cover">
+    <div class="masthead">
+      <div class="brand">STUDIO <b>HOURS</b></div>
+      <div class="controls">
+        <div class="seg" id="seg">
+          <button data-mode="day"><span>☀️</span><span class="tx" data-i18n>낮</span></button>
+          <button data-mode="sunset"><span>🌆</span><span class="tx" data-i18n>노을</span></button>
+          <button data-mode="night" class="on"><span>🌙</span><span class="tx" data-i18n>밤</span></button>
+        </div>
+        <button class="lightbtn on" id="lightBtn"><span>💡</span><span class="tx" data-i18n>불 켜짐</span></button>
+        <button class="lang" id="lang">EN</button>
+      </div>
+    </div>
+    <div class="lead">
+      <div class="k" data-i18n>시간이 흐르는<br>작업실</div>
+      <p data-i18n>낮·노을·밤을 바꿔보고, 램프를 눌러 불을 켜보세요. 방 안의 물건을 클릭하면 방 주인이 반응합니다.</p>
+    </div>
+  </div>
+
+  <!-- 하단 시트 -->
+  <div class="scrim" id="scrim"></div>
+  <div class="sheet" id="sheet">
+    <div class="handle"></div>
+    <button class="s-close" id="sheetClose">✕</button>
+
+    <section class="s-sec" data-key="work">
+      <div class="s-tag">MONITOR · WORK</div>
+      <h2 data-i18n>화면 속에서 <em>자라는</em> 작업</h2>
+      <p data-i18n>브랜드, 웹, 인터랙션. 시간이 어떻게 흐르든 모니터 불빛 앞에서 스케치가 화면이 되고, 화면이 제품이 됩니다.</p>
+      <div class="stat3">
+        <div><span data-i18n>프로젝트</span><b>24</b></div>
+        <div><span data-i18n>클라이언트</span><b>18</b></div>
+        <div><span data-i18n>수상</span><b>5</b></div>
+      </div>
+    </section>
+
+    <section class="s-sec" data-key="about">
+      <div class="s-tag">BOOKSHELF · ABOUT</div>
+      <h2 data-i18n>읽고 <em>기록하는</em> 사람</h2>
+      <p data-i18n>서울에서 작은 스튜디오를 꾸리는 디자이너. 좋은 문장과 좋은 여백을 모으고, 그 사이에서 작업을 만듭니다.</p>
+      <div class="stat3">
+        <div><span data-i18n>스튜디오</span><b>Seoul</b></div>
+        <div><span data-i18n>경력</span><b>8y</b></div>
+        <div><span data-i18n>올해 읽은 책</span><b>37</b></div>
+      </div>
+    </section>
+
+    <section class="s-sec" data-key="contact">
+      <div class="s-tag">PLANT · CONTACT</div>
+      <h2 data-i18n>천천히 <em>함께 키워요</em></h2>
+      <p data-i18n>급하게 피는 것보다 오래 자라는 관계를 좋아합니다. 편지 한 통이면 충분해요 — 어느 시간대든 답장하겠습니다.</p>
+      <div class="rows">
+        <div class="row"><span data-i18n>이메일</span><b>hello@studiohours.day</b></div>
+        <div class="row"><span data-i18n>인스타그램</span><b>@studio.hours</b></div>
+      </div>
+    </section>
+  </div>
+
+  <button class="lang" id="langHidden" style="display:none"></button>
+</div>
+
+<script>
+/* ── 커서 패럴랙스 ── */
+const room = document.getElementById('room');
+const charL = document.getElementById('char');
+let tmx=0, tmy=0, cmx=0, cmy=0, pfr=0;
+addEventListener('mousemove', e=>{ tmx=e.clientX/innerWidth-.5; tmy=e.clientY/innerHeight-.5; });
+(function pLoop(){
+  if(window.__paused && pfr>5){ setTimeout(()=>requestAnimationFrame(pLoop),300); return; }
+  pfr++;
+  cmx+=(tmx-cmx)*0.06; cmy+=(tmy-cmy)*0.06;
+  room.style.transform  = `translate(${-cmx*14}px, ${-cmy*12}px)`;
+  charL.style.transform = `translate(${-cmx*30}px, ${-cmy*20}px)`;
+  requestAnimationFrame(pLoop);
+})();
+
+/* ── 시간대 모드 ── */
+const IMGS = { day:document.getElementById('imgDay'), sunset:document.getElementById('imgSunset'), night:document.getElementById('imgNight') };
+let mode = 'night';
+function setMode(m){
+  if(m===mode) return;
+  mode = m;
+  document.body.classList.remove('mode-day','mode-sunset','mode-night');
+  document.body.classList.add('mode-'+m);
+  Object.keys(IMGS).forEach(k=> IMGS[k].classList.toggle('on', k===m));
+  document.querySelectorAll('#seg button').forEach(b=> b.classList.toggle('on', b.dataset.mode===m));
+  const line = LINES[EN?'en':'ko'].mode[m]; if(line) say(line);
+}
+document.querySelectorAll('#seg button').forEach(b=> b.addEventListener('click', ()=> setMode(b.dataset.mode)));
+
+/* ── 불 켜기/끄기 ── */
+const lightBtn = document.getElementById('lightBtn');
+let lit = true;
+function setLit(v){
+  lit = v;
+  room.classList.toggle('lit', lit);
+  lightBtn.classList.toggle('on', lit);
+  lightBtn.querySelector('.tx').textContent = EN ? (lit?'Lights on':'Lights off') : (lit?'불 켜짐':'불 꺼짐');
+  say(LINES[EN?'en':'ko'][lit?'lightOn':'lightOff']);
+}
+lightBtn.addEventListener('click', ()=> setLit(!lit));
+document.getElementById('o-lamp').addEventListener('click', ()=> setLit(!lit));
+
+/* ── 말풍선 ── */
+const bubble = document.getElementById('bubble');
+let bubbleT=null;
+function say(msg, hold){ if(!msg) return; bubble.textContent=msg; bubble.classList.add('on');
+  clearTimeout(bubbleT); bubbleT=setTimeout(()=>bubble.classList.remove('on'), hold||3200); }
+
+/* ── 오브젝트 클릭 → 시트 ── */
+const sheet=document.getElementById('sheet'), scrim=document.getElementById('scrim');
+const secs=[...document.querySelectorAll('.s-sec')];
+let curSec=null;
+function openSec(key){
+  curSec=key;
+  secs.forEach(s=>s.classList.toggle('on', s.dataset.key===key));
+  sheet.classList.add('on'); scrim.classList.add('on');
+  say(LINES[EN?'en':'ko'].obj[key]);
+}
+function closeSheet(){ sheet.classList.remove('on'); scrim.classList.remove('on'); curSec=null; }
+document.querySelectorAll('.hot[data-sec]').forEach(h=> h.addEventListener('click', ()=> openSec(h.dataset.sec)));
+scrim.addEventListener('click', closeSheet);
+document.getElementById('sheetClose').addEventListener('click', closeSheet);
+addEventListener('keydown', e=>{ if(e.key==='Escape') closeSheet(); });
+document.getElementById('charBob').addEventListener('click', ()=>{ const g=LINES[EN?'en':'ko'].hi; say(g[Math.floor(pfr)%g.length]); });
+
+/* ── 대사 ── */
+const LINES = {
+  ko:{
+    obj:{ work:'여기가 제가 작업하는 자리예요.', about:'책장엔 저를 만든 문장들이 있어요.', contact:'화분처럼, 천천히 이어져요 🌱' },
+    mode:{ day:'낮의 방은 이렇게 환해요 ☀️', sunset:'노을 질 때가 제일 좋아요 🌆', night:'밤엔 모니터 불빛만 남아요 🌙' },
+    lightOn:'불을 켰어요. 한결 아늑하죠?', lightOff:'불을 껐어요. 화면만 남았네요.',
+    hi:['안녕하세요! 제 방에 오신 걸 환영해요 👋','시간대를 바꿔보세요 :)','물건을 눌러보세요.','불도 켜고 꺼봐요 💡']
+  },
+  en:{
+    obj:{ work:'This is where I work.', about:'The shelf holds the sentences that made me.', contact:'Like a plant, we grow slowly 🌱' },
+    mode:{ day:'The room is this bright by day ☀️', sunset:'Sunset is my favorite hour 🌆', night:'At night only the monitor glows 🌙' },
+    lightOn:'Lights on — cozier, right?', lightOff:'Lights off. Just the screen now.',
+    hi:['Hi! Welcome to my room 👋','Try changing the time of day :)','Click the objects.','Toggle the lights too 💡']
+  }
+};
+
+/* ── 언어 ── */
+const STR = {
+  '시간이 흐르는<br>작업실':'A studio where<br>the hours pass',
+  '낮·노을·밤을 바꿔보고, 램프를 눌러 불을 켜보세요. 방 안의 물건을 클릭하면 방 주인이 반응합니다.':
+    'Switch between day, sunset and night, and tap the lamp to toggle the lights. Click the objects and the room’s owner reacts.',
+  '낮':'Day','노을':'Sunset','밤':'Night','불 켜짐':'Lights on','불 꺼짐':'Lights off',
+  '불 켜기 / 끄기':'Toggle the light','모니터 · 작업':'Monitor · Work','책장 · 소개':'Bookshelf · About','화분 · 연락':'Plant · Contact',
+  '화면 속에서 <em>자라는</em> 작업':'Work that <em>grows</em> in the screen',
+  '브랜드, 웹, 인터랙션. 시간이 어떻게 흐르든 모니터 불빛 앞에서 스케치가 화면이 되고, 화면이 제품이 됩니다.':
+    'Brand, web, interaction. However the hours pass, by monitor-light a sketch becomes a screen and a screen becomes a product.',
+  '프로젝트':'PROJECTS','클라이언트':'CLIENTS','수상':'AWARDS',
+  '읽고 <em>기록하는</em> 사람':'Someone who reads<br>and <em>writes it down</em>',
+  '서울에서 작은 스튜디오를 꾸리는 디자이너. 좋은 문장과 좋은 여백을 모으고, 그 사이에서 작업을 만듭니다.':
+    'A designer running a small studio in Seoul. I collect good sentences and good whitespace, and make work in between.',
+  '스튜디오':'STUDIO','경력':'EXPERIENCE','올해 읽은 책':'BOOKS THIS YEAR',
+  '천천히 <em>함께 키워요</em>':'Let’s grow it <em>together, slowly</em>',
+  '급하게 피는 것보다 오래 자라는 관계를 좋아합니다. 편지 한 통이면 충분해요 — 어느 시간대든 답장하겠습니다.':
+    'I prefer relationships that grow long over ones that bloom fast. One letter is enough — I’ll reply at any hour.',
+  '이메일':'EMAIL','인스타그램':'INSTAGRAM'
+};
+let EN = new URLSearchParams(location.search).get('lang')==='en';
+const orig = new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if(!orig.has(el)) orig.set(el, el.innerHTML);
+    const ko = orig.get(el).trim();
+    el.innerHTML = EN ? (STR[ko] ?? orig.get(el)) : orig.get(el);
+  });
+  document.getElementById('lang').textContent = EN ? 'KO' : 'EN';
+  lightBtn.querySelector('.tx').textContent = EN ? (lit?'Lights on':'Lights off') : (lit?'불 켜짐':'불 꺼짐');
+  document.documentElement.lang = EN ? 'en' : 'ko';
+  if(EN) document.title = 'STUDIO HOURS — a studio portfolio through the hours';
+}
+document.getElementById('lang').addEventListener('click', ()=>{ EN=!EN; applyLang(); });
+applyLang();
+
+/* 첫 인사 */
+setTimeout(()=>{ const g=LINES[EN?'en':'ko'].hi; say(g[0], 4200); }, 900);
+</script>
+</body>
+</html>

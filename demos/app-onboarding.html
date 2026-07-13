@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앱 · 온보딩 → 로그인 플로우</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ──────────────────────────────────────────────
+   WWIT 분류
+   카테고리: 라이프스타일  |  패턴: 온보딩, 로그인  |  컴포넌트: 캐러셀, 페이지 dots, 소셜 로그인 버튼
+   실제로 동작: 스와이프/버튼으로 온보딩 진행 → 마지막에 로그인 화면 전환
+   ────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --violet: #6c5ce7; --ink: #1d1b2e; --sub: #8c88a3; }
+body { font-family: "Noto Sans KR", sans-serif; min-height: 100vh; display: flex; align-items: center;
+       justify-content: center; gap: 64px; padding: 40px 24px;
+       background: linear-gradient(160deg, #ece9fb, #f4eff0); -webkit-font-smoothing: antialiased; }
+
+.phone { position: relative; width: 375px; height: 780px; flex-shrink: 0; border-radius: 54px;
+         background: #0b0c0e; padding: 10px;
+         box-shadow: 0 50px 100px -24px rgba(50,30,90,.4), inset 0 0 0 2px #3a3d42; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden;
+          background: #fff; }
+.island { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 110px;
+          height: 30px; background: #0b0c0e; border-radius: 99px; z-index: 50; }
+.statusbar { position: absolute; top: 0; left: 0; right: 0; z-index: 40; display: flex;
+             justify-content: space-between; padding: 20px 30px 0; font-size: 14px; font-weight: 700;
+             color: var(--ink); }
+.home-bar { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 130px;
+            height: 5px; border-radius: 99px; background: #0b0c0e; z-index: 60; opacity: .85; }
+
+/* ── 온보딩 뷰 ── */
+.view { position: absolute; inset: 0; display: flex; flex-direction: column;
+        transition: transform .5s cubic-bezier(.7,0,.24,1), opacity .5s; }
+.view.gone { transform: translateX(-12%); opacity: 0; pointer-events: none; }
+.view.waiting { transform: translateX(12%); opacity: 0; pointer-events: none; }
+
+.skip { position: absolute; top: 58px; right: 22px; z-index: 30; font-size: 13.5px; color: var(--sub);
+        cursor: pointer; background: none; border: none; font-family: inherit; }
+
+.slides { flex: 1; display: flex; overflow-x: auto; scroll-snap-type: x mandatory;
+          scrollbar-width: none; }
+.slides::-webkit-scrollbar { display: none; }
+.slide { flex: 0 0 100%; scroll-snap-align: center; display: flex; flex-direction: column;
+         align-items: center; justify-content: center; text-align: center; padding: 80px 34px 20px; }
+.art { width: 220px; height: 220px; border-radius: 64px; display: flex; align-items: center;
+       justify-content: center; font-size: 88px; margin-bottom: 44px; position: relative; }
+.art::after { content: ""; position: absolute; inset: -18px; border-radius: 76px;
+              border: 2px dashed rgba(108,92,231,.3); animation: artspin 14s linear infinite; }
+@keyframes artspin { to { transform: rotate(360deg); } }
+.slide h2 { font-size: 25px; font-weight: 900; letter-spacing: -.5px; color: var(--ink);
+            line-height: 1.35; word-break: keep-all; }
+.slide p { margin-top: 13px; font-size: 14.5px; line-height: 1.75; color: var(--sub); word-break: keep-all; }
+
+.ob-foot { padding: 12px 26px 42px; }
+.dots { display: flex; justify-content: center; gap: 7px; margin-bottom: 20px; }
+.dots i { width: 7px; height: 7px; border-radius: 99px; background: #e3e0f0; transition: all .3s; }
+.dots i.on { width: 22px; background: var(--violet); }
+.next-btn { width: 100%; border: none; font-family: inherit; background: var(--violet); color: #fff;
+            font-size: 16px; font-weight: 700; padding: 16px; border-radius: 16px; cursor: pointer;
+            transition: filter .15s, transform .1s; }
+.next-btn:active { filter: brightness(.9); transform: scale(.985); }
+
+/* ── 로그인 뷰 ── */
+.login-hero { padding: 96px 30px 0; text-align: center; }
+.login-hero .mark { width: 76px; height: 76px; margin: 0 auto; border-radius: 26px; font-size: 38px;
+  display: flex; align-items: center; justify-content: center; color: #fff;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  box-shadow: 0 16px 34px -10px rgba(108,92,231,.55); }
+.login-hero h2 { margin-top: 24px; font-size: 24px; font-weight: 900; letter-spacing: -.5px;
+                 color: var(--ink); }
+.login-hero p { margin-top: 8px; font-size: 13.5px; color: var(--sub); }
+
+.socials { padding: 40px 26px 0; display: flex; flex-direction: column; gap: 11px; }
+.soc { display: flex; align-items: center; justify-content: center; gap: 9px; position: relative;
+       border: none; font-family: inherit; font-size: 15px; font-weight: 700; padding: 15px;
+       border-radius: 14px; cursor: pointer; transition: filter .15s, transform .1s; }
+.soc:active { filter: brightness(.93); transform: scale(.985); }
+.soc.kakao { background: #fee500; color: #191600; }
+.soc.naver { background: #03c75a; color: #fff; }
+.soc.apple { background: #111; color: #fff; }
+.soc.email { background: #f2f2f7; color: var(--ink); }
+.soc .last { position: absolute; right: 14px; top: -9px; background: #ff4757; color: #fff;
+             font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 99px 99px 99px 3px; }
+.login-foot { position: absolute; bottom: 44px; left: 0; right: 0; text-align: center;
+              font-size: 12.5px; color: var(--sub); }
+.login-foot a { color: var(--violet); font-weight: 700; text-decoration: none; }
+.back-ob { position: absolute; top: 58px; left: 22px; z-index: 30; font-size: 20px; color: var(--sub);
+           cursor: pointer; background: none; border: none; }
+
+/* ── WWIT 명세 패널 ── */
+.specs { max-width: 360px; }
+.specs .pill { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+               color: #6a5fae; border: 1.5px solid #c9c2ea; border-radius: 99px; padding: 6px 16px; }
+.specs h1 { margin-top: 18px; font-size: 34px; font-weight: 900; letter-spacing: -1px; color: #1d1b2e; }
+.specs .desc { margin-top: 12px; font-size: 14.5px; line-height: 1.75; color: #514c66; word-break: keep-all; }
+.spec-group { margin-top: 22px; }
+.spec-group h4 { font-size: 11.5px; font-weight: 700; letter-spacing: 2px; color: #9a94b8; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.tags span { font-size: 12.5px; font-weight: 600; background: #fff; border: 1px solid #e0dbf2;
+             padding: 6px 13px; border-radius: 99px; color: #453f60; }
+.tokens { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+.tk { display: flex; align-items: center; gap: 7px; font-family: "JetBrains Mono", monospace; font-size: 11px;
+      color: #736c94; background: #fff; border: 1px solid #e0dbf2; border-radius: 10px; padding: 7px 11px; }
+.tk i { width: 15px; height: 15px; border-radius: 5px; }
+.hint { margin-top: 24px; font-size: 12.5px; color: #9a94b8; line-height: 1.7; }
+.hint b { color: #6c5ce7; }
+
+@media (max-width: 900px) { body { flex-direction: column; gap: 32px; } .specs { max-width: 375px; } }
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="screen">
+    <div class="statusbar"><span>9:41</span><span>􀙇 􀙈 􀛨</span></div>
+
+    <!-- 온보딩 -->
+    <div class="view" id="obView">
+      <button class="skip" id="skip">건너뛰기</button>
+      <div class="slides" id="slides">
+        <div class="slide">
+          <div class="art" style="background:linear-gradient(135deg,#ece9fb,#dcd6f7)">🗂️</div>
+          <h2>흩어진 디자인 레퍼런스,<br>한 곳에 모아요</h2>
+          <p>웹과 앱, 패턴과 컴포넌트별로 정리된<br>레퍼런스를 검색 한 번으로 찾으세요.</p>
+        </div>
+        <div class="slide">
+          <div class="art" style="background:linear-gradient(135deg,#e0f7f5,#c5ede9)">⚡</div>
+          <h2>보기만 하지 말고<br>바로 코드로 쓰세요</h2>
+          <p>모든 레퍼런스는 동작하는 코드와 함께.<br>복사해서 프로젝트에 붙여넣으면 끝.</p>
+        </div>
+        <div class="slide">
+          <div class="art" style="background:linear-gradient(135deg,#fff2e0,#ffe3c2)">🤝</div>
+          <h2>팀과 함께 쓰면<br>더 강력해져요</h2>
+          <p>컬렉션을 만들어 공유하고<br>우리 팀의 디자인 언어를 만들어 가세요.</p>
+        </div>
+      </div>
+      <div class="ob-foot">
+        <div class="dots" id="dots"><i class="on"></i><i></i><i></i></div>
+        <button class="next-btn" id="next">다음</button>
+      </div>
+    </div>
+
+    <!-- 로그인 -->
+    <div class="view waiting" id="loginView">
+      <button class="back-ob" id="backOb">‹</button>
+      <div class="login-hero">
+        <div class="mark">◈</div>
+        <h2>디자인 갤러리 시작하기</h2>
+        <p>3초 만에 가입하고 모든 레퍼런스를 저장하세요</p>
+      </div>
+      <div class="socials">
+        <button class="soc kakao">💬 카카오로 계속하기 <span class="last">마지막 로그인</span></button>
+        <button class="soc naver">N 네이버로 계속하기</button>
+        <button class="soc apple"> Apple로 계속하기</button>
+        <button class="soc email">✉️ 이메일로 계속하기</button>
+      </div>
+      <div class="login-foot">이미 계정이 있나요? <a href="#">로그인</a></div>
+    </div>
+
+    <div class="home-bar"></div>
+  </div>
+</div>
+
+<aside class="specs">
+  <span class="pill">APP REFERENCE</span>
+  <h1>온보딩 → 로그인<br>플로우</h1>
+  <p class="desc">스크롤 스냅 캐러셀 온보딩 3장과 소셜 로그인 화면을 잇는 첫 진입 플로우.
+  <b>스와이프하거나 '다음'을 눌러</b> 진행하고, 마지막 장에서 로그인으로 전환됩니다.
+  '마지막 로그인' 뱃지 디테일까지.</p>
+
+  <div class="spec-group"><h4>카테고리</h4>
+    <div class="tags"><span>라이프스타일</span><span>공통 플로우</span></div></div>
+  <div class="spec-group"><h4>패턴</h4>
+    <div class="tags"><span>온보딩</span><span>로그인</span><span>회원가입</span></div></div>
+  <div class="spec-group"><h4>컴포넌트</h4>
+    <div class="tags"><span>캐러셀</span><span>페이지 인디케이터</span><span>소셜 로그인 버튼</span><span>뱃지</span></div></div>
+  <div class="spec-group"><h4>디자인 토큰</h4>
+    <div class="tokens">
+      <span class="tk"><i style="background:#6c5ce7"></i>#6C5CE7</span>
+      <span class="tk"><i style="background:#fee500"></i>#FEE500</span>
+      <span class="tk"><i style="background:#03c75a"></i>#03C75A</span>
+    </div>
+    <div class="tokens"><span class="tk">radius 14~16px</span><span class="tk">scroll-snap</span></div></div>
+
+  <p class="hint">💡 캐러셀은 <b>CSS scroll-snap</b>이라 JS 없이도 스와이프가 되고,
+  JS는 dots 동기화와 화면 전환만 담당합니다.</p>
+</aside>
+
+<script>
+const slides = document.getElementById('slides');
+const dots = document.querySelectorAll('#dots i');
+const nextBtn = document.getElementById('next');
+const obView = document.getElementById('obView');
+const loginView = document.getElementById('loginView');
+let idx = 0;
+
+/* 스와이프 → dots/버튼 동기화 */
+slides.addEventListener('scroll', () => {
+  const i = Math.round(slides.scrollLeft / slides.clientWidth);
+  if (i !== idx) { idx = i; sync(); }
+});
+function sync() {
+  dots.forEach((d, i) => d.classList.toggle('on', i === idx));
+  nextBtn.textContent = idx === 2 ? '시작하기' : '다음';
+}
+
+/* 다음 버튼: 슬라이드 이동, 마지막이면 로그인 전환 */
+nextBtn.addEventListener('click', () => {
+  if (idx < 2) slides.scrollTo({ left: (idx + 1) * slides.clientWidth, behavior: 'smooth' });
+  else showLogin();
+});
+document.getElementById('skip').addEventListener('click', showLogin);
+document.getElementById('backOb').addEventListener('click', () => {
+  loginView.classList.add('waiting'); obView.classList.remove('gone');
+});
+function showLogin() {
+  obView.classList.add('gone');
+  loginView.classList.remove('waiting');
+}
+</script>
+<script>
+/* ── EN mode (?lang=en) — additive, non-destructive ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "앱 · 온보딩 → 로그인 플로우": "App · Onboarding → Login Flow",
+    "건너뛰기": "Skip",
+    "흩어진 디자인 레퍼런스,": "Scattered design references,",
+    "한 곳에 모아요": "all in one place",
+    "웹과 앱, 패턴과 컴포넌트별로 정리된": "Organized by web and app, pattern and component —",
+    "레퍼런스를 검색 한 번으로 찾으세요.": "find any reference with a single search.",
+    "보기만 하지 말고": "Don't just look —",
+    "바로 코드로 쓰세요": "use it as code right away",
+    "모든 레퍼런스는 동작하는 코드와 함께.": "Every reference comes with working code.",
+    "복사해서 프로젝트에 붙여넣으면 끝.": "Just copy and paste it into your project.",
+    "팀과 함께 쓰면": "It's even more powerful",
+    "더 강력해져요": "when you use it with your team",
+    "컬렉션을 만들어 공유하고": "Create and share collections",
+    "우리 팀의 디자인 언어를 만들어 가세요.": "and build your team's design language.",
+    "다음": "Next",
+    "시작하기": "Get started",
+    "디자인 갤러리 시작하기": "Get started with the design gallery",
+    "3초 만에 가입하고 모든 레퍼런스를 저장하세요": "Sign up in 3 seconds and save every reference",
+    "💬 카카오로 계속하기": "💬 Continue with Kakao",
+    "마지막 로그인": "Last used",
+    "N 네이버로 계속하기": "N Continue with Naver",
+    "Apple로 계속하기": "Continue with Apple",
+    "✉️ 이메일로 계속하기": "✉️ Continue with email",
+    "이미 계정이 있나요?": "Already have an account?",
+    "로그인": "Log in",
+    "온보딩 → 로그인": "Onboarding → Login",
+    "플로우": "Flow",
+    "스크롤 스냅 캐러셀 온보딩 3장과 소셜 로그인 화면을 잇는 첫 진입 플로우.": "A first-run flow linking a 3-page scroll-snap carousel onboarding to a social login screen.",
+    "스와이프하거나 '다음'을 눌러": "Swipe or tap 'Next'",
+    "진행하고, 마지막 장에서 로그인으로 전환됩니다.\n  '마지막 로그인' 뱃지 디테일까지.": " to advance, and the last page switches to login — down to the 'Last used' badge detail.",
+    "카테고리": "Category",
+    "패턴": "Pattern",
+    "컴포넌트": "Component",
+    "디자인 토큰": "Design tokens",
+    "라이프스타일": "Lifestyle",
+    "공통 플로우": "Common flow",
+    "온보딩": "Onboarding",
+    "회원가입": "Sign up",
+    "캐러셀": "Carousel",
+    "페이지 인디케이터": "Page indicator",
+    "소셜 로그인 버튼": "Social login button",
+    "뱃지": "Badge",
+    "💡 캐러셀은": "💡 The carousel uses",
+    "이라 JS 없이도 스와이프가 되고,\n  JS는 dots 동기화와 화면 전환만 담당합니다.": ", so swiping works even without JS; JS only handles dots sync and view transitions."
+  };
+  const swap = s => { const t = s.trim(); return TR[t] != null ? s.replace(t, TR[t]) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (TR[n.nodeValue.trim()] != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ['placeholder','title','alt','aria-label'].forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && TR[n.getAttribute(a).trim()] != null) n.setAttribute(a, TR[n.getAttribute(a).trim()]); });
+    n.childNodes.forEach(walk);
+  };
+  /* next-btn text toggles between '다음' and '시작하기' at runtime → catch it */
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  if (TR[document.title.trim()]) document.title = TR[document.title.trim()];
+})();
+</script>
+</body>
+</html>

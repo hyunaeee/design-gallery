@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OBJET — 아트 디렉터 포트폴리오</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500;1,700&family=Noto+Serif+KR:wght@600;900&family=Inter:wght@400;500;600&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+/* AI 생성 미디어(Higgsfield): assets/gen/ — 영상 히어로 + 프로젝트 이미지 4점 */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --paper: #f4f1ec; --ink: #141210; --accent: #8a2c1e; }
+body { font-family: Inter, "Noto Sans KR", sans-serif; background: var(--ink); color: var(--paper);
+       -webkit-font-smoothing: antialiased; cursor: none; }
+a, button { cursor: none; }
+
+/* 커스텀 커서 */
+.cur { position: fixed; z-index: 999; width: 10px; height: 10px; border-radius: 50%;
+       background: var(--paper); pointer-events: none; transform: translate(-50%,-50%);
+       mix-blend-mode: difference; transition: width .25s, height .25s, font-size .25s; }
+.cur.big { width: 84px; height: 84px; display: flex; align-items: center; justify-content: center;
+           font-size: 11px; font-weight: 600; letter-spacing: 2px; color: var(--ink); }
+
+.grain { position: fixed; inset: -100%; z-index: 90; pointer-events: none; opacity: .35;
+  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220"><filter id="g"><feTurbulence type="fractalNoise" baseFrequency="0.75" numOctaves="3"/><feColorMatrix type="saturate" values="0"/></filter><rect width="100%" height="100%" filter="url(%23g)" opacity="0.14"/></svg>');
+  animation: gr .9s steps(4) infinite; }
+@keyframes gr { 0%{transform:translate(0,0)} 25%{transform:translate(-3%,2%)} 50%{transform:translate(2%,-3%)}
+  75%{transform:translate(-2%,-2%)} 100%{transform:translate(3%,3%)} }
+
+/* ── 히어로: AI 생성 영상 풀블리드 ── */
+.hero { position: relative; height: 100vh; overflow: hidden; }
+.hero video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+              filter: saturate(.9) brightness(.85); }
+.hero .veil { position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(20,18,16,.5), transparent 35%, rgba(20,18,16,.65) 90%); }
+.hero-top { position: absolute; z-index: 5; top: 0; left: 0; right: 0; display: flex;
+            justify-content: space-between; align-items: center; padding: 30px 4.5vw;
+            font-size: 12.5px; letter-spacing: 2.5px; }
+.hero-top a { color: var(--paper); text-decoration: none; }
+.hero-name { position: absolute; z-index: 5; left: 4.5vw; right: 4.5vw; bottom: 9vh; }
+.hero-name .role { font-size: 13px; letter-spacing: 5px; color: rgba(244,241,236,.8); }
+.hero-name h1 { margin-top: 2vh; font-family: "Playfair Display", "Noto Serif KR", serif;
+                font-size: clamp(64px, 12.5vw, 190px); font-weight: 700; line-height: .93;
+                letter-spacing: -.02em; }
+.hero-name h1 em { font-style: italic; font-weight: 500; color: #d8c39a; }
+.hero-name .sub { margin-top: 3vh; display: flex; justify-content: space-between; align-items: flex-end;
+                  flex-wrap: wrap; gap: 14px; }
+.hero-name .sub p { max-width: 330px; font-size: 13.5px; line-height: 1.8; color: rgba(244,241,236,.75);
+                    word-break: keep-all; }
+.hero-name .sub span { font-size: 11.5px; letter-spacing: 3px; color: rgba(244,241,236,.55); }
+
+/* ── 스택 프로젝트: 스크롤하면 카드가 겹겹이 쌓임 ── */
+.works { position: relative; }
+.panel { position: sticky; top: 0; height: 100vh; overflow: hidden; border-radius: 26px 26px 0 0;
+         box-shadow: 0 -30px 80px rgba(0,0,0,.55); }
+.panel img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+             transition: transform 1.2s cubic-bezier(.2,.6,.2,1); }
+.panel:hover img { transform: scale(1.035); }
+.panel::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(20,18,16,.35), transparent 40%, rgba(20,18,16,.55) 92%); }
+.panel .p-head { position: absolute; z-index: 3; top: 4.5vh; left: 4.5vw; right: 4.5vw;
+                 display: flex; justify-content: space-between; font-size: 12px; letter-spacing: 3px;
+                 color: rgba(244,241,236,.85); }
+.panel .p-title { position: absolute; z-index: 3; left: 4.5vw; bottom: 7vh; }
+.panel .p-title .no { font-family: "Playfair Display", serif; font-style: italic; font-size: 17px;
+                      color: #d8c39a; }
+.panel .p-title h2 { margin-top: 8px; font-family: "Noto Serif KR", serif; font-weight: 900;
+                     font-size: clamp(34px, 5.4vw, 76px); letter-spacing: -.02em; line-height: 1.05;
+                     word-break: keep-all; }
+.panel .p-title .meta { margin-top: 14px; font-size: 12.5px; letter-spacing: 2px;
+                        color: rgba(244,241,236,.7); }
+.panel.light::after { background: linear-gradient(180deg, rgba(244,241,236,.15), transparent 40%,
+                                                   rgba(20,18,16,.5) 92%); }
+
+/* ── 아웃트로 ── */
+.outro { position: relative; background: var(--paper); color: var(--ink); padding: 16vh 4.5vw 10vh;
+         border-radius: 26px 26px 0 0; }
+.outro .kicker { font-size: 12px; letter-spacing: 5px; color: #8a8478; }
+.outro h2 { margin-top: 3vh; font-family: "Playfair Display", "Noto Serif KR", serif;
+            font-size: clamp(44px, 8vw, 120px); font-weight: 700; line-height: 1; letter-spacing: -.02em; }
+.outro h2 em { font-style: italic; color: var(--accent); }
+.outro .row { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8vh;
+              flex-wrap: wrap; gap: 20px; }
+.outro .mail { font-size: clamp(17px, 2.4vw, 26px); color: var(--ink); text-decoration: none;
+               border-bottom: 2px solid var(--ink); padding-bottom: 4px; font-weight: 500; }
+.outro .mail:hover { color: var(--accent); border-color: var(--accent); }
+.outro .fine { font-size: 11.5px; letter-spacing: 2px; color: #8a8478; line-height: 2; text-align: right; }
+
+.reveal { opacity: 0; transform: translateY(30px); transition: opacity 1s cubic-bezier(.2,.6,.2,1),
+          transform 1s cubic-bezier(.2,.6,.2,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+@media (max-width: 760px) {
+  body { cursor: auto; } .cur { display: none; }
+  .hero-top span:nth-child(2) { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="cur" id="cur"></div>
+<div class="grain"></div>
+
+<header class="hero">
+  <video autoplay muted loop playsinline poster="../assets/gen/chrome.png"
+         onerror="this.style.display='none'">
+    <source src="../assets/gen/hero-loop.mp4" type="video/mp4">
+  </video>
+  <div class="veil"></div>
+  <div class="hero-top">
+    <span>OBJET STUDIO</span>
+    <span>SEOUL — PARIS</span>
+    <a href="#contact" data-big="MAIL">CONTACT</a>
+  </div>
+  <div class="hero-name">
+    <div class="role">ART DIRECTION & DIGITAL CRAFT</div>
+    <h1>서예린<br><em>Objet</em> Studio</h1>
+    <div class="sub">
+      <p>형태가 감정을 만들 때까지 깎아내는 스튜디오. 브랜드, 영상, 인터랙티브 —
+      매체와 무관하게 '물성'을 디자인합니다.</p>
+      <span>SELECTED WORKS 2023 — 2026 ↓</span>
+    </div>
+  </div>
+</header>
+
+<main class="works">
+  <section class="panel" data-big="VIEW">
+    <img src="../assets/gen/fashion-1.png" alt="LA ROBE 캠페인"
+         onerror="this.style.background='linear-gradient(160deg,#3d1518,#0f0a0a)';this.removeAttribute('src')">
+    <div class="p-head"><span>CAMPAIGN FILM</span><span>2026</span></div>
+    <div class="p-title">
+      <div class="no">No.01</div>
+      <h2>LA ROBE —<br>천의 조각彫刻</h2>
+      <div class="meta">패션 하우스 시즌 캠페인 · 아트 디렉션 / 필름</div>
+    </div>
+  </section>
+
+  <section class="panel" data-big="VIEW">
+    <img src="../assets/gen/chrome.png" alt="유동하는 오브제"
+         onerror="this.style.background='linear-gradient(160deg,#c9c2d8,#8f88a8)';this.removeAttribute('src')">
+    <div class="p-head"><span>DIGITAL SCULPTURE</span><span>2025</span></div>
+    <div class="p-title">
+      <div class="no">No.02</div>
+      <h2>유동하는 오브제</h2>
+      <div class="meta">미술관 미디어월 커미션 · 리얼타임 렌더</div>
+    </div>
+  </section>
+
+  <section class="panel" data-big="VIEW">
+    <img src="../assets/gen/brutalist.png" alt="침묵의 구조"
+         onerror="this.style.background='linear-gradient(160deg,#5c5c60,#212124)';this.removeAttribute('src')">
+    <div class="p-head"><span>IDENTITY</span><span>2025</span></div>
+    <div class="p-title">
+      <div class="no">No.03</div>
+      <h2>침묵의 구조</h2>
+      <div class="meta">건축 비엔날레 아이덴티티 · 그래픽 시스템</div>
+    </div>
+  </section>
+
+  <section class="panel light" data-big="VIEW">
+    <img src="../assets/gen/botanical.png" alt="빛의 식물학"
+         onerror="this.style.background='linear-gradient(160deg,#08343a,#020c10)';this.removeAttribute('src')">
+    <div class="p-head"><span>INSTALLATION</span><span>2024</span></div>
+    <div class="p-title">
+      <div class="no">No.04</div>
+      <h2>빛의 식물학</h2>
+      <div class="meta">몰입형 전시 · 제너러티브 비주얼</div>
+    </div>
+  </section>
+</main>
+
+<footer class="outro" id="contact">
+  <div class="kicker reveal">NEXT CHAPTER</div>
+  <h2 class="reveal">같이 만들<br><em>물성</em>이 있나요?</h2>
+  <div class="row reveal">
+    <a class="mail" href="#" data-big="MAIL">hello@objet.studio</a>
+    <div class="fine">OBJET STUDIO © 2026<br>모든 이미지·영상은 AI(Higgsfield)로 생성한 오리지널입니다</div>
+  </div>
+</footer>
+
+<script>
+/* 커스텀 커서 */
+const cur = document.getElementById('cur');
+addEventListener('mousemove', e => { cur.style.left = e.clientX + 'px'; cur.style.top = e.clientY + 'px'; });
+document.querySelectorAll('[data-big]').forEach(el => {
+  el.addEventListener('mouseenter', () => { cur.classList.add('big'); cur.textContent = el.dataset.big; });
+  el.addEventListener('mouseleave', () => { cur.classList.remove('big'); cur.textContent = ''; });
+});
+
+const io = new IntersectionObserver(es => es.forEach(e => e.isIntersecting && e.target.classList.add('in')),
+  { threshold: .2 });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+</script>
+
+<script>
+/* ── English mode (?lang=en): translate all visible Korean text, no logic changes ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "OBJET — 아트 디렉터 포트폴리오": "OBJET — Art Director Portfolio",
+    "서예린": "Seo Yerin",
+    "LA ROBE 캠페인": "LA ROBE Campaign",
+    "유동하는 오브제": "Fluid Objet",
+    "침묵의 구조": "The Structure of Silence",
+    "빛의 식물학": "The Botany of Light",
+    "천의 조각彫刻": "Sculpture in Cloth 彫刻",
+    "패션 하우스 시즌 캠페인 · 아트 디렉션 / 필름": "Fashion house seasonal campaign · Art direction / Film",
+    "미술관 미디어월 커미션 · 리얼타임 렌더": "Museum media-wall commission · Real-time render",
+    "건축 비엔날레 아이덴티티 · 그래픽 시스템": "Architecture biennale identity · Graphic system",
+    "몰입형 전시 · 제너러티브 비주얼": "Immersive exhibition · Generative visuals",
+    "같이 만들": "Is there a",
+    "물성": "materiality",
+    "이 있나요?": " we could make together?",
+    "모든 이미지·영상은 AI(Higgsfield)로 생성한 오리지널입니다": "All imagery and video are originals generated by AI (Higgsfield)"
+  };
+  const PATTERNS = [
+    [/^형태가 감정을 만들[\s\S]*디자인합니다\.$/, () => "A studio that carves form until it becomes emotion. Brand, film, interactive — we design 'materiality' regardless of the medium."]
+  ];
+  const tr = t => { if (TR[t] != null) return TR[t]; for (const [re,fn] of PATTERNS){ const m = t.match(re); if (m) return fn(m); } return null; };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const swap = s => { const t = s.trim(); const r = tr(t); return r != null ? s.replace(t, r) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (tr(n.nodeValue.trim()) != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && tr(n.getAttribute(a).trim()) != null) n.setAttribute(a, tr(n.getAttribute(a).trim())); });
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim()); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

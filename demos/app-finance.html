@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>앱 · 금융 홈 — 토스 스타일</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&family=Inter:wght@500;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+/* ──────────────────────────────────────────────
+   WWIT 분류
+   카테고리: 금융  |  패턴: 홈, 자산  |  컴포넌트: 탭바, 차트, 바텀시트
+   ────────────────────────────────────────────── */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --blue: #3182f6; --bg: #f2f4f6; --card: #fff;
+  --ink: #191f28; --sub: #8b95a1; --red: #f04452; --up: #f04452; --down: #3182f6;
+  --radius: 20px;
+}
+body { font-family: "Noto Sans KR", Inter, sans-serif; min-height: 100vh;
+       display: flex; align-items: center; justify-content: center; gap: 64px; padding: 40px 24px;
+       background: linear-gradient(160deg, #e8eef7, #f6f2ee); -webkit-font-smoothing: antialiased; }
+
+/* ── 아이폰 프레임 ── */
+.phone { position: relative; width: 375px; height: 780px; flex-shrink: 0;
+         border-radius: 54px; background: #0b0c0e; padding: 10px;
+         box-shadow: 0 50px 100px -24px rgba(25,31,40,.45), inset 0 0 0 2px #3a3d42; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 44px; overflow: hidden;
+          background: var(--bg); display: flex; flex-direction: column; }
+.island { position: absolute; top: 22px; left: 50%; transform: translateX(-50%); width: 110px;
+          height: 30px; background: #0b0c0e; border-radius: 99px; z-index: 50; }
+.statusbar { display: flex; justify-content: space-between; padding: 20px 30px 8px; font-size: 14px;
+             font-weight: 700; color: var(--ink); }
+
+/* ── 앱 헤더 ── */
+.app-head { display: flex; align-items: center; justify-content: space-between; padding: 8px 20px; }
+.app-head .brand { font-size: 21px; font-weight: 900; color: var(--blue); letter-spacing: -.5px; }
+.app-head .icons { display: flex; gap: 16px; font-size: 18px; color: var(--sub); }
+.app-head .bell { position: relative; }
+.app-head .bell::after { content: ""; position: absolute; top: 0; right: -2px; width: 7px; height: 7px;
+                         border-radius: 50%; background: var(--red); }
+
+.body-scroll { flex: 1; overflow-y: auto; padding: 6px 16px 90px; scrollbar-width: none; }
+.body-scroll::-webkit-scrollbar { display: none; }
+
+.sec { background: var(--card); border-radius: var(--radius); padding: 20px 18px; margin-bottom: 14px; }
+.sec-title { display: flex; justify-content: space-between; align-items: center; font-size: 15px;
+             font-weight: 700; color: var(--ink); }
+.sec-title span { font-size: 12.5px; color: var(--sub); font-weight: 500; }
+
+/* 계좌 행 — 탭하면 바텀시트 */
+.acct { display: flex; align-items: center; gap: 12px; padding: 13px 4px; border-radius: 14px;
+        cursor: pointer; transition: background .15s; }
+.acct:active { background: #f2f4f6; }
+.acct .ico { width: 40px; height: 40px; border-radius: 14px; display: flex; align-items: center;
+             justify-content: center; font-size: 18px; flex-shrink: 0; }
+.acct .info { flex: 1; min-width: 0; }
+.acct .name { font-size: 13px; color: var(--sub); }
+.acct .amt { font-size: 16.5px; font-weight: 700; color: var(--ink); letter-spacing: -.3px;
+             font-variant-numeric: tabular-nums; }
+.acct .go { color: #d1d6db; font-size: 16px; }
+.send-btn { width: 100%; margin-top: 10px; border: none; background: var(--blue); color: #fff;
+            font-size: 15px; font-weight: 700; font-family: inherit; padding: 14px; border-radius: 14px;
+            cursor: pointer; transition: filter .15s, transform .1s; }
+.send-btn:active { filter: brightness(.9); transform: scale(.985); }
+
+/* 주간 소비 미니 차트 */
+.spend { display: flex; align-items: baseline; gap: 8px; margin-top: 6px; }
+.spend b { font-size: 24px; font-weight: 900; letter-spacing: -.5px; }
+.spend em { font-style: normal; font-size: 12.5px; color: var(--red); font-weight: 700; }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 74px; margin-top: 16px; }
+.bar { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.bar i { width: 100%; border-radius: 7px; background: #e5e8eb; transform-origin: bottom;
+         animation: grow .8s cubic-bezier(.2,.7,.2,1) both; }
+.bar.hot i { background: var(--blue); }
+.bar span { font-size: 10.5px; color: var(--sub); }
+@keyframes grow { from { transform: scaleY(0); } }
+
+/* 주식 리스트 */
+.stock { display: flex; align-items: center; gap: 12px; padding: 11px 4px; }
+.stock .logo { width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0; display: flex;
+               align-items: center; justify-content: center; font-size: 15px; color: #fff; font-weight: 800; }
+.stock .nm { flex: 1; font-size: 14.5px; font-weight: 500; }
+.stock .val { text-align: right; font-variant-numeric: tabular-nums; }
+.stock .val b { display: block; font-size: 14.5px; font-weight: 700; }
+.stock .val span { font-size: 12px; font-weight: 700; }
+.u { color: var(--up); } .d { color: var(--down); }
+
+/* ── 탭바 ── */
+.tabbar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 40; display: flex;
+          background: rgba(255,255,255,.94); backdrop-filter: blur(14px);
+          border-top: 1px solid #eef0f3; padding: 8px 6px 22px; }
+.tab { flex: 1; border: none; background: none; font-family: inherit; display: flex;
+       flex-direction: column; align-items: center; gap: 3px; font-size: 10.5px; color: #b0b8c1;
+       cursor: pointer; font-weight: 500; }
+.tab i { font-style: normal; font-size: 21px; filter: grayscale(1) opacity(.5); transition: filter .2s; }
+.tab.on { color: var(--ink); font-weight: 700; }
+.tab.on i { filter: none; }
+.home-bar { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 130px;
+            height: 5px; border-radius: 99px; background: #0b0c0e; z-index: 60; opacity: .85; }
+
+/* ── 바텀시트 (컴포넌트 데모) ── */
+.dim { position: absolute; inset: 0; z-index: 80; background: rgba(25,31,40,.5); opacity: 0;
+       pointer-events: none; transition: opacity .3s; }
+.sheet { position: absolute; z-index: 90; left: 0; right: 0; bottom: 0; background: #fff;
+         border-radius: 28px 28px 0 0; padding: 12px 22px 34px; transform: translateY(105%);
+         transition: transform .38s cubic-bezier(.2,.8,.2,1); }
+.screen.sheet-open .dim { opacity: 1; pointer-events: auto; }
+.screen.sheet-open .sheet { transform: none; }
+.sheet .grab { width: 44px; height: 5px; border-radius: 99px; background: #e5e8eb; margin: 0 auto 18px; }
+.sheet h3 { font-size: 18px; font-weight: 900; letter-spacing: -.3px; }
+.sheet .bal { margin-top: 6px; font-size: 13.5px; color: var(--sub); }
+.sheet .row2 { display: flex; gap: 10px; margin-top: 20px; }
+.sheet .row2 button { flex: 1; border: none; font-family: inherit; font-size: 15px; font-weight: 700;
+                      padding: 15px; border-radius: 14px; cursor: pointer; }
+.sheet .primary { background: var(--blue); color: #fff; }
+.sheet .ghost { background: #f2f4f6; color: var(--ink); }
+
+/* ── WWIT 스타일 명세 패널 ── */
+.specs { max-width: 360px; }
+.specs .pill { display: inline-block; font-size: 12px; font-weight: 700; letter-spacing: 2px;
+               color: #6b7684; border: 1.5px solid #d1d6db; border-radius: 99px; padding: 6px 16px; }
+.specs h1 { margin-top: 18px; font-size: 34px; font-weight: 900; letter-spacing: -1px; color: #191f28; }
+.specs .desc { margin-top: 12px; font-size: 14.5px; line-height: 1.75; color: #4e5968; word-break: keep-all; }
+.spec-group { margin-top: 22px; }
+.spec-group h4 { font-size: 11.5px; font-weight: 700; letter-spacing: 2px; color: #8b95a1; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 10px; }
+.tags span { font-size: 12.5px; font-weight: 600; background: #fff; border: 1px solid #e5e8eb;
+             padding: 6px 13px; border-radius: 99px; color: #333d4b; }
+.tokens { display: flex; gap: 10px; margin-top: 10px; }
+.tk { display: flex; align-items: center; gap: 7px; font-family: "JetBrains Mono", monospace;
+      font-size: 11px; color: #6b7684; background: #fff; border: 1px solid #e5e8eb;
+      border-radius: 10px; padding: 7px 11px; }
+.tk i { width: 15px; height: 15px; border-radius: 5px; }
+.hint { margin-top: 24px; font-size: 12.5px; color: #8b95a1; line-height: 1.7; }
+.hint b { color: #3182f6; }
+
+@media (max-width: 900px) {
+  body { flex-direction: column; gap: 32px; }
+  .specs { max-width: 375px; }
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+  <div class="island"></div>
+  <div class="screen" id="screen">
+    <div class="statusbar"><span>9:41</span><span>􀙇 􀙈 􀛨</span></div>
+
+    <div class="app-head">
+      <span class="brand">toss</span>
+      <div class="icons"><span>💬</span><span class="bell">🔔</span></div>
+    </div>
+
+    <div class="body-scroll">
+      <div class="sec">
+        <div class="sec-title">자산 <span>순서 편집</span></div>
+        <div class="acct" data-sheet data-name="토스뱅크 통장" data-amt="2,483,000">
+          <span class="ico" style="background:#e8f3ff">🏦</span>
+          <span class="info"><span class="name">토스뱅크 통장</span>
+          <span class="amt">2,483,000원</span></span><span class="go">›</span>
+        </div>
+        <div class="acct" data-sheet data-name="비상금 저금통" data-amt="518,200">
+          <span class="ico" style="background:#fff3e0">🐷</span>
+          <span class="info"><span class="name">비상금 저금통</span>
+          <span class="amt">518,200원</span></span><span class="go">›</span>
+        </div>
+        <div class="acct" data-sheet data-name="증권 계좌" data-amt="7,214,850">
+          <span class="ico" style="background:#eef4ff">📈</span>
+          <span class="info"><span class="name">증권 계좌</span>
+          <span class="amt">7,214,850원</span></span><span class="go">›</span>
+        </div>
+        <button class="send-btn">송금하기</button>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">이번 주 소비 <span>7월 6일 ~ 오늘</span></div>
+        <div class="spend"><b>184,300원</b><em>지난주보다 12% ↓</em></div>
+        <div class="bars">
+          <div class="bar"><i style="height:38%;animation-delay:.05s"></i><span>월</span></div>
+          <div class="bar"><i style="height:62%;animation-delay:.1s"></i><span>화</span></div>
+          <div class="bar"><i style="height:30%;animation-delay:.15s"></i><span>수</span></div>
+          <div class="bar hot"><i style="height:88%;animation-delay:.2s"></i><span>목</span></div>
+          <div class="bar"><i style="height:46%;animation-delay:.25s"></i><span>금</span></div>
+          <div class="bar"><i style="height:20%;animation-delay:.3s"></i><span>토</span></div>
+          <div class="bar"><i style="height:12%;animation-delay:.35s"></i><span>일</span></div>
+        </div>
+      </div>
+
+      <div class="sec">
+        <div class="sec-title">내 주식 <span>실시간</span></div>
+        <div class="stock"><span class="logo" style="background:#1a1a1a">A</span>
+          <span class="nm">애플</span>
+          <span class="val"><b>312,400원</b><span class="u">+2.4%</span></span></div>
+        <div class="stock"><span class="logo" style="background:#3182f6">N</span>
+          <span class="nm">엔비디아</span>
+          <span class="val"><b>198,750원</b><span class="u">+5.1%</span></span></div>
+        <div class="stock"><span class="logo" style="background:#03c75a">네</span>
+          <span class="nm">네이버</span>
+          <span class="val"><b>224,000원</b><span class="d">-0.8%</span></span></div>
+      </div>
+    </div>
+
+    <div class="tabbar">
+      <button class="tab on"><i>🏠</i>홈</button>
+      <button class="tab"><i>🎁</i>혜택</button>
+      <button class="tab"><i>💸</i>토스페이</button>
+      <button class="tab"><i>📊</i>증권</button>
+      <button class="tab"><i>☰</i>전체</button>
+    </div>
+
+    <!-- 바텀시트 컴포넌트 -->
+    <div class="dim" data-close></div>
+    <div class="sheet">
+      <div class="grab"></div>
+      <h3 id="sh-name">토스뱅크 통장</h3>
+      <p class="bal">잔액 <b id="sh-amt">2,483,000</b>원</p>
+      <div class="row2">
+        <button class="ghost" data-close>내역 보기</button>
+        <button class="primary" data-close>송금</button>
+      </div>
+    </div>
+
+    <div class="home-bar"></div>
+  </div>
+</div>
+
+<aside class="specs">
+  <span class="pill">APP REFERENCE</span>
+  <h1>금융 홈<br>— 토스 스타일</h1>
+  <p class="desc">간결한 카드 섹션, 자산 리스트, 주간 소비 차트로 구성된 금융 앱 홈.
+  <b>계좌를 탭하면 바텀시트</b>가 올라오고, 하단 탭바가 상태를 전환합니다. 전부 동작하는 코드입니다.</p>
+
+  <div class="spec-group"><h4>카테고리</h4>
+    <div class="tags"><span>금융</span></div></div>
+  <div class="spec-group"><h4>패턴</h4>
+    <div class="tags"><span>홈</span><span>자산</span><span>소비 리포트</span></div></div>
+  <div class="spec-group"><h4>컴포넌트</h4>
+    <div class="tags"><span>탭바</span><span>차트</span><span>바텀시트</span><span>리스트 행</span></div></div>
+  <div class="spec-group"><h4>디자인 토큰</h4>
+    <div class="tokens">
+      <span class="tk"><i style="background:#3182f6"></i>#3182F6</span>
+      <span class="tk"><i style="background:#f2f4f6;border:1px solid #e5e8eb"></i>#F2F4F6</span>
+      <span class="tk"><i style="background:#191f28"></i>#191F28</span>
+    </div>
+    <div class="tokens"><span class="tk">radius 20px</span><span class="tk">Noto Sans KR</span></div></div>
+
+  <p class="hint">💡 <b>코드 보기</b>로 전체 소스를 복사하면 그대로 사용할 수 있습니다.
+  바텀시트·탭바는 클래스 토글만으로 동작해 프레임워크에 쉽게 이식됩니다.</p>
+</aside>
+
+<script>
+/* 바텀시트: 계좌 행 탭 → 열기, dim/버튼 탭 → 닫기 */
+const screen = document.getElementById('screen');
+document.querySelectorAll('[data-sheet]').forEach(row => row.addEventListener('click', () => {
+  document.getElementById('sh-name').textContent = row.dataset.name;
+  document.getElementById('sh-amt').textContent = row.dataset.amt;
+  screen.classList.add('sheet-open');
+}));
+document.querySelectorAll('[data-close]').forEach(el =>
+  el.addEventListener('click', () => screen.classList.remove('sheet-open')));
+
+/* 탭바 활성 전환 */
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('on'));
+  t.classList.add('on');
+}));
+</script>
+<script>
+/* ── EN mode (?lang=en) — additive, non-destructive ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "앱 · 금융 홈 — 토스 스타일": "App · Finance Home — Toss Style",
+    "자산": "Assets",
+    "순서 편집": "Edit order",
+    "토스뱅크 통장": "Toss Bank account",
+    "2,483,000원": "2,483,000 KRW",
+    "비상금 저금통": "Emergency savings",
+    "518,200원": "518,200 KRW",
+    "증권 계좌": "Brokerage account",
+    "7,214,850원": "7,214,850 KRW",
+    "송금하기": "Send money",
+    "이번 주 소비": "This week's spending",
+    "7월 6일 ~ 오늘": "Jul 6 – today",
+    "184,300원": "184,300 KRW",
+    "지난주보다 12% ↓": "12% ↓ vs last week",
+    "월": "Mon",
+    "화": "Tue",
+    "수": "Wed",
+    "목": "Thu",
+    "금": "Fri",
+    "토": "Sat",
+    "일": "Sun",
+    "내 주식": "My stocks",
+    "실시간": "Live",
+    "애플": "Apple",
+    "312,400원": "312,400 KRW",
+    "엔비디아": "NVIDIA",
+    "198,750원": "198,750 KRW",
+    "네": "N",
+    "네이버": "NAVER",
+    "224,000원": "224,000 KRW",
+    "혜택": "Benefits",
+    "토스페이": "Toss Pay",
+    "증권": "Stocks",
+    "전체": "All",
+    "홈": "Home",
+    "잔액": "Balance",
+    "원": " KRW",
+    "내역 보기": "View history",
+    "송금": "Send",
+    "금융 홈": "Finance Home",
+    "— 토스 스타일": "— Toss style",
+    "간결한 카드 섹션, 자산 리스트, 주간 소비 차트로 구성된 금융 앱 홈.": "A finance app home built from clean card sections, an asset list, and a weekly spending chart.",
+    "계좌를 탭하면 바텀시트": "Tap an account and a bottom sheet",
+    "가 올라오고, 하단 탭바가 상태를 전환합니다. 전부 동작하는 코드입니다.": " slides up, and the bottom tab bar switches state. It's all working code.",
+    "카테고리": "Category",
+    "패턴": "Pattern",
+    "컴포넌트": "Component",
+    "디자인 토큰": "Design tokens",
+    "금융": "Finance",
+    "소비 리포트": "Spending report",
+    "탭바": "Tab bar",
+    "차트": "Chart",
+    "바텀시트": "Bottom sheet",
+    "리스트 행": "List row",
+    "코드 보기": "View code",
+    "로 전체 소스를 복사하면 그대로 사용할 수 있습니다.\n  바텀시트·탭바는 클래스 토글만으로 동작해 프레임워크에 쉽게 이식됩니다.": " to copy the full source and use it as-is. The bottom sheet and tab bar work with just class toggles, so they port easily to any framework."
+  };
+  const swap = s => { const t = s.trim(); return TR[t] != null ? s.replace(t, TR[t]) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (TR[n.nodeValue.trim()] != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    /* data-name is copied into the bottom sheet by existing JS → translate it too */
+    ['placeholder','title','alt','aria-label','data-name'].forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && TR[n.getAttribute(a).trim()] != null) n.setAttribute(a, TR[n.getAttribute(a).trim()]); });
+    n.childNodes.forEach(walk);
+  };
+  walk(document.body);
+  if (TR[document.title.trim()]) document.title = TR[document.title.trim()];
+})();
+</script>
+</body>
+</html>

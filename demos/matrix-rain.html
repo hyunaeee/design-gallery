@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NULLBYTE — 보이지 않는 위협을, 실시간으로</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: "Noto Sans KR", sans-serif; background: #000; color: #fff;
+       -webkit-font-smoothing: antialiased; }
+
+#c { position: fixed; inset: 0; display: block; touch-action: none; z-index: 0; }
+
+/* ── 상단 네비게이션 ── */
+.nav { position: fixed; z-index: 12; top: 0; left: 0; right: 0;
+       display: flex; align-items: center; justify-content: space-between;
+       padding: 20px 32px; pointer-events: none; }
+.brand { display: flex; align-items: center; gap: 10px; pointer-events: auto; text-decoration: none;
+         font-family: "JetBrains Mono", monospace; }
+.brand .mark { width: 30px; height: 30px; border-radius: 7px; display: grid; place-items: center;
+               background: rgba(10,24,14,.7); border: 1.5px solid rgba(77,255,136,.6);
+               box-shadow: 0 0 16px rgba(77,255,136,.35); color: #4dff88; font-weight: 700;
+               font-size: 15px; }
+.brand .name { font-size: 18px; font-weight: 700; letter-spacing: 2px; color: #fff; }
+.brand .name b { color: #4dff88; }
+.nav .links { display: flex; align-items: center; gap: 24px; pointer-events: auto;
+              font-family: "JetBrains Mono", monospace; }
+.nav .links a { font-size: 13px; color: rgba(255,255,255,.72); text-decoration: none;
+                letter-spacing: .5px; transition: color .2s; }
+.nav .links a:hover { color: #4dff88; }
+.nav .links a.pill { padding: 8px 16px; border-radius: 8px; color: #001108; font-weight: 700;
+                     background: #4dff88; box-shadow: 0 0 20px rgba(77,255,136,.4); }
+
+/* ── 히어로 ── */
+.head { position: fixed; z-index: 11; top: 104px; left: 32px; pointer-events: none;
+        width: min(560px, 90vw); }
+.head .kicker { font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 4px;
+                color: rgba(120,255,160,.7); }
+.head h1 { margin-top: 12px; font-size: clamp(30px, 5vw, 50px); font-weight: 700;
+           letter-spacing: -.02em; line-height: 1.2; text-shadow: 0 0 26px rgba(0,0,0,.95); }
+.head h1 .accent { color: #4dff88; }
+.head p { margin-top: 14px; font-size: 14px; line-height: 1.75; color: rgba(255,255,255,.72);
+          max-width: 440px; word-break: keep-all; }
+.head .cta { display: inline-flex; align-items: center; gap: 8px; margin-top: 22px;
+             pointer-events: auto; font-family: "Noto Sans KR", sans-serif; font-size: 15px;
+             font-weight: 700; color: #001108; text-decoration: none; padding: 13px 28px;
+             border-radius: 10px; background: #4dff88; box-shadow: 0 0 34px rgba(77,255,136,.45);
+             transition: transform .2s, box-shadow .2s; }
+.head .cta:hover { transform: translateY(-2px); box-shadow: 0 6px 44px rgba(77,255,136,.65); }
+
+/* ── 신뢰 지표 (하단 좌측 스탯) ── */
+.trust { position: fixed; z-index: 11; bottom: 26px; left: 32px; pointer-events: none;
+         display: flex; gap: 30px; font-family: "JetBrains Mono", monospace; }
+.trust div { display: flex; flex-direction: column; gap: 4px; }
+.trust .v { font-size: clamp(18px, 2.4vw, 24px); font-weight: 700; color: #4dff88;
+            text-shadow: 0 0 16px rgba(77,255,136,.4); }
+.trust .k { font-size: 10.5px; letter-spacing: 1.5px; color: rgba(255,255,255,.5); }
+
+/* ── 하단 컨트롤 ── */
+.ui { position: fixed; z-index: 10; bottom: 24px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px; padding: 9px 14px; flex-wrap: wrap;
+      justify-content: center; max-width: 94vw;
+      background: rgba(4,10,6,.62); border: 1px solid rgba(120,255,160,.18);
+      border-radius: 14px; backdrop-filter: blur(14px);
+      font-family: "JetBrains Mono", monospace; }
+.ui .grp { display: flex; gap: 5px; align-items: center; }
+.ui label { font-size: 11px; color: rgba(255,255,255,.55); letter-spacing: 1px; }
+.ui button { font-family: "JetBrains Mono", monospace; font-size: 12px; color: rgba(255,255,255,.72);
+             background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.12);
+             padding: 7px 13px; border-radius: 8px; cursor: pointer; transition: all .18s; }
+.ui button:hover { color: #fff; background: rgba(255,255,255,.14); }
+.ui button.on { color: #000; font-weight: 700; }
+.ui .sep { width: 1px; height: 22px; background: rgba(255,255,255,.16); }
+.ui input[type=range] { width: 110px; accent-color: #4dff88; cursor: pointer; }
+
+.hint { position: fixed; z-index: 10; bottom: 84px; left: 50%; transform: translateX(-50%);
+        font-family: "JetBrains Mono", monospace; font-size: 11px; letter-spacing: 2px;
+        color: rgba(255,255,255,.38); pointer-events: none; white-space: nowrap; }
+
+@media (max-width: 720px){ .head p { display: none; } .nav .links a.txt { display: none; }
+                           .trust { gap: 18px; } .trust .k { font-size: 9px; } }
+@media (max-width: 560px){ .ui label { display: none; } .ui input[type=range] { width: 74px; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<nav class="nav">
+  <a class="brand" href="#"><span class="mark">N</span><span class="name">NULL<b>BYTE</b></span></a>
+  <div class="links">
+    <a class="txt" href="#">제품</a>
+    <a class="txt" href="#">위협 인텔</a>
+    <a class="txt" href="#">문서</a>
+    <a class="pill" href="#">무료 진단</a>
+  </div>
+</nav>
+
+<div class="head">
+  <div class="kicker">CYBERSECURITY · THREAT DETECTION</div>
+  <h1>보이지 않는 위협을,<br><span class="accent">실시간으로</span></h1>
+  <p>NULLBYTE는 네트워크로 흘러드는 모든 트래픽을 스트림 단위로 해독합니다. 이상 징후가 코드가 되어 흐르기 전에, 자동으로 탐지하고 차단하세요.</p>
+  <a class="cta" href="#">무료 진단 시작 →</a>
+</div>
+
+<div class="trust">
+  <div><span class="v">2.4억+</span><span class="k">차단한 위협</span></div>
+  <div><span class="v">99.98%</span><span class="k">탐지 정확도</span></div>
+  <div><span class="v">18ms</span><span class="k">평균 대응</span></div>
+</div>
+
+<div class="hint">마우스로 열을 가속 · 클릭하면 글자가 터진다</div>
+
+<div class="ui">
+  <span class="grp" id="pal"></span>
+  <span class="sep"></span>
+  <span class="grp"><label>밀도</label><input id="dens" type="range" min="6" max="22" value="14"></span>
+</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   코드의 비 — 매트릭스 디지털 레인 (라이브러리 없음)
+   카타카나 + 숫자 + 한글 자모 섞은 세로 스트림
+   ───────────────────────────────────────────── */
+
+/* rAF 루프에서 참조하는 모든 것은 루프 시작 前에 선언 */
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, DPR = 1;
+
+/* 글리프 세트 */
+const KATA = 'アカサタナハマヤラワイキシチニヒミリヰウクスツヌフムユルエケセテネヘメレヱオコソトノホモヨロヲン';
+const HANGUL = 'ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎㅏㅑㅓㅕㅗㅛㅜㅠㅡㅣ';
+const DIGIT = '0123456789';
+const GLYPHS = (KATA + HANGUL + DIGIT).split('');
+function rg(){ return GLYPHS[(Math.random() * GLYPHS.length) | 0]; }
+
+/* 팔레트 (선두=밝음, 꼬리=페이드) */
+const palettes = {
+  '클래식': { name:'초록', head:'#d6ffe4', body:[80, 255, 130], glow:'rgba(60,255,120,.9)' },
+  '시안':   { name:'시안', head:'#e2ffff', body:[70, 230, 255], glow:'rgba(70,230,255,.9)' },
+  '앰버':   { name:'앰버', head:'#fff2d6', body:[255, 190, 70], glow:'rgba(255,190,70,.9)' },
+  '핑크':   { name:'핑크', head:'#ffe6f4', body:[255, 90, 190], glow:'rgba(255,90,190,.9)' }
+};
+let palKey = '클래식';
+
+/* 숨은 메시지 */
+const MSG = 'WELCOME';
+
+/* ── 상태 ── */
+let fontSize = 16;      // 밀도 슬라이더로 조절
+let cols = 0;
+let drops = [];         // 각 열의 선두 y (행 단위)
+let speeds = [];        // 각 열 낙하 속도(행/프레임)
+let boost = [];         // 마우스 근접 부스트(0..1)
+let bursts = [];        // 클릭 방사 폭발 {cx,cy,age}
+const mouse = { x: -9999, y: -9999 };
+let t = 0;
+
+/* 숨은 메시지 격자 좌표 (열,행) 집합 — 주기적으로 활성 */
+let msgCells = new Set();
+let msgTimer = 0;       // 0..1 페이드 사이클
+let msgActive = false;
+
+function buildGrid(){
+  cols = Math.ceil(W / fontSize);
+  const rows = Math.ceil(H / fontSize);
+  drops = new Array(cols);
+  speeds = new Array(cols);
+  boost = new Array(cols).fill(0);
+  for (let i = 0; i < cols; i++){
+    drops[i] = Math.random() * -rows;          // 화면 위에서 시작 → 로드 즉시 흘러내림
+    speeds[i] = 0.4 + Math.random() * 0.5;
+  }
+  computeMsg(rows);
+}
+
+/* 중앙에 MSG 글자를 5x7 비트맵으로 배치할 격자 셀 계산 */
+const FONT5x7 = {
+  'W':['10001','10001','10001','10101','10101','11011','10001'],
+  'E':['11111','10000','10000','11110','10000','10000','11111'],
+  'L':['10000','10000','10000','10000','10000','10000','11111'],
+  'C':['01111','10000','10000','10000','10000','10000','01111'],
+  'O':['01110','10001','10001','10001','10001','10001','01110'],
+  'M':['10001','11011','10101','10101','10001','10001','10001']
+};
+function computeMsg(rows){
+  msgCells = new Set();
+  const letters = MSG.split('');
+  const lw = 5, lh = 7, gap = 1;
+  const totalW = letters.length * (lw + gap) - gap;
+  const startCol = Math.floor((cols - totalW) / 2);
+  const startRow = Math.floor((rows - lh) / 2);
+  if (startCol < 0 || startRow < 0) return;
+  letters.forEach((ch, li) => {
+    const g = FONT5x7[ch]; if (!g) return;
+    for (let r = 0; r < lh; r++){
+      for (let cc = 0; cc < lw; cc++){
+        if (g[r][cc] === '1'){
+          const col = startCol + li * (lw + gap) + cc;
+          const row = startRow + r;
+          msgCells.add(col + ',' + row);
+        }
+      }
+    }
+  });
+}
+
+function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  buildGrid();
+}
+
+/* ── 초기화 ── */
+resize();
+addEventListener('resize', resize);
+
+/* ── 입력 ── */
+addEventListener('mousemove', e => { mouse.x = e.clientX; mouse.y = e.clientY; });
+addEventListener('mouseleave', () => { mouse.x = -9999; mouse.y = -9999; });
+addEventListener('mousedown', e => bursts.push({ cx: e.clientX, cy: e.clientY, age: 0 }));
+canvas.addEventListener('touchstart', e => {
+  const tt = e.touches[0]; mouse.x = tt.clientX; mouse.y = tt.clientY;
+  bursts.push({ cx: tt.clientX, cy: tt.clientY, age: 0 });
+}, { passive: true });
+canvas.addEventListener('touchmove', e => {
+  const tt = e.touches[0]; mouse.x = tt.clientX; mouse.y = tt.clientY;
+}, { passive: true });
+canvas.addEventListener('touchend', () => { mouse.x = -9999; mouse.y = -9999; }, { passive: true });
+
+/* ── UI ── */
+const palWrap = document.getElementById('pal');
+function paintPalButtons(){
+  Object.keys(palettes).forEach(k => {
+    const b = document.createElement('button');
+    const p = palettes[k];
+    b.textContent = p.name;
+    b.style.borderColor = 'rgba(' + p.body.join(',') + ',.5)';
+    if (k === palKey){ b.classList.add('on'); b.style.background = p.head; }
+    b.onclick = () => {
+      palKey = k;
+      [...palWrap.children].forEach((c, i) => {
+        const kk = Object.keys(palettes)[i];
+        c.classList.remove('on'); c.style.background = 'rgba(255,255,255,.05)';
+      });
+      b.classList.add('on'); b.style.background = p.head;
+    };
+    palWrap.appendChild(b);
+  });
+}
+paintPalButtons();
+document.getElementById('dens').addEventListener('input', e => {
+  fontSize = 30 - parseInt(e.target.value, 10);  // 값 클수록 촘촘 (폰트 작게)
+  ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+  buildGrid();
+});
+
+/* ── 메인 루프 ── */
+let frames = 0;
+(function loop(){
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+  t++;
+
+  /* 잔상: 반투명 검정 덮기 */
+  ctx.fillStyle = 'rgba(0,0,0,0.09)';
+  ctx.fillRect(0, 0, W, H);
+
+  const pal = palettes[palKey];
+  ctx.font = fontSize + "px 'JetBrains Mono', monospace";
+  ctx.textBaseline = 'top';
+
+  const rows = Math.ceil(H / fontSize);
+  const mCol = mouse.x >= 0 ? Math.floor(mouse.x / fontSize) : -999;
+  const mRow = mouse.y >= 0 ? Math.floor(mouse.y / fontSize) : -999;
+
+  /* 숨은 메시지 주기: 약 9초 주기로 나타났다 사라짐 */
+  msgTimer = (msgTimer + 0.0016) % 1;
+  const mv = msgTimer < 0.5 ? Math.max(0, (msgTimer - 0.28) / 0.22) : Math.max(0, (0.72 - msgTimer) / 0.22);
+  msgActive = mv > 0.02 && msgCells.size > 0;
+
+  for (let i = 0; i < cols; i++){
+    const x = i * fontSize;
+
+    /* 마우스 근접 → 부스트(가속+밝기) */
+    const near = Math.abs(i - mCol);
+    const target = near < 2 ? 1 : (near < 5 ? 0.5 : 0);
+    boost[i] += (target - boost[i]) * 0.15;
+
+    const headRow = drops[i];
+    /* 스트림 그리기: 선두부터 위로 20칸 페이드 */
+    const tail = 22;
+    for (let k = 0; k < tail; k++){
+      const row = Math.floor(headRow) - k;
+      if (row < 0 || row > rows) continue;
+      const y = row * fontSize;
+      /* 매 프레임 글자를 조금씩 바꿔 반짝임 */
+      const ch = ((i * 31 + row * 17 + (t >> 2)) % 7 === 0) ? rg()
+                 : GLYPHS[(i * 7 + row * 13 + (row % 3)) % GLYPHS.length];
+
+      const isHead = k === 0;
+      const fadeAmt = 1 - k / tail;
+      let bright = fadeAmt;
+
+      /* 마우스 하이라이트: 커서 근처 글자 흰색 */
+      const distM = mCol === i ? Math.abs(row - mRow) : 999;
+      const nearMouse = near < 2 && distM < 3;
+
+      if (isHead){
+        ctx.fillStyle = pal.head;
+        ctx.shadowColor = pal.glow; ctx.shadowBlur = 8 + boost[i] * 8;
+      } else if (nearMouse){
+        ctx.fillStyle = 'rgba(255,255,255,' + (0.85 * fadeAmt + 0.15).toFixed(2) + ')';
+        ctx.shadowColor = 'rgba(255,255,255,.8)'; ctx.shadowBlur = 8;
+      } else {
+        const b = pal.body;
+        const a = (bright * (0.32 + boost[i] * 0.5)).toFixed(2);
+        ctx.fillStyle = 'rgba(' + b[0] + ',' + b[1] + ',' + b[2] + ',' + a + ')';
+        ctx.shadowBlur = 0;
+      }
+      ctx.fillText(ch, x, y);
+    }
+    ctx.shadowBlur = 0;
+
+    /* 낙하 진행 */
+    let sp = speeds[i] * (1 + boost[i] * 1.8);
+    drops[i] += sp;
+    if (headRow * fontSize > H && Math.random() > 0.975){
+      drops[i] = 0;
+      speeds[i] = 0.4 + Math.random() * 0.5;
+    }
+  }
+
+  /* 숨은 메시지 글자 오버레이 */
+  if (msgActive){
+    ctx.shadowColor = pal.glow; ctx.shadowBlur = 10;
+    for (const cell of msgCells){
+      const [c, r] = cell.split(',').map(Number);
+      const x = c * fontSize, y = r * fontSize;
+      const ch = ((c * 3 + r + (t >> 3)) % 11 === 0) ? rg()
+                 : GLYPHS[(c + r * 5) % GLYPHS.length];
+      ctx.fillStyle = 'rgba(255,255,255,' + (mv * 0.95).toFixed(2) + ')';
+      ctx.fillText(ch, x, y);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  /* 클릭 방사 폭발: 중심에서 링 형태로 밝은 글자 */
+  for (let bi = bursts.length - 1; bi >= 0; bi--){
+    const bu = bursts[bi];
+    bu.age += 1;
+    const radius = bu.age * fontSize * 0.9;
+    const ring = 24;
+    const alpha = Math.max(0, 1 - bu.age / 26);
+    if (alpha <= 0){ bursts.splice(bi, 1); continue; }
+    ctx.shadowColor = pal.glow; ctx.shadowBlur = 12;
+    for (let a = 0; a < ring; a++){
+      const ang = (a / ring) * Math.PI * 2;
+      const x = bu.cx + Math.cos(ang) * radius;
+      const y = bu.cy + Math.sin(ang) * radius;
+      if (x < 0 || x > W || y < 0 || y > H) continue;
+      ctx.fillStyle = 'rgba(255,255,255,' + alpha.toFixed(2) + ')';
+      ctx.fillText(rg(), x, y);
+    }
+    ctx.shadowBlur = 0;
+  }
+
+  requestAnimationFrame(loop);
+})();
+</script>
+<script>
+/* ── English mode (?lang=en) — non-destructive DOM text swap ──
+   Note: the falling glyphs (katakana + Hangul jamo + digits) are decorative
+   visual noise, not words, so they are intentionally left unchanged. The only
+   real message drawn on canvas is "WELCOME", which is already English. */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "NULLBYTE — 보이지 않는 위협을, 실시간으로": "NULLBYTE — Unseen Threats, in Real Time",
+    "제품": "Products",
+    "위협 인텔": "Threat Intel",
+    "문서": "Docs",
+    "무료 진단": "Free Scan",
+    "보이지 않는 위협을,": "The threats you can't see,",
+    "실시간으로": "in real time",
+    "NULLBYTE는 네트워크로 흘러드는 모든 트래픽을 스트림 단위로 해독합니다. 이상 징후가 코드가 되어 흐르기 전에, 자동으로 탐지하고 차단하세요.":
+      "NULLBYTE decodes every packet flowing into your network, stream by stream. Detect and block anomalies automatically — before they turn into code and slip away.",
+    "무료 진단 시작 →": "Start a Free Scan →",
+    "2.4억+": "240M+",
+    "차단한 위협": "THREATS BLOCKED",
+    "탐지 정확도": "DETECTION ACCURACY",
+    "평균 대응": "AVG. RESPONSE",
+    "마우스로 열을 가속 · 클릭하면 글자가 터진다": "Move your mouse to speed up columns · Click to burst the glyphs",
+    "밀도": "Density",
+    "초록": "Green",
+    "시안": "Cyan",
+    "앰버": "Amber",
+    "핑크": "Pink"
+  };
+  const swap = s => { const t = s.trim(); return TR[t] != null ? s.replace(t, TR[t]) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (TR[n.nodeValue.trim()] != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ['placeholder','title','alt','aria-label'].forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && TR[n.getAttribute(a).trim()] != null) n.setAttribute(a, TR[n.getAttribute(a).trim()]); });
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  if (TR[document.title.trim()]) document.title = TR[document.title.trim()];
+})();
+</script>
+</body>
+</html>

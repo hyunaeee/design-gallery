@@ -1,0 +1,595 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEON DIVE — 사이버펑크 게임 런처</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+/* AI 생성 영상 히어로(Higgsfield · vid-cyber.mp4) + 글리치 타이포 + 커서 HUD.
+   HUD 내비/버튼을 누르면 요원 선택·무기고·패치노트·예고편 "페이지"로 이동하는
+   멀티페이지 런처. 요원을 링크하고 다이브하면 터미널 접속 시퀀스가 재생된다. */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root { --pink: #ff2e88; --cyan: #00eaff; --ink: #05060d; }
+body { font-family: "Noto Sans KR", sans-serif; background: var(--ink); color: #eaf6ff;
+       height: 100vh; overflow: hidden; cursor: none; -webkit-font-smoothing: antialiased; }
+a, button { cursor: none; }
+
+/* 배경 영상 */
+.bgv { position: fixed; inset: 0; }
+.bgv video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
+             filter: saturate(1.3) contrast(1.1); }
+.bgv::after { content: ""; position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(5,6,13,.55), rgba(5,6,13,.35) 40%, rgba(5,6,13,.85)),
+              radial-gradient(120% 90% at 50% 30%, transparent 40%, rgba(5,6,13,.7)); }
+/* 스캔라인 */
+.scan { position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: .4;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,.25) 0 1px, transparent 1px 3px);
+  mix-blend-mode: multiply; }
+/* 그리드 오버레이 */
+.grid-ov { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: .12;
+  background:
+    linear-gradient(var(--cyan) 1px, transparent 1px) 0 0 / 100% 46px,
+    linear-gradient(90deg, var(--cyan) 1px, transparent 1px) 0 0 / 46px 100%;
+  mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 30%, transparent 80%);
+  -webkit-mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 30%, transparent 80%); }
+
+.wrap { position: relative; z-index: 5; height: 100%; display: flex; flex-direction: column;
+        padding: 0 5vw; }
+
+/* HUD 상단 바 */
+.hud { display: flex; align-items: center; justify-content: space-between; gap: 20px;
+       padding: 26px 0; font-family: "Space Mono", monospace; font-size: 11.5px;
+       letter-spacing: 2px; color: #7fd7ff; position: relative; z-index: 35; }
+.hud .logo { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 19px; letter-spacing: 3px;
+             color: #fff; text-shadow: 0 0 18px var(--cyan); }
+.hud .logo b { color: var(--pink); }
+.hud nav { display: flex; gap: 26px; }
+.hud nav a { color: #7fd7ff; padding: 4px 0; position: relative; white-space: nowrap; }
+.hud nav a::after { content: ""; position: absolute; left: 0; bottom: 0; height: 1px; width: 0;
+  background: var(--cyan); box-shadow: 0 0 8px var(--cyan); transition: width .25s; }
+.hud nav a:hover { color: #fff; text-shadow: 0 0 10px var(--cyan); }
+.hud nav a:hover::after { width: 100%; }
+.hud .status { display: flex; gap: 20px; }
+.hud .status span { white-space: nowrap; }
+.hud .status span::before { content: "● "; color: #4dff9e; }
+
+/* 중앙 히어로 */
+.hero { flex: 1; display: flex; flex-direction: column; justify-content: center; }
+.tag { font-family: "Space Mono", monospace; font-size: 13px; letter-spacing: 6px; color: var(--cyan);
+       margin-bottom: 20px; }
+.glitch { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: clamp(52px, 12vw, 168px);
+          line-height: .92; letter-spacing: -.01em; position: relative; width: max-content; max-width: 100%; }
+.glitch .base { color: #fff; text-shadow: 0 0 40px rgba(0,234,255,.35); }
+.glitch::before, .glitch::after { content: attr(data-txt); position: absolute; inset: 0;
+  clip-path: inset(0 0 0 0); }
+.glitch::before { color: var(--pink); animation: gl1 3.2s steps(1) infinite; }
+.glitch::after { color: var(--cyan); animation: gl2 2.7s steps(1) infinite; }
+@keyframes gl1 { 0%,92%,100%{transform:translate(0,0);opacity:0} 93%{transform:translate(-4px,2px);opacity:.9}
+  95%{transform:translate(3px,-1px)} 97%{transform:translate(-2px,1px)} }
+@keyframes gl2 { 0%,90%,100%{transform:translate(0,0);opacity:0} 91%{transform:translate(4px,-2px);opacity:.8}
+  94%{transform:translate(-3px,2px)} 96%{transform:translate(2px,-1px)} }
+.sub { margin-top: 26px; max-width: 440px; font-size: 15px; line-height: 1.8; color: #b9cfe0;
+       word-break: keep-all; }
+
+.actions { margin-top: 38px; display: flex; gap: 16px; align-items: center; }
+.btn-play { position: relative; display: inline-flex; align-items: center; gap: 12px;
+            font-family: "Orbitron", sans-serif; font-weight: 700; font-size: 15px; letter-spacing: 1px;
+            color: var(--ink); background: var(--cyan); border: none; padding: 16px 32px;
+            clip-path: polygon(0 0, 100% 0, 100% 70%, 92% 100%, 0 100%); cursor: none;
+            box-shadow: 0 0 30px rgba(0,234,255,.5); }
+.btn-play:hover { background: #fff; box-shadow: 0 0 44px rgba(255,255,255,.6); }
+.btn-ghost { font-family: "Space Mono", monospace; font-size: 13px; letter-spacing: 2px; color: #eaf6ff;
+             border: 1px solid rgba(0,234,255,.4); background: rgba(0,234,255,.06); padding: 15px 24px;
+             cursor: none; }
+.btn-ghost:hover { border-color: var(--cyan); background: rgba(0,234,255,.14); }
+
+/* 하단 스탯 티커 */
+.foot { display: flex; justify-content: space-between; align-items: flex-end; padding: 0 0 30px;
+        font-family: "Space Mono", monospace; }
+.stats { display: flex; gap: 40px; }
+.stat b { display: block; font-family: "Orbitron", sans-serif; font-size: 26px; color: #fff;
+          text-shadow: 0 0 16px var(--pink); }
+.stat span { font-size: 10.5px; letter-spacing: 2px; color: #6b8ba3; }
+.foot .credit { font-size: 10px; letter-spacing: 2px; color: #4a6379; }
+
+/* ── 페이지 오버레이 ─────────────────────────────── */
+.pages { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
+.page { position: absolute; inset: 0; overflow-y: auto; padding: 100px 6vw 70px;
+  background: rgba(4,5,12,.9); backdrop-filter: blur(10px);
+  opacity: 0; pointer-events: none; transition: opacity .3s; }
+.page.on { opacity: 1; pointer-events: auto; animation: pageIn .38s steps(3); }
+@keyframes pageIn { 0%{ clip-path: inset(0 0 100% 0);} 60%{ clip-path: inset(0 0 20% 0);}
+  100%{ clip-path: inset(0 0 0 0);} }
+.page .p-tag { font-family: "Space Mono", monospace; font-size: 12px; letter-spacing: 5px; color: var(--cyan); }
+.page h2 { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: clamp(30px,5.4vw,64px);
+  color: #fff; margin-top: 12px; text-shadow: 0 0 30px rgba(0,234,255,.3); }
+.page .p-sub { margin-top: 12px; color: #8fb3c9; font-size: 14px; max-width: 520px; word-break: keep-all; }
+.p-close { position: absolute; top: 26px; right: 5vw; font-family: "Space Mono", monospace;
+  font-size: 12px; letter-spacing: 2px; color: #eaf6ff; background: rgba(255,46,136,.1);
+  border: 1px solid rgba(255,46,136,.5); padding: 10px 18px; }
+.p-close:hover { background: rgba(255,46,136,.3); }
+
+/* 요원 카드 */
+.agents { margin-top: 44px; display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; max-width: 980px; }
+.agent { position: relative; border: 1px solid rgba(0,234,255,.25); background: rgba(8,12,24,.7);
+  padding: 26px 22px; transition: transform .2s, border-color .2s, box-shadow .2s; }
+.agent:hover { transform: translateY(-6px); border-color: var(--cyan); box-shadow: 0 0 30px rgba(0,234,255,.15); }
+.agent.sel { border-color: var(--pink); box-shadow: 0 0 34px rgba(255,46,136,.3); }
+.agent.sel::after { content: "LINKED"; position: absolute; top: 12px; right: 12px;
+  font-family: "Space Mono", monospace; font-size: 9px; letter-spacing: 2px; color: var(--pink);
+  border: 1px solid var(--pink); padding: 3px 7px; animation: blinkP 1s steps(1) infinite; }
+@keyframes blinkP { 50%{ opacity: .25; } }
+.agent .no { font-family: "Orbitron", sans-serif; font-weight: 900; font-size: 44px;
+  color: transparent; -webkit-text-stroke: 1px rgba(0,234,255,.5); }
+.agent h3 { font-family: "Orbitron", sans-serif; font-size: 21px; letter-spacing: 2px; color: #fff; margin-top: 8px; }
+.agent .role { font-family: "Space Mono", monospace; font-size: 11px; letter-spacing: 2px;
+  color: var(--cyan); margin-top: 5px; }
+.agent .bars { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+.agent .brow { display: grid; grid-template-columns: 74px 1fr; align-items: center; gap: 10px;
+  font-family: "Space Mono", monospace; font-size: 10px; letter-spacing: 1px; color: #6b8ba3; }
+.bar { height: 5px; background: rgba(0,234,255,.12); position: relative; overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--cyan), var(--pink));
+  box-shadow: 0 0 10px rgba(0,234,255,.6); transition: width .9s cubic-bezier(.2,.8,.2,1); }
+.play-foot { margin-top: 40px; display: flex; align-items: center; gap: 22px; flex-wrap: wrap; }
+.linked { font-family: "Space Mono", monospace; font-size: 12px; letter-spacing: 2px; color: #8fb3c9; }
+.linked b { color: var(--pink); }
+.btn-play[disabled] { opacity: .35; box-shadow: none; }
+
+/* 무기고 */
+.weapons { margin-top: 44px; display: grid; grid-template-columns: repeat(3,1fr); gap: 20px; max-width: 980px; }
+.weapon { border: 1px solid rgba(0,234,255,.25); background: rgba(8,12,24,.7); padding: 24px 22px;
+  transition: transform .2s, border-color .2s; }
+.weapon:hover { transform: translateY(-6px); border-color: var(--cyan); }
+.weapon .glyph { font-size: 38px; filter: drop-shadow(0 0 14px rgba(0,234,255,.6)); }
+.weapon h3 { font-family: "Orbitron", sans-serif; font-size: 18px; letter-spacing: 1px; color: #fff; margin-top: 12px; }
+.weapon .wtype { font-family: "Space Mono", monospace; font-size: 10.5px; letter-spacing: 2px;
+  color: var(--cyan); margin-top: 4px; }
+.weapon .bars { margin-top: 16px; display: flex; flex-direction: column; gap: 9px; }
+.weapon .brow { display: grid; grid-template-columns: 64px 1fr; align-items: center; gap: 10px;
+  font-family: "Space Mono", monospace; font-size: 9.5px; letter-spacing: 1px; color: #6b8ba3; }
+.equip { margin-top: 18px; width: 100%; font-family: "Space Mono", monospace; font-size: 12px;
+  letter-spacing: 2px; color: var(--cyan); background: rgba(0,234,255,.07);
+  border: 1px solid rgba(0,234,255,.4); padding: 11px 0; }
+.equip:hover { background: rgba(0,234,255,.2); color: #fff; }
+
+/* 패치 노트 */
+.news-list { margin-top: 40px; max-width: 760px; display: flex; flex-direction: column; }
+.news { border-top: 1px solid rgba(0,234,255,.18); padding: 20px 6px; transition: background .2s; }
+.news:last-child { border-bottom: 1px solid rgba(0,234,255,.18); }
+.news:hover { background: rgba(0,234,255,.05); }
+.news .n-head { display: flex; align-items: baseline; gap: 16px; }
+.news .n-date { font-family: "Space Mono", monospace; font-size: 11px; letter-spacing: 1px; color: var(--pink); }
+.news h3 { font-size: 17px; font-weight: 700; color: #fff; flex: 1; }
+.news .n-arrow { font-family: "Space Mono", monospace; color: var(--cyan); transition: transform .25s; }
+.news.open .n-arrow { transform: rotate(90deg); }
+.news .n-body { max-height: 0; overflow: hidden; transition: max-height .35s ease; }
+.news .n-body p { padding: 12px 2px 4px; font-size: 13.5px; line-height: 1.8; color: #9db8cc; word-break: keep-all; }
+.news.open .n-body { max-height: 140px; }
+
+/* 예고편 */
+.trailer-stage { margin-top: 40px; max-width: 900px; position: relative; }
+.trailer-stage video { width: 100%; display: block; border: 1px solid rgba(0,234,255,.35);
+  box-shadow: 0 0 60px rgba(0,234,255,.15); filter: saturate(1.3) contrast(1.1); }
+.trailer-stage .tbar { position: absolute; left: 0; right: 0; height: 9%; background: #000; }
+.trailer-stage .tbar.top { top: 0; } .trailer-stage .tbar.bot { bottom: 0; }
+.trailer-cap { margin-top: 16px; font-family: "Space Mono", monospace; font-size: 11px;
+  letter-spacing: 3px; color: #6b8ba3; display: flex; justify-content: space-between; }
+.trailer-cap b { color: var(--cyan); }
+
+/* 다이브 접속 시퀀스 */
+.dive { position: fixed; inset: 0; z-index: 44; background: #010208; display: none;
+  align-items: center; justify-content: center; }
+.dive.on { display: flex; }
+.term { width: min(560px, 86vw); font-family: "Space Mono", monospace; font-size: 13.5px;
+  line-height: 2.1; color: #4dff9e; text-shadow: 0 0 8px rgba(77,255,158,.5); }
+.term div::before { content: "> "; color: var(--cyan); }
+.term div { animation: lineIn .18s steps(2); }
+@keyframes lineIn { from{ opacity: 0; transform: translateX(-6px);} }
+.term .ok { color: var(--cyan); }
+.term .warn { color: var(--pink); }
+
+/* 토스트 */
+.toastc { position: fixed; left: 50%; bottom: 44px; transform: translateX(-50%) translateY(16px);
+  z-index: 46; font-family: "Space Mono", monospace; font-size: 12.5px; letter-spacing: 2px;
+  color: #eaf6ff; background: rgba(5,10,20,.92); border: 1px solid var(--cyan);
+  box-shadow: 0 0 26px rgba(0,234,255,.35); padding: 13px 24px; opacity: 0; pointer-events: none;
+  transition: opacity .25s, transform .3s; }
+.toastc.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* 커스텀 커서 (조준경 HUD) */
+.crosshair { position: fixed; z-index: 50; width: 42px; height: 42px; pointer-events: none;
+             transform: translate(-50%, -50%); mix-blend-mode: screen; }
+.crosshair::before, .crosshair::after { content: ""; position: absolute; background: var(--cyan);
+  box-shadow: 0 0 8px var(--cyan); }
+.crosshair::before { left: 50%; top: 0; bottom: 0; width: 1px; transform: translateX(-50%); }
+.crosshair::after { top: 50%; left: 0; right: 0; height: 1px; transform: translateY(-50%); }
+.crosshair i { position: absolute; inset: 8px; border: 1px solid rgba(0,234,255,.6); border-radius: 50%; }
+.ch-dot { position: fixed; z-index: 51; width: 5px; height: 5px; background: var(--pink); border-radius: 50%;
+          transform: translate(-50%,-50%); pointer-events: none; box-shadow: 0 0 10px var(--pink); }
+
+@media (max-width: 760px) {
+  body { cursor: auto; } .crosshair, .ch-dot { display: none; }
+  .hud .status { display: none; } .hud nav { gap: 14px; font-size: 10px; } .stats { gap: 20px; }
+  .agents, .weapons { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+<div class="bgv">
+  <video autoplay muted loop playsinline poster="../assets/gen/nebula.png" onerror="this.style.display='none'">
+    <source src="../assets/gen/vid-cyber.mp4" type="video/mp4">
+  </video>
+</div>
+<div class="grid-ov"></div>
+<div class="scan"></div>
+<div class="crosshair" id="ch"><i></i></div>
+<div class="ch-dot" id="chDot"></div>
+
+<div class="wrap">
+  <div class="hud">
+    <div class="logo">NEON<b>//</b>DIVE</div>
+    <nav>
+      <a href="#" data-page="play">요원</a>
+      <a href="#" data-page="armory">무기고</a>
+      <a href="#" data-page="news">패치노트</a>
+      <a href="#" data-page="trailer">예고편</a>
+    </nav>
+    <div class="status">
+      <span>SERVER: SEOUL-01</span><span>PING 12ms</span><span>온라인 4,821,006</span>
+    </div>
+  </div>
+
+  <div class="hero">
+    <div class="tag">SEASON 07 — 네온의 심연</div>
+    <div class="glitch" data-txt="접속하라">
+      <span class="base">접속하라</span>
+    </div>
+    <p class="sub">비가 멈추지 않는 도시, 홀로그램의 뒷골목. 지금 다이브하면 시즌 보상 전부 언락.
+    당신의 감각만이 유일한 무기입니다.</p>
+    <div class="actions">
+      <button class="btn-play" data-page="play">▶ 지금 플레이</button>
+      <button class="btn-ghost" data-page="trailer">예고편 보기 →</button>
+    </div>
+  </div>
+
+  <div class="foot">
+    <div class="stats">
+      <div class="stat"><b id="s1">0</b><span>다운로드</span></div>
+      <div class="stat"><b id="s2">0</b><span>동시 접속</span></div>
+      <div class="stat"><b>4.9★</b><span>유저 평점</span></div>
+    </div>
+    <div class="credit">BACKGROUND FILM — AI GENERATED (HIGGSFIELD)</div>
+  </div>
+</div>
+
+<!-- ── 페이지들 ─────────────────────────────────── -->
+<div class="pages" id="pages">
+
+  <!-- 요원 선택 -->
+  <section class="page" data-key="play">
+    <button class="p-close">✕ 닫기 [ESC]</button>
+    <div class="p-tag">OPERATION — SEASON 07</div>
+    <h2>요원 선택</h2>
+    <p class="p-sub">다이브에 투입할 요원을 링크하세요. 능력치는 네온 심연 기준 보정치입니다.</p>
+    <div class="agents">
+      <div class="agent" data-name="스펙터" data-en="SPECTRE">
+        <div class="no">01</div><h3>SPECTRE</h3><div class="role">침투 전문가</div>
+        <div class="bars">
+          <div class="brow"><span>반응속도</span><div class="bar"><i data-v="92"></i></div></div>
+          <div class="brow"><span>해킹</span><div class="bar"><i data-v="74"></i></div></div>
+          <div class="brow"><span>화력</span><div class="bar"><i data-v="58"></i></div></div>
+        </div>
+      </div>
+      <div class="agent" data-name="발키리" data-en="VALKYRIE">
+        <div class="no">02</div><h3>VALKYRIE</h3><div class="role">화력 지원</div>
+        <div class="bars">
+          <div class="brow"><span>반응속도</span><div class="bar"><i data-v="66"></i></div></div>
+          <div class="brow"><span>해킹</span><div class="bar"><i data-v="41"></i></div></div>
+          <div class="brow"><span>화력</span><div class="bar"><i data-v="95"></i></div></div>
+        </div>
+      </div>
+      <div class="agent" data-name="누아르" data-en="NOIR">
+        <div class="no">03</div><h3>NOIR</h3><div class="role">정보 해커</div>
+        <div class="bars">
+          <div class="brow"><span>반응속도</span><div class="bar"><i data-v="71"></i></div></div>
+          <div class="brow"><span>해킹</span><div class="bar"><i data-v="97"></i></div></div>
+          <div class="brow"><span>화력</span><div class="bar"><i data-v="49"></i></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="play-foot">
+      <button class="btn-play" id="diveBtn" disabled>다이브 시작 ▶</button>
+      <div class="linked" id="linked">요원을 선택하세요</div>
+    </div>
+  </section>
+
+  <!-- 무기고 -->
+  <section class="page" data-key="armory">
+    <button class="p-close">✕ 닫기 [ESC]</button>
+    <div class="p-tag">ARMORY — LOADOUT</div>
+    <h2>무기고</h2>
+    <p class="p-sub">시즌 07 신규 무장. 장착은 다음 다이브부터 적용됩니다.</p>
+    <div class="weapons">
+      <div class="weapon" data-name="네온 카타나" data-en="NEON KATANA">
+        <div class="glyph">⚔️</div><h3>네온 카타나</h3><div class="wtype">근접 · 처형</div>
+        <div class="bars">
+          <div class="brow"><span>공격력</span><div class="bar"><i data-v="94"></i></div></div>
+          <div class="brow"><span>연사</span><div class="bar"><i data-v="35"></i></div></div>
+          <div class="brow"><span>사거리</span><div class="bar"><i data-v="18"></i></div></div>
+        </div>
+        <button class="equip">장착</button>
+      </div>
+      <div class="weapon" data-name="펄스 SMG" data-en="PULSE SMG">
+        <div class="glyph">🔫</div><h3>펄스 SMG</h3><div class="wtype">속사 · 제압</div>
+        <div class="bars">
+          <div class="brow"><span>공격력</span><div class="bar"><i data-v="52"></i></div></div>
+          <div class="brow"><span>연사</span><div class="bar"><i data-v="96"></i></div></div>
+          <div class="brow"><span>사거리</span><div class="bar"><i data-v="55"></i></div></div>
+        </div>
+        <button class="equip">장착</button>
+      </div>
+      <div class="weapon" data-name="레일 스나이퍼" data-en="RAIL SNIPER">
+        <div class="glyph">🎯</div><h3>레일 스나이퍼</h3><div class="wtype">정밀 · 관통</div>
+        <div class="bars">
+          <div class="brow"><span>공격력</span><div class="bar"><i data-v="99"></i></div></div>
+          <div class="brow"><span>연사</span><div class="bar"><i data-v="14"></i></div></div>
+          <div class="brow"><span>사거리</span><div class="bar"><i data-v="98"></i></div></div>
+        </div>
+        <button class="equip">장착</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- 패치노트 -->
+  <section class="page" data-key="news">
+    <button class="p-close">✕ 닫기 [ESC]</button>
+    <div class="p-tag">SYSTEM LOG</div>
+    <h2>패치노트</h2>
+    <p class="p-sub">클릭하면 상세 내용이 펼쳐집니다.</p>
+    <div class="news-list">
+      <div class="news">
+        <div class="n-head"><span class="n-date">2026.04.02</span><h3>시즌 07 — 네온의 심연 오픈</h3><span class="n-arrow">▶</span></div>
+        <div class="n-body"><p>신규 지역 '침수 구역'과 요원 누아르가 추가됐습니다. 시즌 패스 보상 60종, 다이브 랭크 초기화.</p></div>
+      </div>
+      <div class="news">
+        <div class="n-head"><span class="n-date">2026.03.18</span><h3>밸런스 패치 7.0.2</h3><span class="n-arrow">▶</span></div>
+        <div class="n-body"><p>펄스 SMG 반동 12% 감소, 레일 스나이퍼 재장전 0.2초 증가. 침투 루트 3곳의 조명이 조정됐습니다.</p></div>
+      </div>
+      <div class="news">
+        <div class="n-head"><span class="n-date">2026.03.04</span><h3>야간 시장 이벤트</h3><span class="n-arrow">▶</span></div>
+        <div class="n-body"><p>홀로그램 뒷골목에 한정 상점이 열립니다. 네온 크레딧으로 스킨 '산성비'를 교환하세요.</p></div>
+      </div>
+      <div class="news">
+        <div class="n-head"><span class="n-date">2026.02.20</span><h3>랭크전 시즌 결산</h3><span class="n-arrow">▶</span></div>
+        <div class="n-body"><p>다이아 이상 도달 요원에게 칭호 '심연을 걷는 자'가 지급됐습니다. 다음 시즌 배치는 3판입니다.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 예고편 -->
+  <section class="page" data-key="trailer">
+    <button class="p-close">✕ 닫기 [ESC]</button>
+    <div class="p-tag">OFFICIAL FILM</div>
+    <h2>시즌 07 예고편</h2>
+    <div class="trailer-stage">
+      <video id="tv" muted loop playsinline poster="../assets/gen/nebula.png">
+        <source src="../assets/gen/vid-cyber.mp4" type="video/mp4">
+      </video>
+      <div class="tbar top"></div><div class="tbar bot"></div>
+    </div>
+    <div class="trailer-cap"><span>NEON//DIVE — <b>SEASON 07</b></span><span>AI GENERATED FILM</span></div>
+  </section>
+</div>
+
+<!-- 다이브 접속 시퀀스 -->
+<div class="dive" id="dive"><div class="term" id="term"></div></div>
+<div class="toastc" id="toastc"></div>
+
+<script>
+/* 커스텀 커서 (지연 추종) */
+const ch = document.getElementById('ch'), chDot = document.getElementById('chDot');
+let tx = innerWidth/2, ty = innerHeight/2, cx = tx, cy = ty;
+addEventListener('mousemove', e => {
+  tx = e.clientX; ty = e.clientY;
+  chDot.style.left = tx+'px'; chDot.style.top = ty+'px';
+});
+let frames = 0;
+(function loop(){
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+  cx += (tx-cx)*.18; cy += (ty-cy)*.18;
+  ch.style.left = cx+'px'; ch.style.top = cy+'px';
+  requestAnimationFrame(loop);
+})();
+
+/* 스탯 카운트업 */
+function countUp(el, target, suffix){
+  const t0 = performance.now();
+  (function tick(t){
+    const p = Math.min((t-t0)/2000, 1), e = 1-Math.pow(1-p,3);
+    el.textContent = Math.round(target*e).toLocaleString('ko-KR') + (suffix||'');
+    if (p<1) requestAnimationFrame(tick);
+  })(t0);
+}
+countUp(document.getElementById('s1'), 12480000, '+');
+countUp(document.getElementById('s2'), 482100, '');
+
+/* ── 페이지 라우팅 ─────────────────────────────── */
+const IS_EN = new URLSearchParams(location.search).get('lang') === 'en';
+const pagesEl = document.getElementById('pages');
+const tv = document.getElementById('tv');
+function openPage(k){
+  closePage();
+  const p = pagesEl.querySelector(`.page[data-key="${k}"]`); if (!p) return;
+  p.classList.add('on');
+  /* 능력치 바 채우기 애니메이션 */
+  p.querySelectorAll('.bar i').forEach(b => {
+    b.style.width = '0'; void b.offsetWidth;
+    requestAnimationFrame(() => b.style.width = b.dataset.v + '%');
+  });
+  if (k === 'trailer'){ tv.currentTime = 0; tv.play().catch(()=>{}); }
+}
+function closePage(){
+  pagesEl.querySelectorAll('.page.on').forEach(p => p.classList.remove('on'));
+  tv.pause();
+}
+document.querySelectorAll('[data-page]').forEach(el =>
+  el.addEventListener('click', e => { e.preventDefault(); openPage(el.dataset.page); }));
+document.querySelectorAll('.p-close').forEach(b => b.addEventListener('click', closePage));
+addEventListener('keydown', e => { if (e.key === 'Escape') closePage(); });
+
+/* 토스트 */
+const toastc = document.getElementById('toastc');
+let toastT = null;
+function toast(msg){
+  toastc.textContent = msg;
+  toastc.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => toastc.classList.remove('show'), 2200);
+}
+
+/* ── 요원 선택 + 다이브 시퀀스 ─────────────────── */
+let agentSel = null;
+const diveBtn = document.getElementById('diveBtn');
+const linkedEl = document.getElementById('linked');
+document.querySelectorAll('.agent').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('.agent').forEach(x => x.classList.toggle('sel', x === c));
+  agentSel = IS_EN ? c.dataset.en : c.dataset.name;
+  linkedEl.innerHTML = (IS_EN ? 'LINKED AGENT: ' : '링크된 요원: ') + '<b>' + agentSel + '</b>';
+  diveBtn.disabled = false;
+}));
+
+const diveEl = document.getElementById('dive');
+const termEl = document.getElementById('term');
+let diving = false;
+diveBtn.addEventListener('click', () => {
+  if (!agentSel || diving) return;
+  diving = true;
+  termEl.innerHTML = '';
+  diveEl.classList.add('on');
+  const lines = IS_EN ? [
+    ['NEURAL LINK REQUEST … ACCEPTED',''],
+    ['SYNCING CORTEX … 34% … 78% … 98%',''],
+    ['AGENT ' + agentSel + ' AUTHORIZED','ok'],
+    ['LOADING DISTRICT: THE NEON ABYSS',''],
+    ['WARNING: RAIN NEVER STOPS HERE','warn'],
+    ['DIVE COMPLETE — WELCOME, ' + agentSel,'ok'],
+  ] : [
+    ['뉴럴 링크 요청 … 승인됨',''],
+    ['대뇌피질 동기화 … 34% … 78% … 98%',''],
+    ['요원 ' + agentSel + ' 인증 완료','ok'],
+    ['구역 로딩: 네온의 심연',''],
+    ['경고: 이 도시의 비는 멈추지 않습니다','warn'],
+    ['다이브 완료 — 환영합니다, ' + agentSel,'ok'],
+  ];
+  lines.forEach(([txt, cls], i) => setTimeout(() => {
+    const d = document.createElement('div');
+    d.textContent = txt; if (cls) d.className = cls;
+    termEl.appendChild(d);
+  }, 420 * i));
+  setTimeout(() => {
+    diveEl.classList.remove('on');
+    closePage();
+    diving = false;
+    toast(IS_EN ? '▶ SEASON 07 — DIVE SUCCESSFUL' : '▶ 시즌 07 — 접속에 성공했습니다');
+  }, 420 * lines.length + 1100);
+});
+
+/* ── 무기 장착 ─────────────────────────────────── */
+document.querySelectorAll('.weapon .equip').forEach(b => b.addEventListener('click', () => {
+  const w = b.closest('.weapon');
+  const nm = IS_EN ? w.dataset.en : w.dataset.name;
+  toast(IS_EN ? 'EQUIPPED: ' + nm : '장착 완료: ' + nm);
+}));
+
+/* ── 패치노트 펼치기 ───────────────────────────── */
+document.querySelectorAll('.news').forEach(n => n.addEventListener('click', () =>
+  n.classList.toggle('open')));
+
+/* 클릭 글리치 (재미 요소) — 페이지 열려 있을 땐 생략 */
+addEventListener('click', e => {
+  if (e.target.closest('.page') || e.target.closest('.dive')) return;
+  const g = document.querySelector('.glitch');
+  g.style.animation = 'none'; void g.offsetWidth;
+  g.style.filter = 'blur(1px)';
+  setTimeout(() => g.style.filter = '', 120);
+});
+</script>
+
+<script>
+/* ── English mode (?lang=en): translate all visible Korean text, no logic changes ── */
+(function(){
+  const __EN = new URLSearchParams(location.search).get('lang') === 'en';
+  if (!__EN) return;
+  const TR = {
+    "NEON DIVE — 사이버펑크 게임 런처": "NEON DIVE — Cyberpunk Game Launcher",
+    "온라인 4,821,006": "ONLINE 4,821,006",
+    "SEASON 07 — 네온의 심연": "SEASON 07 — The Neon Abyss",
+    "접속하라": "JACK IN",
+    "▶ 지금 플레이": "▶ Play Now",
+    "예고편 보기 →": "Watch Trailer →",
+    "다운로드": "DOWNLOADS",
+    "동시 접속": "CONCURRENT PLAYERS",
+    "유저 평점": "USER RATING",
+    "요원": "AGENTS",
+    "무기고": "ARMORY",
+    "패치노트": "PATCH NOTES",
+    "예고편": "TRAILER",
+    "✕ 닫기 [ESC]": "✕ CLOSE [ESC]",
+    "요원 선택": "SELECT AGENT",
+    "다이브에 투입할 요원을 링크하세요. 능력치는 네온 심연 기준 보정치입니다.":
+      "Link the agent you will send into the dive. Stats are adjusted for the Neon Abyss.",
+    "침투 전문가": "INFILTRATOR",
+    "화력 지원": "FIRE SUPPORT",
+    "정보 해커": "INTEL HACKER",
+    "반응속도": "REFLEX", "해킹": "HACKING", "화력": "FIREPOWER",
+    "다이브 시작 ▶": "START DIVE ▶",
+    "요원을 선택하세요": "Select an agent",
+    "시즌 07 신규 무장. 장착은 다음 다이브부터 적용됩니다.":
+      "New season 07 armaments. Equipping applies from your next dive.",
+    "네온 카타나": "NEON KATANA", "근접 · 처형": "MELEE · EXECUTION",
+    "펄스 SMG": "PULSE SMG", "속사 · 제압": "RAPID · SUPPRESSION",
+    "레일 스나이퍼": "RAIL SNIPER", "정밀 · 관통": "PRECISION · PIERCE",
+    "공격력": "DAMAGE", "연사": "RATE", "사거리": "RANGE",
+    "장착": "EQUIP",
+    "클릭하면 상세 내용이 펼쳐집니다.": "Click an entry to expand the details.",
+    "시즌 07 — 네온의 심연 오픈": "Season 07 — The Neon Abyss opens",
+    "신규 지역 '침수 구역'과 요원 누아르가 추가됐습니다. 시즌 패스 보상 60종, 다이브 랭크 초기화.":
+      "New district 'The Flooded Zone' and agent NOIR added. 60 season-pass rewards, dive ranks reset.",
+    "밸런스 패치 7.0.2": "Balance patch 7.0.2",
+    "펄스 SMG 반동 12% 감소, 레일 스나이퍼 재장전 0.2초 증가. 침투 루트 3곳의 조명이 조정됐습니다.":
+      "Pulse SMG recoil down 12%, Rail Sniper reload up 0.2s. Lighting adjusted on three infiltration routes.",
+    "야간 시장 이벤트": "Night market event",
+    "홀로그램 뒷골목에 한정 상점이 열립니다. 네온 크레딧으로 스킨 '산성비'를 교환하세요.":
+      "A limited shop opens in the hologram back alleys. Trade neon credits for the 'Acid Rain' skin.",
+    "랭크전 시즌 결산": "Ranked season wrap-up",
+    "다이아 이상 도달 요원에게 칭호 '심연을 걷는 자'가 지급됐습니다. 다음 시즌 배치는 3판입니다.":
+      "Agents who reached Diamond+ received the title 'Abyss Walker'. Next season placements: 3 matches.",
+    "시즌 07 예고편": "SEASON 07 TRAILER"
+  };
+  const PATTERNS = [
+    [/^비가 멈추지 않는 도시[\s\S]*무기입니다\.$/, () => "A city where the rain never stops, the back alleys of holograms. Dive in now and unlock every season reward. Your senses are the only weapon you have."]
+  ];
+  const tr = t => { if (TR[t] != null) return TR[t]; for (const [re,fn] of PATTERNS){ const m = t.match(re); if (m) return fn(m); } return null; };
+  const ATTRS = ['placeholder','title','alt','aria-label','data-txt'];
+  const swap = s => { const t = s.trim(); const r = tr(t); return r != null ? s.replace(t, r) : s; };
+  const walk = n => {
+    if (n.nodeType === 3) { if (tr(n.nodeValue.trim()) != null) n.nodeValue = swap(n.nodeValue); return; }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a) && tr(n.getAttribute(a).trim()) != null) n.setAttribute(a, tr(n.getAttribute(a).trim())); });
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(muts => muts.forEach(m => m.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim()); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

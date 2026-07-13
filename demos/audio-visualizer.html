@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RESON — 당신이 연주하는 순간, 세상이 소리가 됩니다</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: "Noto Sans KR", sans-serif; background: #06060e; color: #fff;
+       -webkit-font-smoothing: antialiased; }
+
+#c { position: fixed; inset: 0; display: block; touch-action: none; z-index: 0; }
+
+/* ── 오버레이 공통: 컨테이너는 클릭 통과, 인터랙티브 요소만 auto ── */
+.overlay { position: fixed; inset: 0; z-index: 10; pointer-events: none; }
+.overlay a, .overlay button { pointer-events: auto; }
+
+/* ── 상단 네비게이션 ── */
+.nav { position: fixed; z-index: 12; top: 0; left: 0; right: 0;
+       display: flex; align-items: center; justify-content: space-between;
+       padding: 22px 34px; pointer-events: none; }
+.brand { display: flex; align-items: center; gap: 11px; pointer-events: auto; text-decoration: none; }
+.brand .mark { width: 34px; height: 34px; border-radius: 50%; position: relative;
+               background: radial-gradient(circle at 35% 30%, #e8c6ff, #a15bff 55%, #5b2bd6);
+               box-shadow: 0 0 18px rgba(150,90,240,.6); }
+.brand .mark::after { content: ""; position: absolute; inset: 9px; border-radius: 50%;
+                      border: 1.5px solid rgba(255,255,255,.7); }
+.brand .name { font-family: "Space Mono", monospace; font-size: 19px; font-weight: 700;
+               letter-spacing: 3px; color: #fff; }
+.nav .links { display: flex; align-items: center; gap: 26px; pointer-events: auto; }
+.nav .links a { font-size: 13.5px; color: rgba(255,255,255,.72); text-decoration: none;
+                letter-spacing: .5px; transition: color .2s; }
+.nav .links a:hover { color: #d9b3ff; }
+.nav .links a.pill { padding: 8px 18px; border-radius: 99px; color: #06060e; font-weight: 700;
+                     background: linear-gradient(120deg,#e8c6ff,#a97bff); }
+
+/* ── 히어로 헤드라인 (상단, 오브 링과 겹치지 않게 상단 배치) ── */
+.hero { position: fixed; z-index: 11; top: 96px; left: 50%; transform: translateX(-50%);
+        text-align: center; pointer-events: none; width: min(760px, 92vw); }
+.hero .kicker { font-family: "Space Mono", monospace; font-size: 11px; letter-spacing: 4px;
+                color: rgba(217,179,255,.6); }
+.hero h1 { margin-top: 12px; font-size: clamp(26px, 4.4vw, 44px); font-weight: 700;
+           letter-spacing: -.02em; line-height: 1.28; text-shadow: 0 2px 26px rgba(0,0,0,.75); }
+.hero h1 .accent { color: #d9b3ff; }
+.hero p { margin-top: 14px; font-size: 14.5px; line-height: 1.7; color: rgba(255,255,255,.72);
+          word-break: keep-all; max-width: 520px; margin-left: auto; margin-right: auto; }
+.hero .cta { display: inline-block; margin-top: 22px; pointer-events: auto;
+             font-family: "Noto Sans KR", sans-serif; font-size: 15px; font-weight: 700;
+             color: #06060e; text-decoration: none; padding: 13px 30px; border-radius: 99px;
+             background: linear-gradient(120deg,#e8c6ff,#a97bff);
+             box-shadow: 0 10px 34px rgba(140,80,240,.4); transition: transform .2s, box-shadow .2s; }
+.hero .cta:hover { transform: translateY(-2px); box-shadow: 0 14px 44px rgba(140,80,240,.55); }
+
+/* ── 연주 안내 배너 (하단 재배치) ── */
+.banner { position: fixed; z-index: 12; bottom: 66px; left: 50%; transform: translateX(-50%);
+          display: flex; align-items: center; gap: 12px; padding: 12px 22px; pointer-events: auto;
+          background: rgba(18,14,34,.55); border: 1px solid rgba(180,140,255,.25);
+          border-radius: 99px; backdrop-filter: blur(16px); text-align: center;
+          box-shadow: 0 8px 40px rgba(120,60,220,.18); transition: opacity .6s; }
+.banner .dot { width: 9px; height: 9px; border-radius: 50%; background: #ff5f8f;
+               box-shadow: 0 0 12px #ff5f8f; animation: pulse 1.6s infinite; }
+.banner.live .dot { background: #57ffb0; box-shadow: 0 0 12px #57ffb0; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+.banner span { font-size: 13.5px; letter-spacing: .2px; color: rgba(255,255,255,.9); }
+.banner b { color: #d9b3ff; font-weight: 700; }
+
+/* ── 하단 푸터 ── */
+.foot { position: fixed; z-index: 11; bottom: 22px; left: 50%; transform: translateX(-50%);
+        font-family: "Space Mono", monospace; font-size: 11px; letter-spacing: 2px;
+        color: rgba(255,255,255,.42); pointer-events: none; white-space: nowrap; }
+
+@media (max-width: 620px){ .nav .links a.txt { display: none; } .hero p { display: none; }
+                           .hero { top: 84px; } .banner span { font-size: 12px; } }
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<nav class="nav">
+  <a class="brand" href="#"><span class="mark"></span><span class="name">RESON</span></a>
+  <div class="links">
+    <a class="txt" href="#">사운드</a>
+    <a class="txt" href="#">구독</a>
+    <a class="pill" href="#">앱 다운로드</a>
+  </div>
+</nav>
+
+<div class="hero">
+  <div class="kicker">INTERACTIVE MUSIC · MEDITATION</div>
+  <h1>당신이 연주하는 순간,<br><span class="accent">세상이 소리가 됩니다</span></h1>
+  <p>화면 위의 빛나는 오브를 누르면 펜타토닉 화음이 피어납니다. 정답도 악보도 없이, 손끝의 리듬만으로 나만의 사운드스케이프를 만들어 보세요.</p>
+  <a class="cta" href="#" onclick="ensureStarted();return false;">무료로 연주하기</a>
+</div>
+
+<div class="banner" id="banner">
+  <span class="dot"></span>
+  <span id="bannerTxt"><b>오브를 눌러 연주하세요</b> — 소리가 켜집니다</span>
+</div>
+
+<div class="foot">RESON · 펜타토닉 스케일 · 클릭 또는 호버로 연주 · © 2026</div>
+
+<script>
+/* ─────────────────────────────────────────────
+   사운드 가든 — 클릭으로 연주하고 소리가 그림이 되는
+   Web Audio(오실레이터+게인+필터) + AnalyserNode 원형 스펙트럼
+   ───────────────────────────────────────────── */
+
+/* rAF 루프에서 참조하는 모든 것은 루프 시작 前에 선언한다 */
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+const banner = document.getElementById('banner');
+const bannerTxt = document.getElementById('bannerTxt');
+let W = 0, H = 0, DPR = 1, CX = 0, CY = 0;
+
+/* 펜타토닉 스케일 주파수 (A마이너 펜타토닉 계열) */
+const SCALE = [220.00, 261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33];
+
+/* ── 오디오 상태 (제스처 前까지 null) ── */
+let audio = null;        // AudioContext
+let analyser = null;
+let masterGain = null;
+let freqData = null;
+let padStarted = false;
+let started = false;
+
+/* ── 비주얼 상태 ── */
+let orbs = [];
+let ripples = [];        // {x,y,r,max,life,hue}
+let particles = [];      // 스펙트럼 반응 파티클
+let t = 0;
+
+/* 오브 정의: 원형으로 배치 */
+function buildOrbs(){
+  orbs = [];
+  const n = SCALE.length;
+  const R = Math.min(W, H) * 0.30;
+  for (let i = 0; i < n; i++){
+    const ang = (i / n) * Math.PI * 2 - Math.PI / 2;
+    orbs.push({
+      bx: Math.cos(ang) * R, by: Math.sin(ang) * R,   // 중심 기준 기본 위치
+      x: 0, y: 0, r: Math.min(W, H) * 0.052,
+      freq: SCALE[i], hue: (i / n) * 300 + 200,
+      glow: 0, hover: 0, phase: Math.random() * 6.28
+    });
+  }
+}
+
+function resize(){
+  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  W = innerWidth; H = innerHeight; CX = W / 2; CY = H / 2;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  buildOrbs();
+}
+resize();
+addEventListener('resize', resize);
+
+/* ── 오디오 초기화 (첫 제스처에서만) ── */
+function initAudio(){
+  if (audio) return;
+  const AC = window.AudioContext || window.webkitAudioContext;
+  audio = new AC();
+  masterGain = audio.createGain();
+  masterGain.gain.value = 0.9;
+  analyser = audio.createAnalyser();
+  analyser.fftSize = 256;
+  analyser.smoothingTimeConstant = 0.82;
+  freqData = new Uint8Array(analyser.frequencyBinCount);
+  masterGain.connect(analyser);
+  analyser.connect(audio.destination);
+}
+
+/* 앰비언트 패드: 낮은 화음을 부드럽게 지속 */
+function startPad(){
+  if (padStarted) return; padStarted = true;
+  const padGain = audio.createGain();
+  padGain.gain.value = 0.0;
+  padGain.gain.linearRampToValueAtTime(0.16, audio.currentTime + 3);
+  const filter = audio.createBiquadFilter();
+  filter.type = 'lowpass'; filter.frequency.value = 700;
+  padGain.connect(filter); filter.connect(masterGain);
+  [110, 164.81, 220].forEach((f, i) => {
+    const o = audio.createOscillator();
+    o.type = 'sawtooth'; o.frequency.value = f;
+    const lfo = audio.createOscillator();     // 느린 디튠 LFO
+    const lfoGain = audio.createGain();
+    lfo.frequency.value = 0.06 + i * 0.03; lfoGain.gain.value = 2.5;
+    lfo.connect(lfoGain); lfoGain.connect(o.detune);
+    o.connect(padGain); o.start(); lfo.start();
+  });
+}
+
+/* 오브 한 개 연주: 오실레이터 + 필터 + ADSR 게인 */
+function playOrb(orb){
+  if (!audio) return;
+  const now = audio.currentTime;
+  const o = audio.createOscillator();
+  const o2 = audio.createOscillator();      // 옥타브 하모닉
+  const g = audio.createGain();
+  const filter = audio.createBiquadFilter();
+  o.type = 'triangle'; o.frequency.value = orb.freq;
+  o2.type = 'sine'; o2.frequency.value = orb.freq * 2;
+  filter.type = 'lowpass';
+  filter.frequency.setValueAtTime(2200, now);
+  filter.frequency.exponentialRampToValueAtTime(700, now + 0.9);
+  /* ADSR */
+  g.gain.setValueAtTime(0.0001, now);
+  g.gain.exponentialRampToValueAtTime(0.5, now + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001, now + 1.6);
+  o.connect(g); o2.connect(g); g.connect(filter); filter.connect(masterGain);
+  o.start(now); o2.start(now);
+  o.stop(now + 1.7); o2.stop(now + 1.7);
+  /* 비주얼 반응 */
+  orb.glow = 1;
+  ripples.push({ x: orb.x, y: orb.y, r: orb.r, max: Math.min(W, H) * 0.5, life: 1, hue: orb.hue });
+  for (let i = 0; i < 14; i++){
+    const a = Math.random() * 6.28, sp = 1 + Math.random() * 3;
+    particles.push({ x: orb.x, y: orb.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+                     life: 1, hue: orb.hue });
+  }
+}
+
+function ensureStarted(){
+  if (started) return;
+  started = true;
+  initAudio();
+  if (audio.state === 'suspended') audio.resume();
+  startPad();
+  banner.classList.add('live');
+  bannerTxt.innerHTML = '<b>연주 중</b> — 오브를 눌러 소리를 더하세요';
+}
+
+/* ── 입력 ── */
+let pointer = { x: -9999, y: -9999 };
+function hitOrb(x, y){
+  for (const orb of orbs){
+    const d = Math.hypot(x - orb.x, y - orb.y);
+    if (d < orb.r * 1.15) return orb;
+  }
+  return null;
+}
+function onDown(x, y){
+  ensureStarted();
+  const orb = hitOrb(x, y);
+  if (orb) playOrb(orb);
+  else ripples.push({ x, y, r: 4, max: 160, life: 1, hue: 260 });
+}
+let lastHover = null;
+function onMove(x, y){
+  pointer.x = x; pointer.y = y;
+  const orb = hitOrb(x, y);
+  if (orb && orb !== lastHover){
+    lastHover = orb;
+    if (started) playOrb(orb);   // 호버로도 연주 (소리 켜진 뒤에만)
+    orb.glow = Math.max(orb.glow, 0.7);
+  } else if (!orb){ lastHover = null; }
+}
+canvas.addEventListener('mousedown', e => onDown(e.clientX, e.clientY));
+canvas.addEventListener('mousemove', e => onMove(e.clientX, e.clientY));
+canvas.addEventListener('mouseleave', () => { pointer.x = -9999; pointer.y = -9999; lastHover = null; });
+canvas.addEventListener('touchstart', e => {
+  e.preventDefault(); const tt = e.touches[0]; onDown(tt.clientX, tt.clientY);
+}, { passive: false });
+canvas.addEventListener('touchmove', e => {
+  const tt = e.touches[0]; onMove(tt.clientX, tt.clientY);
+}, { passive: true });
+
+/* ── 그리기 헬퍼 ── */
+function drawSpectrum(){
+  /* 중앙 방사형 막대: 오디오 있으면 실데이터, 없으면 은은한 사인파 */
+  const bars = 72;
+  const baseR = Math.min(W, H) * 0.11;
+  ctx.save();
+  ctx.translate(CX, CY);
+  for (let i = 0; i < bars; i++){
+    const ang = (i / bars) * Math.PI * 2;
+    let v;
+    if (freqData){
+      const idx = Math.floor((i / bars) * freqData.length);
+      v = freqData[idx] / 255;
+    } else {
+      v = 0.12 + 0.08 * (0.5 + 0.5 * Math.sin(t * 0.03 + i * 0.4));
+    }
+    const len = baseR * (0.3 + v * 1.9);
+    const hue = 220 + (i / bars) * 160 + t * 0.4;
+    const a = 0.25 + v * 0.6;
+    ctx.strokeStyle = 'hsla(' + (hue % 360) + ',85%,' + (55 + v * 25) + '%,' + a + ')';
+    ctx.lineWidth = 2.4;
+    ctx.beginPath();
+    ctx.moveTo(Math.cos(ang) * baseR, Math.sin(ang) * baseR);
+    ctx.lineTo(Math.cos(ang) * (baseR + len), Math.sin(ang) * (baseR + len));
+    ctx.stroke();
+  }
+  /* 중앙 코어 글로우 */
+  let energy = 0;
+  if (freqData){ for (let i = 0; i < 24; i++) energy += freqData[i]; energy /= (24 * 255); }
+  else energy = 0.12;
+  const cr = baseR * (0.55 + energy * 0.8);
+  const grd = ctx.createRadialGradient(0, 0, 0, 0, 0, cr);
+  grd.addColorStop(0, 'hsla(280,90%,70%,' + (0.5 + energy * 0.4) + ')');
+  grd.addColorStop(0.5, 'hsla(230,90%,60%,.22)');
+  grd.addColorStop(1, 'transparent');
+  ctx.fillStyle = grd;
+  ctx.beginPath(); ctx.arc(0, 0, cr, 0, 6.2832); ctx.fill();
+  ctx.restore();
+}
+
+/* ── 초기 화면이 비지 않도록 배경 한 번 채움 ── */
+ctx.fillStyle = '#06060e'; ctx.fillRect(0, 0, W, H);
+
+/* ── 메인 루프 ── */
+let frames = 0;
+(function loop(){
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+  t++;
+
+  if (analyser) analyser.getByteFrequencyData(freqData);
+
+  /* 몽환적 잔상 배경 */
+  ctx.fillStyle = 'rgba(6,6,14,0.24)';
+  ctx.fillRect(0, 0, W, H);
+
+  /* 방사형 그라디언트 앰비언트 */
+  const bg = ctx.createRadialGradient(CX, CY, 0, CX, CY, Math.max(W, H) * 0.7);
+  bg.addColorStop(0, 'rgba(30,16,60,0.06)');
+  bg.addColorStop(1, 'rgba(6,6,14,0.02)');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
+
+  /* 중앙 스펙트럼 */
+  drawSpectrum();
+
+  /* 오브 위치 갱신(살짝 떠다님) + 그리기 */
+  ctx.save();
+  for (const orb of orbs){
+    orb.phase += 0.012;
+    orb.x = CX + orb.bx + Math.sin(orb.phase) * 8;
+    orb.y = CY + orb.by + Math.cos(orb.phase * 0.9) * 8;
+    orb.glow *= 0.94;
+
+    const isHover = lastHover === orb;
+    const rr = orb.r * (1 + orb.glow * 0.25);
+    /* 오브 글로우 */
+    const g = ctx.createRadialGradient(orb.x, orb.y, 0, orb.x, orb.y, rr * 2.4);
+    const sat = 85, light = 60 + orb.glow * 25;
+    g.addColorStop(0, 'hsla(' + orb.hue + ',' + sat + '%,' + light + '%,' + (0.9) + ')');
+    g.addColorStop(0.35, 'hsla(' + orb.hue + ',' + sat + '%,' + (light - 15) + '%,' + (0.35 + orb.glow * 0.4) + ')');
+    g.addColorStop(1, 'transparent');
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(orb.x, orb.y, rr * 2.4, 0, 6.2832); ctx.fill();
+    /* 코어 */
+    ctx.fillStyle = 'hsla(' + orb.hue + ',90%,' + (75 + orb.glow * 20) + '%,' + (0.85 + orb.glow * 0.15) + ')';
+    ctx.beginPath(); ctx.arc(orb.x, orb.y, rr * (isHover ? 0.55 : 0.45), 0, 6.2832); ctx.fill();
+    /* 링 */
+    ctx.strokeStyle = 'hsla(' + orb.hue + ',80%,80%,' + (0.3 + orb.glow * 0.5) + ')';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(orb.x, orb.y, rr, 0, 6.2832); ctx.stroke();
+  }
+  ctx.restore();
+
+  /* 파문(ripple) */
+  for (let i = ripples.length - 1; i >= 0; i--){
+    const rp = ripples[i];
+    rp.r += (rp.max - rp.r) * 0.06;
+    rp.life -= 0.02;
+    if (rp.life <= 0){ ripples.splice(i, 1); continue; }
+    ctx.strokeStyle = 'hsla(' + rp.hue + ',85%,70%,' + (rp.life * 0.5) + ')';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(rp.x, rp.y, rp.r, 0, 6.2832); ctx.stroke();
+  }
+
+  /* 파티클 */
+  for (let i = particles.length - 1; i >= 0; i--){
+    const p = particles[i];
+    p.x += p.vx; p.y += p.vy; p.vx *= 0.96; p.vy *= 0.96;
+    p.life -= 0.018;
+    if (p.life <= 0){ particles.splice(i, 1); continue; }
+    ctx.fillStyle = 'hsla(' + p.hue + ',90%,72%,' + p.life + ')';
+    ctx.beginPath(); ctx.arc(p.x, p.y, 2.2 * p.life + 0.5, 0, 6.2832); ctx.fill();
+  }
+
+  /* 커서 근처 은은한 빛 */
+  if (pointer.x > 0){
+    const pg = ctx.createRadialGradient(pointer.x, pointer.y, 0, pointer.x, pointer.y, 90);
+    pg.addColorStop(0, 'rgba(200,160,255,0.10)');
+    pg.addColorStop(1, 'transparent');
+    ctx.fillStyle = pg;
+    ctx.beginPath(); ctx.arc(pointer.x, pointer.y, 90, 0, 6.2832); ctx.fill();
+  }
+
+  requestAnimationFrame(loop);
+})();
+</script>
+
+<script>
+/* ── English mode (?lang=en) — translation layer only, no logic changes ── */
+(function(){
+  if (new URLSearchParams(location.search).get('lang') !== 'en') return;
+  const TR = {
+    "RESON — 당신이 연주하는 순간, 세상이 소리가 됩니다": "RESON — The moment you play, the world becomes sound",
+    "사운드": "Sound",
+    "구독": "Subscribe",
+    "앱 다운로드": "Download App",
+    "당신이 연주하는 순간,": "The moment you play,",
+    "세상이 소리가 됩니다": "the world becomes sound",
+    "화면 위의 빛나는 오브를 누르면 펜타토닉 화음이 피어납니다. 정답도 악보도 없이, 손끝의 리듬만으로 나만의 사운드스케이프를 만들어 보세요.": "Tap the glowing orbs on screen and pentatonic chords bloom. No right answers, no sheet music — craft your own soundscape with just the rhythm of your fingertips.",
+    "무료로 연주하기": "Play for free",
+    "오브를 눌러 연주하세요": "Tap an orb to play",
+    "— 소리가 켜집니다": "— sound turns on",
+    "연주 중": "Playing",
+    "— 오브를 눌러 소리를 더하세요": "— tap orbs to add sound",
+    "RESON · 펜타토닉 스케일 · 클릭 또는 호버로 연주 · © 2026": "RESON · Pentatonic scale · Play by click or hover · © 2026"
+  };
+  const RE = [];
+  const tr = t => {
+    if (TR[t] != null) return TR[t];
+    for (const [re, rep] of RE) { if (re.test(t)) return t.replace(re, rep); }
+    return null;
+  };
+  const ATTRS = ['placeholder','title','alt','aria-label'];
+  const walk = n => {
+    if (n.nodeType === 3) {
+      const raw = n.nodeValue, t = raw.trim().replace(/\s+/g,' ');
+      if (t) { const out = tr(t); if (out != null) {
+        const lead = (raw.match(/^\s*/)||[''])[0], trail = (raw.match(/\s*$/)||[''])[0];
+        n.nodeValue = lead + out + trail;
+      }}
+      return;
+    }
+    if (n.nodeType !== 1) return;
+    ATTRS.forEach(a => { if (n.hasAttribute && n.hasAttribute(a)) {
+      const out = tr(n.getAttribute(a).trim().replace(/\s+/g,' ')); if (out != null) n.setAttribute(a, out);
+    }});
+    n.childNodes.forEach(walk);
+  };
+  new MutationObserver(m => m.forEach(x => x.addedNodes.forEach(walk))).observe(document.body, {childList:true, subtree:true});
+  walk(document.body);
+  const dt = tr(document.title.trim().replace(/\s+/g,' ')); if (dt != null) document.title = dt;
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LUMEN STUDIO — 포토그래피 &amp; 크리에이티브 스튜디오</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,500&family=Noto+Serif+KR:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --bg:#f6f2ea; --surface:#fffdf9; --ink:#1a1712; --ink-soft:#3c362c; --muted:#847b6b;
+  --line:#e3dbcb; --accent:#a5713f; --accent-deep:#7c5228; --accent-soft:#efe3d1;
+  --radius:2px;
+}
+html{ scroll-behavior:smooth; }
+body{ font-family:'Inter','Noto Serif KR',sans-serif; background:var(--bg); color:var(--ink);
+  -webkit-font-smoothing:antialiased; line-height:1.6; overflow-x:hidden; }
+.serif{ font-family:'Playfair Display','Noto Serif KR',serif; }
+.wrap{ max-width:1180px; margin:0 auto; padding:0 28px; }
+a{ color:inherit; text-decoration:none; }
+img{ display:block; max-width:100%; }
+.eyebrow{ display:inline-flex; align-items:center; gap:10px; font-size:12px; font-weight:600;
+  letter-spacing:.22em; text-transform:uppercase; color:var(--accent-deep); }
+.eyebrow::before{ content:''; width:26px; height:1px; background:var(--accent-deep); display:inline-block; }
+.btn{ display:inline-flex; align-items:center; gap:10px; font-weight:600; font-size:13px;
+  letter-spacing:.06em; text-transform:uppercase; padding:15px 28px; border:1px solid var(--ink);
+  cursor:pointer; transition:background .25s, color .25s, border-color .25s; font-family:'Inter',sans-serif; }
+.btn-primary{ background:var(--ink); color:#fdfbf6; }
+.btn-primary:hover{ background:var(--accent-deep); border-color:var(--accent-deep); }
+.btn-ghost{ background:transparent; color:var(--ink); }
+.btn-ghost:hover{ background:var(--ink); color:#fdfbf6; }
+.btn-light{ border-color:rgba(255,255,255,.65); color:#fff; }
+.btn-light:hover{ background:#fff; color:var(--ink); }
+.section{ padding:120px 0; }
+.section-head{ max-width:640px; margin:0 0 56px; }
+.section-head.center{ margin-left:auto; margin-right:auto; text-align:center; }
+.section-head h2{ margin-top:16px; font-size:clamp(30px,4.4vw,48px); font-weight:600; letter-spacing:-.01em; }
+.section-head p{ margin-top:16px; color:var(--muted); font-size:16px; word-break:keep-all; max-width:520px; }
+.section-head.center p{ margin-left:auto; margin-right:auto; }
+
+/* ── reveal ─────────────────────────────────────── */
+.reveal{ opacity:0; transform:translateY(28px); transition:opacity .9s ease, transform .9s cubic-bezier(.16,.8,.24,1); }
+.reveal.in{ opacity:1; transform:translateY(0); }
+.reveal.d1{ transition-delay:.1s; } .reveal.d2{ transition-delay:.2s; } .reveal.d3{ transition-delay:.3s; }
+
+/* ── 내비게이션 ─────────────────────────────────── */
+.nav{ position:fixed; top:0; left:0; right:0; z-index:100; padding:26px 0; transition:background .35s, padding .35s, border-color .35s; border-bottom:1px solid transparent; }
+.nav .wrap{ display:flex; align-items:center; justify-content:space-between; }
+.nav.on{ background:rgba(246,242,234,.92); backdrop-filter:blur(10px); padding:16px 0; border-color:var(--line); }
+.brand{ font-family:'Playfair Display',serif; font-weight:700; font-size:21px; letter-spacing:.05em; color:var(--ink); }
+.nav.hero-zone .brand, .nav.hero-zone .nav-links a, .nav.hero-zone .lang-btn{ color:#fdfbf6; }
+.nav.hero-zone.on .brand, .nav.hero-zone.on .nav-links a, .nav.hero-zone.on .lang-btn{ color:var(--ink); }
+.nav-links{ display:flex; gap:38px; }
+.nav-links a{ font-size:13px; letter-spacing:.05em; text-transform:uppercase; font-weight:600; color:var(--ink); opacity:.82; transition:opacity .2s, color .2s; }
+.nav-links a:hover{ opacity:1; color:var(--accent); }
+.nav-right{ display:flex; align-items:center; gap:18px; }
+.lang-btn{ background:none; border:1px solid currentColor; color:var(--ink); font:inherit; font-weight:600; font-size:12px;
+  letter-spacing:.05em; cursor:pointer; padding:7px 12px; border-radius:20px; opacity:.85; transition:opacity .2s, background .2s; }
+.lang-btn:hover{ opacity:1; }
+.hamburger{ display:none; flex-direction:column; gap:5px; background:none; border:none; cursor:pointer; padding:6px; z-index:210; }
+.hamburger span{ width:24px; height:2px; background:var(--ink); transition:transform .3s, opacity .3s, background .3s; }
+.nav.hero-zone:not(.on) .hamburger span{ background:#fdfbf6; }
+.hamburger.open span:nth-child(1){ transform:translateY(7px) rotate(45deg); }
+.hamburger.open span:nth-child(2){ opacity:0; }
+.hamburger.open span:nth-child(3){ transform:translateY(-7px) rotate(-45deg); }
+
+.nav-overlay{ position:fixed; inset:0; background:var(--bg); z-index:150; display:flex; flex-direction:column;
+  align-items:center; justify-content:center; gap:34px; opacity:0; visibility:hidden; transition:opacity .35s ease; }
+.nav-overlay.open{ opacity:1; visibility:visible; }
+.nav-overlay a{ font-family:'Playfair Display',serif; font-size:32px; font-weight:600; color:var(--ink); }
+.nav-overlay a:hover{ color:var(--accent); }
+
+@media(max-width:860px){
+  .nav-links{ display:none; }
+  .hamburger{ display:flex; }
+}
+
+/* ── 히어로 ──────────────────────────────────────── */
+.hero{ position:relative; height:100vh; min-height:620px; display:flex; align-items:flex-end; overflow:hidden;
+  background:#2a251d; }
+.hero .imgwrap{ position:absolute; inset:0; overflow:hidden; }
+.hero img{ width:100%; height:100%; object-fit:cover; animation:kenburns 22s ease-in-out infinite alternate; }
+@keyframes kenburns{ from{ transform:scale(1.12) translate(0,0);} to{ transform:scale(1) translate(-1%,-1%);} }
+.hero::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, rgba(20,17,12,.15) 0%, rgba(20,17,12,.15) 40%, rgba(15,12,8,.86) 100%); }
+.hero-content{ position:relative; z-index:2; color:#fdfbf6; padding-bottom:96px; width:100%; }
+.hero-content .eyebrow{ color:#e6d9bf; }
+.hero-content .eyebrow::before{ background:#e6d9bf; }
+.hero-content h1{ margin-top:20px; font-size:clamp(42px,7.4vw,86px); font-weight:600; letter-spacing:-.01em; line-height:1.04; max-width:820px; }
+.hero-content p{ margin-top:20px; max-width:460px; font-size:17px; color:#e9e2d3; word-break:keep-all; }
+.hero-content .actions{ margin-top:36px; display:flex; gap:14px; flex-wrap:wrap; }
+.scroll-cue{ position:absolute; right:28px; bottom:28px; z-index:2; display:flex; flex-direction:column; align-items:center; gap:10px; color:#e9e2d3; font-size:11px; letter-spacing:.2em; text-transform:uppercase; }
+.scroll-cue i{ width:1px; height:46px; background:linear-gradient(#e9e2d3,transparent); display:block; animation:cue 1.8s ease-in-out infinite; }
+@keyframes cue{ 0%{ opacity:.2;} 50%{ opacity:1;} 100%{ opacity:.2;} }
+
+/* ── 소개 ────────────────────────────────────────── */
+.about{ background:var(--surface); }
+.about .grid{ display:grid; grid-template-columns:0.9fr 1.1fr; gap:80px; align-items:center; }
+.about-visual{ position:relative; aspect-ratio:4/5; background:linear-gradient(150deg,#c9a06a 0%,#7c5228 55%,#372617 100%); overflow:hidden; }
+.about-visual::before{ content:''; position:absolute; inset:0; background:
+  repeating-linear-gradient(115deg, rgba(255,255,255,.06) 0 2px, transparent 2px 26px); mix-blend-mode:overlay; }
+.about-visual .tag{ position:absolute; left:24px; bottom:24px; color:#fdfbf6; font-family:'Playfair Display',serif; font-style:italic; font-size:22px; }
+.about-visual .frame-no{ position:absolute; top:24px; right:24px; color:#fdfbf6; font-size:12px; letter-spacing:.1em; opacity:.75; }
+.about-copy p{ margin-top:18px; color:var(--ink-soft); font-size:16px; word-break:keep-all; }
+.about-copy p:first-of-type{ margin-top:20px; }
+.stat-row{ display:flex; gap:56px; margin-top:44px; flex-wrap:wrap; }
+.stat b{ display:block; font-family:'Playfair Display',serif; font-size:38px; font-weight:600; color:var(--accent-deep); }
+.stat span{ display:block; margin-top:6px; font-size:13px; color:var(--muted); letter-spacing:.02em; }
+@media(max-width:900px){ .about .grid{ grid-template-columns:1fr; gap:44px; } .about-visual{ max-width:380px; } }
+
+/* ── 작업(포트폴리오) ────────────────────────────── */
+.portfolio{ background:var(--bg); }
+.pf-grid{ display:grid; grid-template-columns:repeat(6,1fr); gap:18px; }
+.pf-tile{ position:relative; overflow:hidden; cursor:pointer; background:var(--accent-soft); }
+.pf-tile img{ width:100%; height:100%; object-fit:cover; transition:transform .7s cubic-bezier(.16,.8,.24,1); }
+.pf-tile:hover img{ transform:scale(1.08); }
+.pf-tile .grad{ position:absolute; inset:0; }
+.pf-tile .cap{ position:absolute; left:0; right:0; bottom:0; padding:22px; color:#fdfbf6;
+  background:linear-gradient(0deg, rgba(15,12,8,.82) 0%, rgba(15,12,8,0) 70%);
+  transform:translateY(12px); opacity:0; transition:opacity .35s, transform .35s; }
+.pf-tile:hover .cap{ opacity:1; transform:translateY(0); }
+.pf-tile .cap b{ font-family:'Playfair Display',serif; font-size:19px; font-weight:600; display:block; }
+.pf-tile .cap span{ font-size:12px; letter-spacing:.08em; text-transform:uppercase; opacity:.85; }
+.pf-tile.c1{ grid-column:span 3; grid-row:span 2; aspect-ratio:4/5; }
+.pf-tile.c2{ grid-column:span 3; grid-row:span 2; aspect-ratio:4/5; }
+.pf-tile.c3{ grid-column:span 2; aspect-ratio:1/1; }
+.pf-tile.c4{ grid-column:span 2; aspect-ratio:1/1; }
+.pf-tile.c5{ grid-column:span 2; aspect-ratio:1/1; }
+.g1{ background:linear-gradient(135deg,#3a4a44,#111814); }
+.g2{ background:linear-gradient(135deg,#8a5a3d,#2a1b10); }
+.g3{ background:linear-gradient(135deg,#5a5245,#1c1913); }
+@media(max-width:820px){
+  .pf-grid{ grid-template-columns:repeat(2,1fr); }
+  .pf-tile.c1,.pf-tile.c2,.pf-tile.c3,.pf-tile.c4,.pf-tile.c5{ grid-column:span 1; aspect-ratio:4/5; }
+}
+
+/* ── 서비스 ──────────────────────────────────────── */
+.services{ background:var(--surface); }
+.svc-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--line); border:1px solid var(--line); }
+.svc{ background:var(--surface); padding:44px 36px; transition:background .25s; }
+.svc:hover{ background:var(--accent-soft); }
+.svc .no{ font-family:'Playfair Display',serif; font-size:14px; color:var(--accent); letter-spacing:.05em; }
+.svc h3{ margin-top:20px; font-family:'Playfair Display',serif; font-size:25px; font-weight:600; }
+.svc p{ margin-top:14px; color:var(--muted); font-size:15px; word-break:keep-all; }
+.svc .price{ margin-top:22px; font-size:13px; letter-spacing:.06em; text-transform:uppercase; color:var(--ink-soft); font-weight:600; }
+@media(max-width:820px){ .svc-grid{ grid-template-columns:1fr; } }
+
+/* ── 후기 ────────────────────────────────────────── */
+.testimonial{ background:var(--ink); color:#fdfbf6; text-align:center; }
+.testimonial .quote-mark{ font-family:'Playfair Display',serif; font-size:80px; color:var(--accent); line-height:1;
+  display:inline-block; animation:pulse 3.4s ease-in-out infinite; }
+@keyframes pulse{ 0%,100%{ opacity:.65; transform:scale(1);} 50%{ opacity:1; transform:scale(1.08);} }
+.testimonial blockquote{ margin:20px auto 0; max-width:760px; font-family:'Playfair Display',serif; font-style:italic;
+  font-size:clamp(22px,3.2vw,34px); font-weight:500; line-height:1.5; word-break:keep-all; }
+.testimonial .who{ margin-top:30px; font-size:14px; letter-spacing:.05em; color:#c9bda2; }
+.testimonial .who b{ color:#fdfbf6; font-weight:600; }
+.testimonial .dots{ margin-top:40px; display:flex; gap:10px; justify-content:center; }
+.testimonial .dots span{ width:7px; height:7px; border-radius:50%; background:#5a5245; }
+.testimonial .dots span.on{ background:var(--accent); }
+
+/* ── 연락 ────────────────────────────────────────── */
+.contact{ background:var(--bg); }
+.contact .grid{ display:grid; grid-template-columns:1fr 1fr; gap:80px; }
+.field{ margin-bottom:22px; }
+.field label{ display:block; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; font-weight:600; }
+.field input, .field textarea{ width:100%; border:none; border-bottom:1px solid var(--line); background:transparent;
+  padding:12px 2px; font:inherit; font-size:15px; color:var(--ink); font-family:'Inter',sans-serif; transition:border-color .2s; }
+.field input:focus, .field textarea:focus{ outline:none; border-color:var(--accent); }
+.field textarea{ resize:vertical; min-height:96px; }
+.contact-info{ display:flex; flex-direction:column; justify-content:space-between; }
+.info-row{ display:flex; gap:20px; padding:22px 0; border-top:1px solid var(--line); }
+.info-row:last-child{ border-bottom:1px solid var(--line); }
+.info-row .k{ width:110px; flex-shrink:0; font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); font-weight:600; padding-top:2px; }
+.info-row .v{ font-size:16px; color:var(--ink-soft); }
+.social-row{ display:flex; gap:16px; margin-top:28px; }
+.social-row a{ width:40px; height:40px; border:1px solid var(--line); border-radius:50%; display:grid; place-items:center; font-size:14px; transition:background .2s, color .2s, border-color .2s; }
+.social-row a:hover{ background:var(--ink); color:#fdfbf6; border-color:var(--ink); }
+@media(max-width:900px){ .contact .grid{ grid-template-columns:1fr; gap:44px; } }
+.toast{ position:fixed; left:50%; bottom:32px; transform:translate(-50%,20px); background:var(--ink); color:#fdfbf6;
+  padding:14px 26px; font-size:14px; letter-spacing:.02em; opacity:0; pointer-events:none; transition:opacity .3s, transform .3s; z-index:300; }
+.toast.show{ opacity:1; transform:translate(-50%,0); }
+
+/* ── 푸터 ────────────────────────────────────────── */
+footer{ background:var(--ink); color:#c9bda2; padding:64px 0 32px; }
+footer .cols{ display:flex; justify-content:space-between; gap:40px; flex-wrap:wrap; padding-bottom:44px; border-bottom:1px solid #3a352a; }
+footer .about-f{ max-width:300px; }
+footer .brand{ color:#fdfbf6; }
+footer .about-f p{ margin-top:14px; font-size:14px; word-break:keep-all; line-height:1.7; }
+footer .fcol h4{ font-size:12px; font-weight:700; letter-spacing:.1em; color:#8a8069; text-transform:uppercase; margin-bottom:16px; }
+footer .fcol a{ display:block; font-size:14px; color:#e9e2d3; margin-bottom:10px; opacity:.82; }
+footer .fcol a:hover{ opacity:1; color:var(--accent); }
+footer .copy{ margin-top:28px; font-size:12px; color:#8a8069; display:flex; justify-content:space-between; gap:16px; flex-wrap:wrap; }
+</style>
+</head>
+<body>
+
+<!-- 내비게이션 -->
+<nav class="nav hero-zone" id="nav">
+  <div class="wrap">
+    <a href="#" class="brand">LUMEN STUDIO</a>
+    <div class="nav-links">
+      <a href="#about" data-i18n>소개</a>
+      <a href="#work" data-i18n>작업</a>
+      <a href="#services" data-i18n>서비스</a>
+      <a href="#testimonial" data-i18n>후기</a>
+      <a href="#contact" data-i18n>연락</a>
+    </div>
+    <div class="nav-right">
+      <button class="lang-btn" id="lang">EN</button>
+      <button class="hamburger" id="hamburger" aria-label="메뉴 열기"><span></span><span></span><span></span></button>
+    </div>
+  </div>
+</nav>
+
+<!-- 모바일 내비 오버레이 -->
+<div class="nav-overlay" id="navOverlay">
+  <a href="#about" data-i18n>소개</a>
+  <a href="#work" data-i18n>작업</a>
+  <a href="#services" data-i18n>서비스</a>
+  <a href="#testimonial" data-i18n>후기</a>
+  <a href="#contact" data-i18n>연락</a>
+</div>
+
+<!-- 히어로 -->
+<header class="hero" id="hero">
+  <div class="imgwrap">
+    <img src="../assets/gen/wix-photo-hero.jpg" alt="스튜디오 히어로 이미지" onerror="this.parentElement.style.background='linear-gradient(135deg,#4a4335,#17140f)'; this.remove();">
+  </div>
+  <div class="wrap hero-content">
+    <span class="eyebrow" data-i18n>포토그래피 &amp; 크리에이티브 스튜디오</span>
+    <h1 class="serif" data-i18n>빛과 순간을<br>기록하는 시선</h1>
+    <p data-i18n>인물, 브랜드, 필름을 넘나들며 시네마틱한 무드로 이야기를 담는 크리에이티브 스튜디오입니다.</p>
+    <div class="actions">
+      <a href="#contact" class="btn btn-primary" data-i18n>예약 문의</a>
+      <a href="#work" class="btn btn-ghost btn-light" data-i18n>작업 둘러보기</a>
+    </div>
+  </div>
+  <div class="scroll-cue"><span data-i18n>스크롤</span><i></i></div>
+</header>
+
+<!-- 소개 -->
+<section class="section about" id="about">
+  <div class="wrap grid">
+    <div class="about-visual reveal">
+      <span class="frame-no">No. 07 / 26</span>
+      <span class="tag serif" data-i18n>Studio Journal</span>
+    </div>
+    <div class="about-copy">
+      <span class="eyebrow reveal" data-i18n>소개</span>
+      <h2 class="serif reveal" data-i18n>정직한 순간을<br>세심하게 편집합니다</h2>
+      <p class="reveal d1" data-i18n>루멘 스튜디오는 서울을 기반으로 활동하는 포토그래퍼 &amp; 디렉터 그룹입니다. 과장 없는 빛과 구도로 인물과 공간의 결을 있는 그대로 기록하는 것을 원칙으로 삼습니다.</p>
+      <p class="reveal d2" data-i18n>패션 에디토리얼부터 브랜드 캠페인, 건축 촬영까지 — 매체는 다르지만 한 장의 프레임에 이야기를 담는 태도는 언제나 같습니다.</p>
+      <div class="stat-row reveal d3">
+        <div class="stat"><b data-count="180">0</b><span data-i18n>완료한 프로젝트</span></div>
+        <div class="stat"><b data-count="12">0</b><span data-i18n>수상 경력</span></div>
+        <div class="stat"><b data-count="9">0</b><span data-i18n>활동 연차</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 작업 -->
+<section class="section portfolio" id="work">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n>작업</span>
+      <h2 class="serif" data-i18n>셀렉티드 워크</h2>
+      <p data-i18n>인물, 공간, 브랜드 — 최근 진행한 프로젝트 중 일부를 소개합니다.</p>
+    </div>
+    <div class="pf-grid">
+      <div class="pf-tile c1 reveal">
+        <img src="../assets/gen/wix-photo-hero.jpg" alt="에디토리얼 포트레이트" onerror="this.parentElement.style.background='linear-gradient(135deg,#4a4335,#17140f)'; this.remove();">
+        <div class="cap"><b data-i18n>실루엣 오브 라이트</b><span data-i18n>패션 에디토리얼</span></div>
+      </div>
+      <div class="pf-tile c2 reveal d1">
+        <img src="../assets/gen/wix-photo-2.jpg" alt="미니멀 건축 사진" onerror="this.parentElement.style.background='linear-gradient(135deg,#8a5a3d,#2a1b10)'; this.remove();">
+        <div class="cap"><b data-i18n>콘크리트 스틸</b><span data-i18n>건축 · 공간</span></div>
+      </div>
+      <div class="pf-tile c3 g1 reveal d2">
+        <div class="cap"><b data-i18n>그린 아워</b><span data-i18n>브랜드 캠페인</span></div>
+      </div>
+      <div class="pf-tile c4 g2 reveal d3">
+        <div class="cap"><b data-i18n>웜 그레인</b><span data-i18n>필름 무빙</span></div>
+      </div>
+      <div class="pf-tile c5 g3 reveal">
+        <div class="cap"><b data-i18n>노 필터</b><span data-i18n>다큐멘터리</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 서비스 -->
+<section class="section services" id="services">
+  <div class="wrap">
+    <div class="section-head reveal">
+      <span class="eyebrow" data-i18n>서비스</span>
+      <h2 class="serif" data-i18n>함께할 수 있는 일</h2>
+      <p data-i18n>필요에 맞춰 유연하게 구성하는 세 가지 기본 패키지입니다.</p>
+    </div>
+    <div class="svc-grid">
+      <div class="svc reveal">
+        <span class="no">01</span>
+        <h3 class="serif" data-i18n>포트레이트 세션</h3>
+        <p data-i18n>스튜디오 또는 야외에서 진행하는 개인·브랜드 인물 촬영. 보정본 20컷 포함.</p>
+        <div class="price" data-i18n>₩ 480,000 부터</div>
+      </div>
+      <div class="svc reveal d1">
+        <span class="no">02</span>
+        <h3 class="serif" data-i18n>브랜드 캠페인</h3>
+        <p data-i18n>룩북, 제품, 화보 촬영을 아우르는 통합 비주얼 디렉팅과 촬영.</p>
+        <div class="price" data-i18n>별도 견적 문의</div>
+      </div>
+      <div class="svc reveal d2">
+        <span class="no">03</span>
+        <h3 class="serif" data-i18n>필름 &amp; 무빙</h3>
+        <p data-i18n>브랜드 필름, 인터뷰, 비하인드 영상 촬영 및 편집.</p>
+        <div class="price" data-i18n>₩ 1,200,000 부터</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 후기 -->
+<section class="section testimonial" id="testimonial">
+  <div class="wrap">
+    <span class="quote-mark reveal">“</span>
+    <blockquote class="reveal d1" data-i18n>루멘 스튜디오와의 작업은 매번 기대 이상이었습니다. 빛을 다루는 섬세함과 순간을 포착하는 타이밍 — 결과물을 받아볼 때마다 새삼 놀랍니다.</blockquote>
+    <div class="who reveal d2"><b data-i18n>정하은</b> · <span data-i18n>브랜드 디렉터, 아뜰리에 소예</span></div>
+    <div class="dots"><span class="on"></span><span></span><span></span></div>
+  </div>
+</section>
+
+<!-- 연락 -->
+<section class="section contact" id="contact">
+  <div class="wrap grid">
+    <div>
+      <span class="eyebrow reveal" data-i18n>연락</span>
+      <h2 class="serif reveal" data-i18n>프로젝트를<br>시작해볼까요</h2>
+      <p class="reveal" style="margin-top:16px;color:var(--muted);word-break:keep-all;" data-i18n>촬영 일정, 예산, 원하는 무드를 간단히 남겨 주시면 1~2일 내로 답변드립니다.</p>
+      <form id="contactForm" style="margin-top:36px;" class="reveal d1">
+        <div class="field"><label data-i18n>이름</label><input type="text" placeholder="홍길동" required></div>
+        <div class="field"><label data-i18n>이메일</label><input type="email" placeholder="you@email.com" required></div>
+        <div class="field"><label data-i18n>메시지</label><textarea placeholder="프로젝트에 대해 알려주세요" required></textarea></div>
+        <button type="submit" class="btn btn-primary" data-i18n>문의 보내기</button>
+      </form>
+    </div>
+    <div class="contact-info reveal d2">
+      <div>
+        <div class="info-row"><div class="k" data-i18n>스튜디오</div><div class="v" data-i18n>서울시 성동구 성수이로 12길 8</div></div>
+        <div class="info-row"><div class="k" data-i18n>이메일</div><div class="v">hello@lumenstudio.kr</div></div>
+        <div class="info-row"><div class="k" data-i18n>전화</div><div class="v">02-6925-1084</div></div>
+        <div class="info-row"><div class="k" data-i18n>운영시간</div><div class="v" data-i18n>화–토 · 10:00–19:00</div></div>
+      </div>
+      <div class="social-row">
+        <a href="#" aria-label="Instagram">IG</a>
+        <a href="#" aria-label="Vimeo">VM</a>
+        <a href="#" aria-label="Behance">BE</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="toast" id="toast" data-i18n>문의가 접수되었습니다. 곧 연락드릴게요.</div>
+
+<!-- 푸터 -->
+<footer>
+  <div class="wrap">
+    <div class="cols">
+      <div class="about-f">
+        <div class="brand serif">LUMEN STUDIO</div>
+        <p data-i18n>서울 기반의 포토그래피 &amp; 크리에이티브 스튜디오. 빛과 순간을 정직하게 기록합니다.</p>
+      </div>
+      <div class="fcol"><h4 data-i18n>둘러보기</h4><a href="#about" data-i18n>소개</a><a href="#work" data-i18n>작업</a><a href="#services" data-i18n>서비스</a></div>
+      <div class="fcol"><h4 data-i18n>소셜</h4><a href="#" data-i18n>인스타그램</a><a href="#" data-i18n>비메오</a><a href="#" data-i18n>비핸스</a></div>
+      <div class="fcol"><h4 data-i18n>연락처</h4><a href="#" data-i18n>hello@lumenstudio.kr</a><a href="#" data-i18n>02-6925-1084</a></div>
+    </div>
+    <div class="copy">
+      <span>© 2026 hyunaeee · LUMEN STUDIO template</span>
+      <span data-i18n>MIT 라이선스로 배포됩니다</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* 스크롤 상태에 따른 내비게이션 전환 */
+const navEl = document.getElementById('nav');
+const heroEl = document.getElementById('hero');
+function updateNav(){
+  const y = window.scrollY;
+  navEl.classList.toggle('on', y > 40);
+}
+window.addEventListener('scroll', updateNav, { passive:true });
+updateNav();
+
+/* 모바일 햄버거 메뉴 */
+const hamburger = document.getElementById('hamburger');
+const navOverlay = document.getElementById('navOverlay');
+function closeOverlay(){ hamburger.classList.remove('open'); navOverlay.classList.remove('open'); }
+hamburger.addEventListener('click', ()=>{
+  hamburger.classList.toggle('open');
+  navOverlay.classList.toggle('open');
+});
+navOverlay.querySelectorAll('a').forEach(a=>a.addEventListener('click', closeOverlay));
+
+/* 스크롤 리빌 (IntersectionObserver) */
+const revealEls = document.querySelectorAll('.reveal');
+const io = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(entry.isIntersecting){ entry.target.classList.add('in'); io.unobserve(entry.target); }
+  });
+}, { threshold:0.15, rootMargin:'0px 0px -40px 0px' });
+revealEls.forEach(el=>io.observe(el));
+
+/* 숫자 카운트업 (About 통계) */
+const countEls = document.querySelectorAll('[data-count]');
+const countIO = new IntersectionObserver((entries)=>{
+  entries.forEach(entry=>{
+    if(!entry.isIntersecting) return;
+    const el = entry.target;
+    const target = parseInt(el.dataset.count, 10);
+    const duration = 1200;
+    const start = performance.now();
+    function step(now){
+      const p = Math.min(1, (now - start) / duration);
+      el.textContent = Math.round(target * (1 - Math.pow(1 - p, 3)));
+      if(p < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+    countIO.unobserve(el);
+  });
+}, { threshold:0.4 });
+countEls.forEach(el=>countIO.observe(el));
+
+/* 문의 폼 제출 → 토스트 */
+const form = document.getElementById('contactForm');
+const toast = document.getElementById('toast');
+let toastTimer = null;
+form.addEventListener('submit', (e)=>{
+  e.preventDefault();
+  toast.classList.add('show');
+  if(toastTimer) clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toast.classList.remove('show'), 2800);
+  form.reset();
+});
+
+/* 언어 (?lang=en + 토글) */
+const STR={
+  '소개':'About','작업':'Work','서비스':'Services','후기':'Testimonial','연락':'Contact',
+  '포토그래피 &amp; 크리에이티브 스튜디오':'Photography &amp; Creative Studio',
+  '빛과 순간을<br>기록하는 시선':'A gaze that<br>records light and moments',
+  '인물, 브랜드, 필름을 넘나들며 시네마틱한 무드로 이야기를 담는 크리에이티브 스튜디오입니다.':
+    'A creative studio weaving portraits, brands and film into cinematic stories.',
+  '예약 문의':'Book a session','작업 둘러보기':'View the work','스크롤':'Scroll',
+  '정직한 순간을<br>세심하게 편집합니다':'Honest moments,<br>carefully edited',
+  '루멘 스튜디오는 서울을 기반으로 활동하는 포토그래퍼 &amp; 디렉터 그룹입니다. 과장 없는 빛과 구도로 인물과 공간의 결을 있는 그대로 기록하는 것을 원칙으로 삼습니다.':
+    'LUMEN STUDIO is a Seoul-based collective of photographers and directors. We record people and spaces as they are, with honest light and composition.',
+  '패션 에디토리얼부터 브랜드 캠페인, 건축 촬영까지 — 매체는 다르지만 한 장의 프레임에 이야기를 담는 태도는 언제나 같습니다.':
+    'From fashion editorials to brand campaigns and architecture — the medium changes, but our commitment to one honest frame never does.',
+  '완료한 프로젝트':'Projects delivered','수상 경력':'Awards won','활동 연차':'Years active',
+  'Studio Journal':'Studio Journal',
+  '셀렉티드 워크':'Selected Work',
+  '인물, 공간, 브랜드 — 최근 진행한 프로젝트 중 일부를 소개합니다.':
+    'Portraits, spaces, brands — a selection from recent projects.',
+  '실루엣 오브 라이트':'Silhouette of Light','패션 에디토리얼':'Fashion Editorial',
+  '콘크리트 스틸':'Concrete Still','건축 · 공간':'Architecture · Space',
+  '그린 아워':'Green Hour','브랜드 캠페인':'Brand Campaign',
+  '웜 그레인':'Warm Grain','필름 무빙':'Film & Motion',
+  '노 필터':'No Filter','다큐멘터리':'Documentary',
+  '함께할 수 있는 일':'What We Offer',
+  '필요에 맞춰 유연하게 구성하는 세 가지 기본 패키지입니다.':
+    'Three core packages, flexibly tailored to your needs.',
+  '포트레이트 세션':'Portrait Session',
+  '스튜디오 또는 야외에서 진행하는 개인·브랜드 인물 촬영. 보정본 20컷 포함.':
+    'Studio or on-location portrait shoots for individuals and brands. Includes 20 retouched photos.',
+  '₩ 480,000 부터':'From ₩480,000',
+  '브랜드 캠페인':'Brand Campaign',
+  '룩북, 제품, 화보 촬영을 아우르는 통합 비주얼 디렉팅과 촬영.':
+    'Full visual direction and shooting across lookbooks, product and editorial.',
+  '별도 견적 문의':'Custom quote on request',
+  '필름 &amp; 무빙':'Film &amp; Motion',
+  '브랜드 필름, 인터뷰, 비하인드 영상 촬영 및 편집.':
+    'Brand films, interviews and behind-the-scenes footage, shot and edited.',
+  '₩ 1,200,000 부터':'From ₩1,200,000',
+  '루멘 스튜디오와의 작업은 매번 기대 이상이었습니다. 빛을 다루는 섬세함과 순간을 포착하는 타이밍 — 결과물을 받아볼 때마다 새삼 놀랍니다.':
+    'Working with LUMEN STUDIO exceeds expectations every time. The delicacy of their light and their timing for the moment still surprise me with every delivery.',
+  '정하은':'Haeun Jung','브랜드 디렉터, 아뜰리에 소예':'Brand Director, Atelier Soye',
+  '프로젝트를<br>시작해볼까요':'Let’s start<br>a project',
+  '촬영 일정, 예산, 원하는 무드를 간단히 남겨 주시면 1~2일 내로 답변드립니다.':
+    'Leave your schedule, budget and desired mood — we’ll reply within 1–2 days.',
+  '이름':'Name','이메일':'Email','메시지':'Message','문의 보내기':'Send inquiry',
+  '스튜디오':'Studio','서울시 성동구 성수이로 12길 8':'12-gil 8, Seongsuiro, Seongdong-gu, Seoul',
+  '전화':'Phone','운영시간':'Hours','화–토 · 10:00–19:00':'Tue–Sat · 10:00–19:00',
+  '문의가 접수되었습니다. 곧 연락드릴게요.':'Your inquiry has been received. We’ll be in touch soon.',
+  '둘러보기':'Explore',
+  '서울 기반의 포토그래피 &amp; 크리에이티브 스튜디오. 빛과 순간을 정직하게 기록합니다.':
+    'A Seoul-based photography &amp; creative studio, honestly recording light and moments.',
+  '소셜':'Social','인스타그램':'Instagram','비메오':'Vimeo','비핸스':'Behance',
+  '연락처':'Contact','hello@lumenstudio.kr':'hello@lumenstudio.kr','02-6925-1084':'02-6925-1084',
+  'MIT 라이선스로 배포됩니다':'Released under the MIT License'
+};
+let EN=new URLSearchParams(location.search).get('lang')==='en';
+const orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if(!orig.has(el)) orig.set(el,el.innerHTML);
+    const ko=orig.get(el).trim();
+    el.innerHTML=EN?(STR[ko]??orig.get(el)):orig.get(el);
+  });
+  document.documentElement.lang=EN?'en':'ko';
+  document.getElementById('lang').textContent = EN ? 'KO' : 'EN';
+  if(EN) document.title='LUMEN STUDIO — Photography & Creative Studio';
+  else document.title='LUMEN STUDIO — 포토그래피 & 크리에이티브 스튜디오';
+}
+document.getElementById('lang').addEventListener('click', ()=>{ EN=!EN; applyLang(); });
+applyLang();
+</script>
+</body>
+</html>

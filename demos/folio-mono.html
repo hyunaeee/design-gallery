@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>강유하 — 흑백 스위스 타이포그래피 포트폴리오</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+/* 흑과 백, 활자와 괘선만으로 완성하는 스위스 타이포그래피 포트폴리오.
+   색은 단 한 방울도 쓰지 않는다 — 위계는 크기와 반전으로만 만든다. */
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{ --ink:#111; --paper:#fff; --hair:1px solid #111; }
+html{ scroll-behavior:smooth; }
+body{ font-family:'Archivo','Noto Sans KR',sans-serif; background:var(--paper); color:var(--ink);
+  -webkit-font-smoothing:antialiased; line-height:1.4; overflow-x:hidden; }
+a{ color:inherit; text-decoration:none; }
+::selection{ background:#111; color:#fff; }
+
+/* ── 스크롤 리빌 ─────────────────────────────────── */
+.rv{ opacity:0; transform:translateY(28px); transition:opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.rv.in{ opacity:1; transform:none; }
+
+/* ── 상단 메타 바 ────────────────────────────────── */
+.meta{ display:grid; grid-template-columns:repeat(4,1fr); border-bottom:var(--hair); }
+.meta div{ padding:10px 16px; font-size:10px; font-weight:600; letter-spacing:.22em;
+  text-transform:uppercase; border-right:var(--hair); white-space:nowrap; overflow:hidden; }
+.meta div:last-child{ border-right:none; text-align:right; }
+@media(max-width:640px){ .meta{ grid-template-columns:repeat(2,1fr); }
+  .meta div:nth-child(2){ border-right:none; } .meta div{ border-bottom:var(--hair); }
+  .meta div:nth-child(3),.meta div:nth-child(4){ border-bottom:none; } }
+
+/* ── 히어로 ──────────────────────────────────────── */
+.hero{ padding:56px 4vw 40px; border-bottom:var(--hair); }
+.hero h1{ font-size:clamp(72px,16vw,220px); font-weight:900; letter-spacing:-.045em;
+  line-height:.88; text-transform:uppercase; }
+.hero h1 .outline{ color:transparent; -webkit-text-stroke:2px #111; }
+.hero .sub{ margin-top:34px; display:flex; justify-content:space-between; gap:20px;
+  flex-wrap:wrap; align-items:flex-end; }
+.hero .sub p{ max-width:420px; font-size:15px; font-weight:500; word-break:keep-all; }
+.hero .sub .no{ font-size:10px; letter-spacing:.22em; font-weight:600; text-transform:uppercase; }
+
+/* ── 마퀴 ────────────────────────────────────────── */
+.marquee{ background:#111; color:#fff; overflow:hidden; border-bottom:var(--hair);
+  padding:14px 0; white-space:nowrap; }
+.marquee .track{ display:inline-block; animation:mq 22s linear infinite;
+  font-size:clamp(16px,2.4vw,26px); font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+.marquee .track span{ margin:0 18px; }
+@keyframes mq{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+body.anim-paused .marquee .track{ animation-play-state:paused; }
+
+/* ── 프로젝트 인덱스 ─────────────────────────────── */
+.index-head{ display:flex; justify-content:space-between; align-items:baseline;
+  padding:48px 4vw 20px; }
+.index-head h2{ font-size:11px; font-weight:700; letter-spacing:.26em; text-transform:uppercase; }
+.index-head span{ font-size:11px; font-weight:600; letter-spacing:.18em; }
+.proj{ position:relative; display:grid; grid-template-columns:80px 1fr auto auto;
+  gap:24px; align-items:center; padding:26px 4vw; border-top:var(--hair);
+  cursor:pointer; transition:background .18s ease, color .18s ease; }
+.proj:last-of-type{ border-bottom:var(--hair); }
+.proj .num{ font-size:13px; font-weight:600; letter-spacing:.14em; }
+.proj .title{ font-size:clamp(28px,5.4vw,64px); font-weight:800; letter-spacing:-.03em;
+  line-height:1; text-transform:uppercase; word-break:keep-all; }
+.proj .cat{ font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; }
+.proj .year{ font-size:13px; font-weight:600; font-variant-numeric:tabular-nums; }
+.proj:hover{ background:#111; color:#fff; }
+.proj .swatch{ position:absolute; left:0; top:50%; width:200px; height:140px;
+  transform:translate(40px,-50%); opacity:0; pointer-events:none; z-index:2;
+  border:2px solid #fff; transition:opacity .18s ease, transform .22s cubic-bezier(.2,.7,.3,1);
+  box-shadow:0 18px 40px -18px rgba(0,0,0,.6); }
+.proj:hover .swatch{ opacity:1; }
+/* 프로젝트별 패턴 — 전부 CSS 그라디언트, 흑백 한정 */
+.sw1{ background:radial-gradient(circle at 4px 4px, #111 2.2px, transparent 2.6px) 0 0/14px 14px #fff; }
+.sw2{ background:repeating-linear-gradient(45deg, #111 0 9px, #fff 9px 20px); }
+.sw3{ background:conic-gradient(#111 90deg, #fff 90deg 180deg, #111 180deg 270deg, #fff 270deg) 0 0/28px 28px; }
+.sw4{ background:
+  radial-gradient(circle at 20% 30%, rgba(17,17,17,.85) 0 18%, transparent 40%),
+  radial-gradient(circle at 75% 65%, rgba(17,17,17,.6) 0 22%, transparent 48%),
+  radial-gradient(circle at 55% 15%, rgba(17,17,17,.35) 0 14%, transparent 34%),
+  linear-gradient(160deg, #e8e8e8, #fff); }
+.sw5{ background:repeating-radial-gradient(circle at 50% 50%, #111 0 4px, #fff 4px 13px); }
+.sw6{ background:
+  linear-gradient(#111 1.5px, transparent 1.5px) 0 0/100% 17px,
+  linear-gradient(90deg, #111 1.5px, transparent 1.5px) 0 0/17px 100%, #fff; }
+@media(max-width:760px){
+  .proj{ grid-template-columns:44px 1fr auto; }
+  .proj .cat{ display:none; } .proj .swatch{ display:none; }
+}
+
+/* ── 소개 ────────────────────────────────────────── */
+.about{ display:grid; grid-template-columns:1fr 2fr; gap:40px; padding:80px 4vw;
+  border-bottom:var(--hair); }
+.about .label{ position:sticky; top:24px; align-self:start; font-size:11px;
+  font-weight:700; letter-spacing:.26em; text-transform:uppercase; }
+.about .body p{ font-size:clamp(17px,2.2vw,24px); font-weight:500; line-height:1.6;
+  word-break:keep-all; max-width:640px; }
+.about .body p + p{ margin-top:28px; }
+.about .facts{ margin-top:44px; display:grid; grid-template-columns:repeat(3,1fr); gap:0; border:var(--hair); }
+.about .facts div{ padding:16px; border-right:var(--hair); }
+.about .facts div:last-child{ border-right:none; }
+.about .facts b{ display:block; font-size:clamp(22px,3vw,34px); font-weight:900; letter-spacing:-.02em; }
+.about .facts span{ font-size:10px; font-weight:600; letter-spacing:.18em; text-transform:uppercase; }
+@media(max-width:760px){ .about{ grid-template-columns:1fr; } .about .label{ position:static; } }
+
+/* ── 푸터 ────────────────────────────────────────── */
+footer{ padding:72px 4vw 40px; }
+.contact{ display:block; font-size:clamp(48px,12vw,160px); font-weight:900;
+  letter-spacing:-.04em; line-height:.95; text-transform:uppercase; padding:16px 8px;
+  transition:background .18s ease, color .18s ease; }
+.contact:hover{ background:#111; color:#fff; }
+.foot-links{ margin-top:44px; display:flex; justify-content:space-between; gap:16px;
+  flex-wrap:wrap; border-top:var(--hair); padding-top:18px; }
+.foot-links .set{ display:flex; gap:26px; flex-wrap:wrap; }
+.foot-links a{ font-size:11px; font-weight:600; letter-spacing:.2em; text-transform:uppercase; }
+.foot-links a:hover{ text-decoration:underline; text-underline-offset:4px; }
+.foot-links .hint{ font-size:10px; font-weight:500; letter-spacing:.16em; opacity:.55; text-transform:uppercase; }
+
+/* ── 베이스라인 그리드 오버레이 (G 키) ───────────── */
+.grid-overlay{ position:fixed; inset:0; pointer-events:none; z-index:60; opacity:0;
+  transition:opacity .25s ease;
+  background:
+    repeating-linear-gradient(90deg, rgba(0,0,0,.08) 0 1px, transparent 1px calc(100%/12)),
+    repeating-linear-gradient(rgba(0,0,0,.08) 0 1px, transparent 1px 24px); }
+body.grid-on .grid-overlay{ opacity:1; }
+</style>
+</head>
+<body>
+
+<!-- 상단 메타 바 -->
+<div class="meta">
+  <div data-i18n>강유하</div>
+  <div>GRAPHIC DESIGNER</div>
+  <div>SEOUL, KOREA</div>
+  <div>PORTFOLIO — 2026</div>
+</div>
+
+<!-- 히어로 -->
+<header class="hero">
+  <h1>KANG<br><span class="outline">YUHA</span></h1>
+  <div class="sub">
+    <p data-i18n>여백과 괘선, 활자만으로 이야기하는 그래픽 디자이너. 색을 덜어낼수록 구조는 선명해진다고 믿습니다.</p>
+    <div class="no">EST. 2018 — B/W ONLY</div>
+  </div>
+</header>
+
+<!-- 마퀴 -->
+<div class="marquee" aria-hidden="true">
+  <div class="track">
+    <span>Typography</span><span>·</span><span>Editorial</span><span>·</span><span>Branding</span><span>·</span><span>Poster</span><span>·</span><span>Grid System</span><span>·</span><span>Seoul</span><span>·</span>
+    <span>Typography</span><span>·</span><span>Editorial</span><span>·</span><span>Branding</span><span>·</span><span>Poster</span><span>·</span><span>Grid System</span><span>·</span><span>Seoul</span><span>·</span>
+  </div>
+</div>
+
+<!-- 프로젝트 인덱스 -->
+<section>
+  <div class="index-head rv">
+    <h2 data-i18n>선택된 프로젝트</h2>
+    <span>2023 — 2026</span>
+  </div>
+
+  <div class="proj rv" data-sw="sw1">
+    <span class="num">01</span>
+    <span class="title" data-i18n>도시의 리듬</span>
+    <span class="cat" data-i18n>브랜딩</span>
+    <span class="year">2026</span>
+    <span class="swatch sw1" aria-hidden="true"></span>
+  </div>
+  <div class="proj rv" data-sw="sw2">
+    <span class="num">02</span>
+    <span class="title" data-i18n>무중력 서점</span>
+    <span class="cat" data-i18n>편집 디자인</span>
+    <span class="year">2025</span>
+    <span class="swatch sw2" aria-hidden="true"></span>
+  </div>
+  <div class="proj rv" data-sw="sw3">
+    <span class="num">03</span>
+    <span class="title" data-i18n>백색 소음</span>
+    <span class="cat" data-i18n>포스터</span>
+    <span class="year">2025</span>
+    <span class="swatch sw3" aria-hidden="true"></span>
+  </div>
+  <div class="proj rv" data-sw="sw4">
+    <span class="num">04</span>
+    <span class="title" data-i18n>활자 실험실</span>
+    <span class="cat" data-i18n>타이포그래피</span>
+    <span class="year">2024</span>
+    <span class="swatch sw4" aria-hidden="true"></span>
+  </div>
+  <div class="proj rv" data-sw="sw5">
+    <span class="num">05</span>
+    <span class="title" data-i18n>정오의 전시</span>
+    <span class="cat" data-i18n>아이덴티티</span>
+    <span class="year">2024</span>
+    <span class="swatch sw5" aria-hidden="true"></span>
+  </div>
+  <div class="proj rv" data-sw="sw6">
+    <span class="num">06</span>
+    <span class="title" data-i18n>검은 사각형</span>
+    <span class="cat" data-i18n>아트 디렉션</span>
+    <span class="year">2023</span>
+    <span class="swatch sw6" aria-hidden="true"></span>
+  </div>
+</section>
+
+<!-- 소개 -->
+<section class="about">
+  <div class="label rv" data-i18n>소개</div>
+  <div class="body">
+    <p class="rv" data-i18n>강유하는 서울을 기반으로 활동하는 그래픽 디자이너입니다. 브랜딩과 편집 디자인, 포스터 작업을 오가며 그리드 시스템 위에서 활자의 밀도와 리듬을 실험합니다.</p>
+    <p class="rv" data-i18n>모든 작업은 흑과 백에서 출발합니다. 색이 사라진 화면에서는 크기, 간격, 반전만이 위계를 만들고 — 그 제약이 오히려 가장 자유로운 표현이 된다고 생각합니다.</p>
+    <div class="facts rv">
+      <div><b>8</b><span data-i18n>활동 연차</span></div>
+      <div><b>64</b><span data-i18n>완료 프로젝트</span></div>
+      <div><b>12</b><span data-i18n>수상 및 선정</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- 푸터 -->
+<footer>
+  <a class="contact rv" href="#">CONTACT&nbsp;↗</a>
+  <div class="foot-links rv">
+    <div class="set">
+      <a href="#" data-i18n>이메일</a>
+      <a href="#" data-i18n>인스타그램</a>
+      <a href="#" data-i18n>비핸스</a>
+      <a href="#" data-i18n>이력서 다운로드</a>
+    </div>
+    <span class="hint" data-i18n>G 키를 누르면 그리드가 보입니다</span>
+  </div>
+</footer>
+
+<div class="grid-overlay" aria-hidden="true"></div>
+
+<script>
+/* ── 언어 (?lang=en) ─────────────────────────────── */
+const STR={
+  '강유하':'YUHA KANG',
+  '여백과 괘선, 활자만으로 이야기하는 그래픽 디자이너. 색을 덜어낼수록 구조는 선명해진다고 믿습니다.':
+    'A graphic designer who speaks only through whitespace, rules and type. The less color, the clearer the structure.',
+  '선택된 프로젝트':'Selected Projects',
+  '도시의 리듬':'Urban Rhythm','무중력 서점':'Zero-G Bookstore','백색 소음':'White Noise',
+  '활자 실험실':'Type Laboratory','정오의 전시':'Noon Exhibition','검은 사각형':'Black Square',
+  '브랜딩':'Branding','편집 디자인':'Editorial','포스터':'Poster',
+  '타이포그래피':'Typography','아이덴티티':'Identity','아트 디렉션':'Art Direction',
+  '소개':'About',
+  '강유하는 서울을 기반으로 활동하는 그래픽 디자이너입니다. 브랜딩과 편집 디자인, 포스터 작업을 오가며 그리드 시스템 위에서 활자의 밀도와 리듬을 실험합니다.':
+    'Yuha Kang is a Seoul-based graphic designer moving between branding, editorial and poster work, experimenting with the density and rhythm of type on strict grid systems.',
+  '모든 작업은 흑과 백에서 출발합니다. 색이 사라진 화면에서는 크기, 간격, 반전만이 위계를 만들고 — 그 제약이 오히려 가장 자유로운 표현이 된다고 생각합니다.':
+    'Every project starts in black and white. When color disappears, only size, spacing and inversion build hierarchy — and that constraint becomes the freest form of expression.',
+  '활동 연차':'Years active','완료 프로젝트':'Projects done','수상 및 선정':'Awards & picks',
+  '이메일':'Email','인스타그램':'Instagram','비핸스':'Behance','이력서 다운로드':'Download CV',
+  'G 키를 누르면 그리드가 보입니다':'Press G to reveal the grid'
+};
+let EN=new URLSearchParams(location.search).get('lang')==='en';
+const orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(el=>{
+    if(!orig.has(el)) orig.set(el,el.innerHTML);
+    const ko=orig.get(el).trim();
+    el.innerHTML=EN?(STR[ko]??orig.get(el)):orig.get(el);
+  });
+  document.documentElement.lang=EN?'en':'ko';
+  document.title=EN?'Yuha Kang — B/W Swiss Typography Portfolio':'강유하 — 흑백 스위스 타이포그래피 포트폴리오';
+}
+applyLang();
+
+/* ── 스크롤 리빌 ─────────────────────────────────── */
+const io=new IntersectionObserver(es=>{
+  es.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+},{ threshold:.12 });
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+/* ── 프로젝트 행: 프리뷰 스와치가 커서를 따라 수평 이동 ── */
+document.querySelectorAll('.proj').forEach(row=>{
+  const sw=row.querySelector('.swatch');
+  if(!sw) return;
+  row.addEventListener('mousemove',e=>{
+    const r=row.getBoundingClientRect();
+    const w=sw.offsetWidth||200;
+    let x=e.clientX-r.left-w/2;
+    x=Math.max(12,Math.min(x,r.width-w-12));
+    sw.style.transform='translate('+x+'px,-50%)';
+  });
+});
+
+/* ── G 키: 베이스라인 그리드 오버레이 토글 ───────── */
+document.addEventListener('keydown',e=>{
+  if((e.key==='g'||e.key==='G') && !e.metaKey && !e.ctrlKey && !e.altKey){
+    document.body.classList.toggle('grid-on');
+  }
+});
+
+/* ── 갤러리 일시정지 연동 (마퀴 pause) ───────────── */
+setInterval(()=>{
+  document.body.classList.toggle('anim-paused', !!window.__paused);
+},300);
+</script>
+</body>
+</html>

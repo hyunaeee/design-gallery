@@ -1,0 +1,35 @@
+{
+  "finance": {
+    "color": {
+      "primary":        { "value": "#3182F6", "type": "color", "description": "브랜드 블루 — CTA, 활성 상태" },
+      "background":     { "value": "#F2F4F6", "type": "color", "description": "화면 배경" },
+      "surface":        { "value": "#FFFFFF", "type": "color", "description": "카드 배경" },
+      "text-primary":   { "value": "#191F28", "type": "color" },
+      "text-secondary": { "value": "#8B95A1", "type": "color" },
+      "negative":       { "value": "#F04452", "type": "color", "description": "경고, 상승(국내 주식 관례)" },
+      "chart-track":    { "value": "#E5E8EB", "type": "color" }
+    },
+    "radius": {
+      "card":   { "value": "20", "type": "borderRadius" },
+      "button": { "value": "14", "type": "borderRadius" },
+      "sheet":  { "value": "28", "type": "borderRadius", "description": "바텀시트 상단 모서리" },
+      "icon":   { "value": "14", "type": "borderRadius" }
+    },
+    "spacing": {
+      "screen-x": { "value": "16", "type": "spacing" },
+      "card":     { "value": "20", "type": "spacing" },
+      "row-y":    { "value": "13", "type": "spacing" }
+    },
+    "typography": {
+      "amount":  { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "700", "fontSize": "16.5" }, "type": "typography" },
+      "title":   { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "700", "fontSize": "15" }, "type": "typography" },
+      "caption": { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "400", "fontSize": "13" }, "type": "typography" },
+      "spend-total": { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "900", "fontSize": "24" }, "type": "typography" }
+    },
+    "component": {
+      "tabbar-height":    { "value": "84", "type": "sizing" },
+      "acct-icon":        { "value": "40", "type": "sizing" },
+      "sheet-grab":       { "value": "44", "type": "sizing", "description": "바텀시트 그랩 핸들 너비" }
+    }
+  }
+}

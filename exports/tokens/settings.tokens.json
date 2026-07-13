@@ -1,0 +1,53 @@
+{
+  "settings": {
+    "color": {
+      "accent":    { "value": "#FA4E6E", "type": "color", "description": "브랜드 로즈 — 프로필 편집, 아바타 그라디언트 시작" },
+      "switch-on": { "value": "#34C759", "type": "color", "description": "스위치 ON 트랙 (iOS 그린)" },
+      "danger":    { "value": "#FF3B30", "type": "color", "description": "로그아웃, 파괴적 액션" },
+      "avatar-gradient-end": { "value": "#FF9500", "type": "color", "description": "아바타 그라디언트 끝" },
+      "light": {
+        "background":     { "value": "#F2F2F7", "type": "color", "description": "라이트 화면 배경" },
+        "surface":        { "value": "#FFFFFF", "type": "color", "description": "라이트 그룹 카드" },
+        "text-primary":   { "value": "#1C1C1E", "type": "color" },
+        "text-secondary": { "value": "#8E8E93", "type": "color" },
+        "divider":        { "value": "#E5E5EA", "type": "color", "description": "행 구분선 · 스위치 OFF 트랙" }
+      },
+      "dark": {
+        "background":     { "value": "#0B0B0F", "type": "color", "description": "다크 화면 배경" },
+        "surface":        { "value": "#1C1C1E", "type": "color", "description": "다크 그룹 카드" },
+        "text-primary":   { "value": "#F2F2F7", "type": "color" },
+        "text-secondary": { "value": "#98989F", "type": "color" },
+        "divider":        { "value": "#2C2C2E", "type": "color" }
+      }
+    },
+    "radius": {
+      "profile": { "value": "16", "type": "borderRadius", "description": "프로필 헤더 카드" },
+      "group":   { "value": "14", "type": "borderRadius", "description": "iOS 그룹 리스트" },
+      "icon":    { "value": "8",  "type": "borderRadius", "description": "행 아이콘 타일" },
+      "dialog":  { "value": "16", "type": "borderRadius" },
+      "toast":   { "value": "99", "type": "borderRadius", "description": "토스트 — pill" }
+    },
+    "spacing": {
+      "screen-x":    { "value": "16", "type": "spacing" },
+      "row-x":       { "value": "14", "type": "spacing", "description": "리스트 행 좌우 패딩" },
+      "row-y":       { "value": "11", "type": "spacing" },
+      "group-label": { "value": "20", "type": "spacing", "description": "그룹 라벨 위 마진" }
+    },
+    "typography": {
+      "nav-title":   { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "900", "fontSize": "26" }, "type": "typography" },
+      "row-label":   { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "400", "fontSize": "14.5" }, "type": "typography" },
+      "row-value":   { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "400", "fontSize": "13" }, "type": "typography" },
+      "group-label": { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "500", "fontSize": "12.5" }, "type": "typography" },
+      "profile-name":{ "value": { "fontFamily": "Noto Sans KR", "fontWeight": "800", "fontSize": "17" }, "type": "typography" }
+    },
+    "component": {
+      "switch-width":  { "value": "51", "type": "sizing", "description": "iOS 스위치 트랙 너비" },
+      "switch-height": { "value": "31", "type": "sizing" },
+      "switch-thumb":  { "value": "27", "type": "sizing", "description": "스위치 썸 지름" },
+      "avatar":        { "value": "62", "type": "sizing", "description": "프로필 아바타 지름" },
+      "icon-tile":     { "value": "30", "type": "sizing", "description": "행 아이콘 타일 한 변" },
+      "dialog-width":  { "value": "272","type": "sizing" },
+      "theme-duration":{ "value": "350","type": "other", "description": "다크 모드 전환 트랜지션 ms" }
+    }
+  }
+}

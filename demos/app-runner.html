@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title data-i18n>스트라이드 — 러닝 · 피트니스 앱 UI</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+  --accent: #4f46e5; --lime: #a3e635; --app-bg: #f7f8f4; --panel: #ffffff;
+  --ink: #14151a; --dim: #83879b; --line: #e7e8ee; --run: #f43f5e;
+}
+html, body { height: 100%; }
+body {
+  font-family: 'Inter', 'Noto Sans KR', sans-serif; -webkit-font-smoothing: antialiased;
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 40px 20px; position: relative; overflow-x: hidden; color: #1c1c22;
+  background: radial-gradient(ellipse 80% 55% at 50% 32%, #ffffff 0%, #e7e8ec 55%, #d7d9de 100%);
+}
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(circle at 20% 15%, rgba(79,70,229,.07), transparent 40%),
+              radial-gradient(circle at 84% 80%, rgba(163,230,53,.10), transparent 42%);
+}
+
+/* ── 폰 목업 ── */
+.phone { position: relative; z-index: 1; width: 390px; height: 844px; flex-shrink: 0;
+  border-radius: 54px; background: linear-gradient(160deg, #2a2a30, #0a0a0c 60%); padding: 12px;
+  box-shadow: 0 60px 120px -40px rgba(20, 20, 30, .45), 0 24px 50px -24px rgba(20, 20, 30, .35),
+              inset 0 0 0 2px #3a3a40; }
+.screen { position: relative; width: 100%; height: 100%; border-radius: 42px; overflow: hidden;
+  background: var(--app-bg); display: flex; flex-direction: column; color: var(--ink); }
+.notch { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); width: 120px;
+  height: 32px; background: #0a0a0c; border-radius: 20px; z-index: 100; }
+.statusbar { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between;
+  align-items: center; padding: 18px 26px 4px; z-index: 60; }
+.statusbar.on-dark { color: #fff; }
+.statusbar.on-light { color: var(--ink); }
+.statusbar .time { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+.stat-icons { display: flex; align-items: center; gap: 5px; }
+.stat-icons svg { fill: currentColor; }
+.i-signal { width: 17px; height: 11px; }
+.i-wifi { width: 16px; height: 12px; }
+.i-battery { width: 24px; height: 12px; border: 1.4px solid currentColor; border-radius: 3.5px;
+  padding: 1.5px; position: relative; opacity: .95; }
+.i-battery::after { content: ""; position: absolute; right: -3.5px; top: 3.5px; width: 2px; height: 5px;
+  background: currentColor; border-radius: 0 2px 2px 0; }
+.i-battery .fill { height: 100%; width: 82%; background: currentColor; border-radius: 1.5px; }
+.home-indicator { position: absolute; bottom: 7px; left: 50%; transform: translateX(-50%); width: 134px;
+  height: 5px; border-radius: 99px; background: rgba(20,20,30,.5); z-index: 90; }
+
+/* ── 화면 전환 ── */
+.scr { position: absolute; inset: 0; opacity: 0; pointer-events: none;
+  transform: translateY(10px); transition: opacity .3s cubic-bezier(.2,.7,.2,1), transform .3s cubic-bezier(.2,.7,.2,1);
+  overflow-y: auto; -ms-overflow-style: none; scrollbar-width: none; padding-bottom: 108px; }
+.scr::-webkit-scrollbar { display: none; }
+.scr.active { opacity: 1; pointer-events: auto; transform: translateY(0); z-index: 5; }
+
+/* ── 활동 화면 ── */
+.hero { position: relative; height: 216px; flex-shrink: 0; overflow: hidden; background: #1c2033; }
+.hero img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.hero .overlay { position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(10,12,24,.55) 0%, rgba(10,12,24,.15) 42%, rgba(10,12,24,.75) 100%); }
+.hero .htext { position: absolute; left: 24px; right: 24px; bottom: 18px; color: #fff; }
+.hero .htext .greet { font-size: 12.5px; font-weight: 700; opacity: .85; letter-spacing: .01em; }
+.hero .htext h1 { margin-top: 5px; font-size: 23px; font-weight: 800; letter-spacing: -.02em; }
+.hero .htext p { margin-top: 4px; font-size: 12.5px; opacity: .85; }
+
+.ring-card { margin: -34px 18px 0; background: var(--panel); border-radius: 22px; padding: 26px 20px 22px;
+  box-shadow: 0 24px 46px -22px rgba(30,30,50,.22); position: relative; z-index: 2; text-align: center; }
+.ring-wrap { position: relative; width: 176px; height: 176px; margin: 0 auto; }
+.ring-wrap svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+.ring-track { fill: none; stroke: #eef0f6; stroke-width: 12; }
+.ring-fill { fill: none; stroke: url(#ringGrad); stroke-width: 12; stroke-linecap: round;
+  stroke-dasharray: 339.3; stroke-dashoffset: 339.3; transition: stroke-dashoffset .1s linear; }
+.ring-center { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+.ring-center .num { font-size: 34px; font-weight: 900; letter-spacing: -.03em; line-height: 1; }
+.ring-center .num span { font-size: 15px; font-weight: 700; color: var(--dim); margin-left: 2px; }
+.ring-center .lbl { margin-top: 5px; font-size: 11.5px; color: var(--dim); font-weight: 700; }
+.ring-goal { margin-top: 14px; font-size: 12.5px; color: var(--dim); font-weight: 600; }
+.ring-goal b { color: var(--ink); font-weight: 800; }
+
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 18px 0; }
+.stat-box { background: var(--panel); border-radius: 16px; padding: 13px 8px; text-align: center;
+  box-shadow: 0 10px 26px -18px rgba(30,30,50,.25); }
+.stat-box b { display: block; font-size: 17px; font-weight: 800; letter-spacing: -.02em; }
+.stat-box span { font-size: 10.5px; color: var(--dim); font-weight: 700; letter-spacing: .01em; }
+
+.run-btn { display: block; width: calc(100% - 36px); margin: 18px auto 0; height: 54px; border: none;
+  border-radius: 16px; background: var(--accent); color: #fff; font-family: inherit; font-size: 15.5px;
+  font-weight: 800; cursor: pointer; letter-spacing: -.01em; transition: background .25s, box-shadow .25s, transform .15s;
+  box-shadow: 0 16px 30px -12px rgba(79,70,229,.55); position: relative; overflow: hidden; }
+.run-btn:active { transform: scale(.98); }
+.run-btn.running { background: var(--run); box-shadow: 0 16px 30px -12px rgba(244,63,94,.55); animation: pulse-btn 1.6s ease-in-out infinite; }
+@keyframes pulse-btn { 0%, 100% { box-shadow: 0 16px 30px -12px rgba(244,63,94,.55); } 50% { box-shadow: 0 16px 40px -8px rgba(244,63,94,.8); } }
+.run-timer { text-align: center; font-size: 12.5px; color: var(--dim); font-weight: 700; margin-top: 10px;
+  font-variant-numeric: tabular-nums; opacity: 0; transition: opacity .2s; }
+.run-timer.show { opacity: 1; }
+
+.sec-label { font-size: 15.5px; font-weight: 800; letter-spacing: -.01em; margin: 26px 18px 12px; }
+.week-card { margin: 0 18px; background: var(--panel); border-radius: 18px; padding: 18px 16px 14px;
+  box-shadow: 0 10px 26px -18px rgba(30,30,50,.22); }
+.week-bars { display: flex; align-items: flex-end; justify-content: space-between; gap: 8px; height: 92px; }
+.wbar { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 8px; height: 100%; }
+.wbar .bar { width: 100%; max-width: 22px; border-radius: 6px 6px 3px 3px; background: #e4e6f5; transition: height .8s cubic-bezier(.2,.8,.2,1); }
+.wbar.today .bar { background: linear-gradient(180deg, var(--lime), #65a30d); }
+.wbar span { font-size: 10.5px; color: var(--dim); font-weight: 700; }
+.wbar.today span { color: var(--ink); font-weight: 800; }
+
+/* ── 기록 화면 ── */
+#scr-history { padding-top: 60px; }
+.hist-head { padding: 6px 22px 16px; }
+.hist-head h2 { font-size: 24px; font-weight: 800; letter-spacing: -.01em; }
+.hist-head p { margin-top: 4px; font-size: 12.5px; color: var(--dim); }
+.hist-list { display: flex; flex-direction: column; gap: 10px; padding: 0 18px; }
+.hist-row { display: flex; align-items: center; gap: 14px; background: var(--panel); border-radius: 16px;
+  padding: 14px 15px; box-shadow: 0 10px 24px -18px rgba(30,30,50,.22); }
+.hist-row .spark { flex-shrink: 0; width: 56px; height: 40px; }
+.hist-row .spark path { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+.hist-info { flex: 1; min-width: 0; }
+.hist-info b { display: block; font-size: 14px; font-weight: 700; }
+.hist-info span { font-size: 11.5px; color: var(--dim); }
+.hist-dist { text-align: right; flex-shrink: 0; }
+.hist-dist b { display: block; font-size: 16px; font-weight: 800; }
+.hist-dist span { font-size: 10.5px; color: var(--dim); font-weight: 700; }
+
+/* ── 프로필 화면 ── */
+#scr-profile { padding-top: 60px; }
+.prof-head { display: flex; flex-direction: column; align-items: center; padding: 10px 20px 20px; text-align: center; }
+.prof-avatar { width: 82px; height: 82px; border-radius: 50%; display: grid; place-items: center; font-size: 34px;
+  background: linear-gradient(135deg, var(--accent), #818cf8); box-shadow: 0 14px 26px -10px rgba(79,70,229,.5); }
+.prof-head h2 { margin-top: 12px; font-size: 19px; font-weight: 800; }
+.prof-head p { margin-top: 2px; font-size: 12.5px; color: var(--dim); }
+.prof-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 4px 18px 22px; }
+.prof-stats .box { background: var(--panel); border-radius: 14px; padding: 13px 6px; text-align: center;
+  box-shadow: 0 10px 24px -18px rgba(30,30,50,.22); }
+.prof-stats .box b { display: block; font-size: 16px; font-weight: 800; }
+.prof-stats .box span { font-size: 10px; color: var(--dim); font-weight: 700; }
+.settings-list { margin: 0 18px; background: var(--panel); border-radius: 16px; overflow: hidden;
+  box-shadow: 0 10px 24px -18px rgba(30,30,50,.22); }
+.setting-row { display: flex; align-items: center; gap: 12px; padding: 15px 16px; border-bottom: 1px solid var(--line);
+  cursor: pointer; }
+.setting-row:last-child { border-bottom: none; }
+.setting-row .ico { width: 30px; height: 30px; border-radius: 9px; background: #eef0fb; display: grid; place-items: center; font-size: 14px; flex-shrink: 0; }
+.setting-row .lbl { flex: 1; font-size: 14px; font-weight: 600; }
+.setting-row .chev { color: var(--dim); font-size: 15px; }
+.toggle { width: 42px; height: 25px; border-radius: 99px; background: #dcdfe8; position: relative; flex-shrink: 0;
+  transition: background .2s; border: none; cursor: pointer; }
+.toggle::after { content: ""; position: absolute; top: 2.5px; left: 2.5px; width: 20px; height: 20px; border-radius: 50%;
+  background: #fff; transition: transform .2s; box-shadow: 0 2px 4px rgba(0,0,0,.2); }
+.toggle.on { background: var(--accent); }
+.toggle.on::after { transform: translateX(17px); }
+
+/* ── 탭바 ── */
+.tabbar { position: absolute; bottom: 0; left: 0; right: 0; z-index: 40; display: flex;
+  background: rgba(255,255,255,.94); backdrop-filter: blur(14px); border-top: 1px solid var(--line);
+  padding: 9px 6px 22px; }
+.tab { flex: 1; border: none; background: none; font-family: inherit; display: flex; flex-direction: column;
+  align-items: center; gap: 3px; font-size: 10.5px; color: var(--dim); cursor: pointer; font-weight: 600;
+  padding: 4px 0; transition: color .2s; }
+.tab i { font-style: normal; font-size: 19px; filter: grayscale(1) opacity(.55); transition: filter .2s; }
+.tab.on { color: var(--ink); font-weight: 800; }
+.tab.on i { filter: none; }
+
+/* ── 언어 토글 ── */
+.lang-toggle { position: fixed; top: 22px; right: 22px; z-index: 500; background: rgba(20,20,26,.85);
+  color: #fff; border: 1px solid rgba(255,255,255,.18); backdrop-filter: blur(10px); font-family: inherit;
+  font-weight: 700; font-size: 12.5px; letter-spacing: .03em; padding: 9px 16px; border-radius: 99px;
+  cursor: pointer; box-shadow: 0 10px 24px -8px rgba(0,0,0,.35); transition: transform .15s, background .2s; }
+.lang-toggle:hover { background: #26262f; }
+.lang-toggle:active { transform: scale(.94); }
+
+@media (max-width: 480px) {
+  body { padding: 0; }
+  .phone { width: 100vw; height: 100dvh; border-radius: 0; padding: 0; box-shadow: none; }
+  .screen { border-radius: 0; }
+  .notch { top: 10px; }
+}
+</style>
+</head>
+<body>
+
+<button class="lang-toggle" id="lang">EN</button>
+
+<div class="phone">
+  <div class="notch"></div>
+  <div class="screen">
+
+    <!-- 활동 화면 -->
+    <section class="scr active" id="scr-activity">
+      <div class="statusbar on-dark" id="statusActivity">
+        <span class="time">9:41</span>
+        <div class="stat-icons">
+          <svg class="i-signal" viewBox="0 0 18 12"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg class="i-wifi" viewBox="0 0 18 14"><path d="M9 12.5a1.6 1.6 0 100-3.2 1.6 1.6 0 000 3.2zM3.5 7.2a8 8 0 0111 0l-1.5 1.6a5.8 5.8 0 00-8 0zM.7 4.2a12 12 0 0116.6 0L15.8 6a9.4 9.4 0 00-13.6 0z"/></svg>
+          <div class="i-battery"><div class="fill"></div></div>
+        </div>
+      </div>
+
+      <div class="hero">
+        <img src="../assets/gen/app-run.jpg" alt="" loading="lazy" onerror="this.style.display='none'">
+        <div class="overlay"></div>
+        <div class="htext">
+          <span class="greet" data-i18n>좋은 아침이에요 🌅</span>
+          <h1 data-i18n>하은님, 오늘도 달려볼까요?</h1>
+          <p data-i18n>새벽 공기가 딱 좋은 컨디션이에요</p>
+        </div>
+      </div>
+
+      <div class="ring-card">
+        <div class="ring-wrap">
+          <svg viewBox="0 0 120 120">
+            <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#a3e635"/><stop offset="100%" stop-color="#4f46e5"/>
+            </linearGradient></defs>
+            <circle class="ring-track" cx="60" cy="60" r="54"/>
+            <circle class="ring-fill" id="ringFill" cx="60" cy="60" r="54"/>
+          </svg>
+          <div class="ring-center">
+            <div class="num" id="ringNum">3.2<span>km</span></div>
+            <div class="lbl" data-i18n>오늘 거리</div>
+          </div>
+        </div>
+        <div class="ring-goal" data-i18n>목표 <b id="goalTxt">5.0km</b> 중 달성</div>
+
+        <button class="run-btn" id="runBtn" data-i18n>러닝 시작</button>
+        <div class="run-timer" id="runTimer">00:00</div>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat-box"><b id="statPace">5'42"</b><span data-i18n>페이스</span></div>
+        <div class="stat-box"><b id="statTime">28:41</b><span data-i18n>시간</span></div>
+        <div class="stat-box"><b id="statCal">312</b><span data-i18n>칼로리</span></div>
+      </div>
+
+      <p class="sec-label" data-i18n>이번 주 활동</p>
+      <div class="week-card">
+        <div class="week-bars" id="weekBars"></div>
+      </div>
+    </section>
+
+    <!-- 기록 화면 -->
+    <section class="scr" id="scr-history">
+      <div class="statusbar on-light">
+        <span class="time">9:41</span>
+        <div class="stat-icons">
+          <svg class="i-signal" viewBox="0 0 18 12"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg class="i-wifi" viewBox="0 0 18 14"><path d="M9 12.5a1.6 1.6 0 100-3.2 1.6 1.6 0 000 3.2zM3.5 7.2a8 8 0 0111 0l-1.5 1.6a5.8 5.8 0 00-8 0zM.7 4.2a12 12 0 0116.6 0L15.8 6a9.4 9.4 0 00-13.6 0z"/></svg>
+          <div class="i-battery"><div class="fill"></div></div>
+        </div>
+      </div>
+      <div class="hist-head">
+        <h2 data-i18n>기록</h2>
+        <p data-i18n>최근 러닝 이력을 확인해 보세요</p>
+      </div>
+      <div class="hist-list" id="histList"></div>
+    </section>
+
+    <!-- 프로필 화면 -->
+    <section class="scr" id="scr-profile">
+      <div class="statusbar on-light">
+        <span class="time">9:41</span>
+        <div class="stat-icons">
+          <svg class="i-signal" viewBox="0 0 18 12"><rect x="0" y="7" width="3" height="5" rx="1"/><rect x="5" y="4" width="3" height="8" rx="1"/><rect x="10" y="2" width="3" height="10" rx="1"/><rect x="15" y="0" width="3" height="12" rx="1"/></svg>
+          <svg class="i-wifi" viewBox="0 0 18 14"><path d="M9 12.5a1.6 1.6 0 100-3.2 1.6 1.6 0 000 3.2zM3.5 7.2a8 8 0 0111 0l-1.5 1.6a5.8 5.8 0 00-8 0zM.7 4.2a12 12 0 0116.6 0L15.8 6a9.4 9.4 0 00-13.6 0z"/></svg>
+          <div class="i-battery"><div class="fill"></div></div>
+        </div>
+      </div>
+      <div class="prof-head">
+        <div class="prof-avatar">🏃‍♀️</div>
+        <h2 data-i18n>하은</h2>
+        <p data-i18n>매일 달리는 사람</p>
+      </div>
+      <div class="prof-stats">
+        <div class="box"><b>128km</b><span data-i18n>총 거리</span></div>
+        <div class="box"><b data-i18n>42회</b><span data-i18n>총 러닝</span></div>
+        <div class="box"><b>12.4km</b><span data-i18n>최장 거리</span></div>
+      </div>
+      <div class="settings-list">
+        <div class="setting-row"><span class="ico">🔔</span><span class="lbl" data-i18n>푸시 알림</span><button class="toggle on" id="notifToggle"></button></div>
+        <div class="setting-row"><span class="ico">🎯</span><span class="lbl" data-i18n>목표 거리 설정</span><span class="chev">›</span></div>
+        <div class="setting-row"><span class="ico">📏</span><span class="lbl" data-i18n>단위 (km)</span><span class="chev">›</span></div>
+        <div class="setting-row"><span class="ico">ℹ️</span><span class="lbl" data-i18n>앱 정보</span><span class="chev">›</span></div>
+      </div>
+    </section>
+
+    <!-- 탭바 -->
+    <nav class="tabbar" id="tabbar">
+      <button class="tab on" data-tab="activity"><i>🏃</i><span data-i18n>활동</span></button>
+      <button class="tab" data-tab="history"><i>📋</i><span data-i18n>기록</span></button>
+      <button class="tab" data-tab="profile"><i>👤</i><span data-i18n>프로필</span></button>
+    </nav>
+    <div class="home-indicator"></div>
+  </div>
+</div>
+
+<script>
+/* ═══ 스트라이드 러닝 앱 로직 ═══ */
+const $ = id => document.getElementById(id);
+const CIRC = 2 * Math.PI * 54; // 339.29
+
+let goalKm = 5.0, distanceKm = 3.2;
+let ringDisplay = distanceKm / goalKm, ringTarget = distanceKm / goalKm;
+let running = false, runSeconds = 0, runStartDistance = distanceKm, runTimer = null;
+let frames = 0;
+
+function setRing(pct) {
+  $('ringFill').style.strokeDashoffset = CIRC * (1 - Math.min(Math.max(pct, 0), 1));
+}
+function fmtClock(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return String(m).padStart(2, '0') + ':' + String(sec).padStart(2, '0');
+}
+function fmtPace(secPerKm) {
+  if (!isFinite(secPerKm) || secPerKm <= 0) return "5'42\"";
+  const m = Math.floor(secPerKm / 60), s = Math.round(secPerKm % 60);
+  return `${m}'${String(s).padStart(2, '0')}"`;
+}
+
+function updateStats() {
+  $('ringNum').innerHTML = distanceKm.toFixed(1) + '<span>km</span>';
+  ringTarget = distanceKm / goalKm;
+  if (running) {
+    const gained = distanceKm - runStartDistance;
+    const pace = gained > 0 ? runSeconds / gained : 320;
+    $('statPace').textContent = fmtPace(pace);
+    $('statTime').textContent = fmtClock(runSeconds);
+    $('statCal').textContent = Math.round(gained * 62 + runSeconds * 0.03);
+  }
+}
+
+function startRunning() {
+  running = true; runSeconds = 0; runStartDistance = distanceKm;
+  $('runBtn').classList.add('running');
+  $('runBtn').textContent = tr('러닝 종료');
+  $('runTimer').classList.add('show');
+  clearInterval(runTimer);
+  runTimer = setInterval(() => {
+    runSeconds++;
+    const paceJitter = 300 + Math.sin(runSeconds * 0.3) * 20; // 초/km 근사
+    distanceKm += 1 / paceJitter;
+    $('runTimer').textContent = fmtClock(runSeconds);
+    updateStats();
+    renderWeek();
+  }, 1000);
+}
+function stopRunning() {
+  running = false;
+  clearInterval(runTimer);
+  $('runBtn').classList.remove('running');
+  $('runBtn').textContent = tr('러닝 시작');
+  $('runTimer').classList.remove('show');
+}
+$('runBtn').addEventListener('click', () => { running ? stopRunning() : startRunning(); });
+
+/* ── 주간 차트 ── */
+const DAYS = ['월', '화', '수', '목', '금', '토', '일'];
+const WEEK_BASE = [3.8, 5.1, 0, 4.2, 6.0, 2.5];
+function renderWeek() {
+  const vals = [...WEEK_BASE, distanceKm];
+  const max = Math.max(...vals, goalKm);
+  $('weekBars').innerHTML = vals.map((v, i) => `
+    <div class="wbar ${i === 6 ? 'today' : ''}">
+      <div class="bar" style="height:${Math.max(v / max * 100, 3)}%"></div>
+      <span data-i18n-dyn="${DAYS[i]}">${DAYS[i]}</span>
+    </div>`).join('');
+}
+
+/* ── 기록 리스트 ── */
+const HISTORY = [
+  { date: '7월 12일 일요일', dist: '5.2km', pace: "5'24\"", time: '28:07', d: 'M2 30 Q10 10 18 24 T34 14 T50 26' },
+  { date: '7월 10일 금요일', dist: '8.0km', pace: "5'58\"", time: '47:44', d: 'M2 20 Q12 32 20 12 T40 30 T54 8' },
+  { date: '7월 8일 수요일', dist: '3.4km', pace: "6'12\"", time: '21:05', d: 'M2 24 Q14 6 22 22 T44 18 T54 26' },
+  { date: '7월 6일 월요일', dist: '6.1km', pace: "5'40\"", time: '34:37', d: 'M2 12 Q16 30 26 16 T46 24 T54 10' },
+];
+function buildHistory() {
+  $('histList').innerHTML = HISTORY.map(h => `
+    <div class="hist-row">
+      <svg class="spark" viewBox="0 0 56 40"><path d="${h.d}"/></svg>
+      <div class="hist-info"><b data-i18n-dyn="${h.date}">${h.date}</b><span data-i18n-dyn="${h.pace} · ${h.time}">${h.pace} · ${h.time}</span></div>
+      <div class="hist-dist"><b>${h.dist}</b><span data-i18n>완주</span></div>
+    </div>`).join('');
+}
+
+/* ── 탭 전환 ── */
+function showTab(name) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.toggle('on', t.dataset.tab === name));
+  document.querySelectorAll('.scr').forEach(s => s.classList.remove('active'));
+  $('scr-' + name).classList.add('active');
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => showTab(t.dataset.tab)));
+$('notifToggle').addEventListener('click', () => $('notifToggle').classList.toggle('on'));
+
+/* ═══ rAF 루프: 링 애니메이션 (갤러리 공통 __paused 가드) ═══ */
+(function loop(t) {
+  if (window.__paused && frames > 5) { setTimeout(() => requestAnimationFrame(loop), 300); return; }
+  frames++;
+  ringDisplay += (ringTarget - ringDisplay) * 0.08;
+  setRing(ringDisplay);
+  requestAnimationFrame(loop);
+})();
+
+renderWeek();
+buildHistory();
+updateStats();
+
+/* ═══ 언어 전환 (?lang=en + 코너 토글) ═══ */
+const STR = {
+  '스트라이드 — 러닝 · 피트니스 앱 UI': 'Stride — Running & Fitness App UI',
+  '좋은 아침이에요 🌅': 'Good morning 🌅',
+  '하은님, 오늘도 달려볼까요?': 'Ha-eun, ready for a run today?',
+  '새벽 공기가 딱 좋은 컨디션이에요': 'The dawn air is perfect for it',
+  '오늘 거리': "Today's distance",
+  '목표 <b id="goalTxt">5.0km</b> 중 달성': 'Achieved of <b id="goalTxt">5.0km</b> goal',
+  '러닝 시작': 'Start run', '러닝 종료': 'Stop run',
+  '페이스': 'Pace', '시간': 'Time', '칼로리': 'Calories',
+  '이번 주 활동': "This week's activity",
+  '기록': 'History',
+  '최근 러닝 이력을 확인해 보세요': 'Check your recent running history',
+  '완주': 'Completed',
+  '하은': 'Ha-eun',
+  '매일 달리는 사람': 'Runs every single day',
+  '총 거리': 'Total distance', '총 러닝': 'Total runs', '최장 거리': 'Longest run',
+  '42회': '42 runs',
+  '푸시 알림': 'Push notifications', '목표 거리 설정': 'Set distance goal',
+  '단위 (km)': 'Units (km)', '앱 정보': 'About the app',
+  '활동': 'Activity', '프로필': 'Profile',
+  '월': 'Mon', '화': 'Tue', '수': 'Wed', '목': 'Thu', '금': 'Fri', '토': 'Sat', '일': 'Sun',
+  '7월 12일 일요일': 'Sun, Jul 12', '7월 10일 금요일': 'Fri, Jul 10',
+  '7월 8일 수요일': 'Wed, Jul 8', '7월 6일 월요일': 'Mon, Jul 6'
+};
+let EN = new URLSearchParams(location.search).get('lang') === 'en';
+const orig = new WeakMap();
+function applyLang() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    if (!orig.has(el)) orig.set(el, el.innerHTML);
+    const ko = orig.get(el).trim();
+    el.innerHTML = EN ? (STR[ko] ?? orig.get(el)) : orig.get(el);
+  });
+  document.documentElement.lang = EN ? 'en' : 'ko';
+}
+applyLang();
+
+/* 동적으로 주입되는 한국어(요일·기록 날짜)도 동일한 STR 사전으로 번역 */
+function tr(ko) { return EN ? (STR[ko] ?? ko) : ko; }
+function refreshDynamic() {
+  document.querySelectorAll('[data-i18n-dyn]').forEach(el => {
+    const parts = el.dataset.i18nDyn.split(' · ');
+    el.textContent = parts.length > 1 ? parts.map(tr).join(' · ') : tr(el.dataset.i18nDyn);
+  });
+  $('runBtn').textContent = running ? tr('러닝 종료') : tr('러닝 시작');
+  document.getElementById('lang').textContent = EN ? 'KO' : 'EN';
+}
+document.getElementById('lang').addEventListener('click', () => { EN = !EN; applyLang(); refreshDynamic(); });
+refreshDynamic();
+</script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "payment": {
+    "color": {
+      "primary":        { "value": "#1E45D6", "type": "color", "description": "브랜드 딥 블루 — CTA, 선택 상태, 완료 체크" },
+      "primary-tint":   { "value": "#F0F4FF", "type": "color", "description": "선택된 라디오 카드·쿠폰 배경" },
+      "background":     { "value": "#F4F5F9", "type": "color", "description": "화면 배경" },
+      "surface":        { "value": "#FFFFFF", "type": "color", "description": "섹션 카드 배경" },
+      "text-primary":   { "value": "#141C3D", "type": "color", "description": "네이비 잉크" },
+      "text-secondary": { "value": "#8A91A8", "type": "color" },
+      "discount":       { "value": "#F04452", "type": "color", "description": "쿠폰 할인 금액" },
+      "border":         { "value": "#E1E4EE", "type": "color", "description": "라디오 카드·체크박스 기본 보더" },
+      "divider":        { "value": "#EDEFF5", "type": "color" }
+    },
+    "radius": {
+      "card":   { "value": "18", "type": "borderRadius", "description": "섹션 카드" },
+      "radio":  { "value": "14", "type": "borderRadius", "description": "결제수단 라디오 카드·쿠폰" },
+      "button": { "value": "16", "type": "borderRadius", "description": "결제하기 CTA" },
+      "sheet":  { "value": "24", "type": "borderRadius", "description": "쿠폰 바텀시트 상단 모서리" },
+      "thumb":  { "value": "12", "type": "borderRadius", "description": "주문 상품 썸네일" }
+    },
+    "spacing": {
+      "screen-x":  { "value": "16", "type": "spacing" },
+      "card":      { "value": "18", "type": "spacing", "description": "섹션 카드 패딩" },
+      "radio-gap": { "value": "9",  "type": "spacing", "description": "라디오 카드 2열 그리드 간격" }
+    },
+    "typography": {
+      "section-title": { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "700", "fontSize": "15" }, "type": "typography" },
+      "item-price":    { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "800", "fontSize": "14.5" }, "type": "typography" },
+      "total":         { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "900", "fontSize": "18" }, "type": "typography", "description": "총 결제 금액" },
+      "cta":           { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "700", "fontSize": "16" }, "type": "typography" },
+      "terms":         { "value": { "fontFamily": "Noto Sans KR", "fontWeight": "400", "fontSize": "13" }, "type": "typography" }
+    },
+    "component": {
+      "thumb-size":       { "value": "56",   "type": "sizing", "description": "주문 상품 썸네일 한 변" },
+      "checkbox-size":    { "value": "21",   "type": "sizing", "description": "원형 체크박스 지름" },
+      "radio-border":     { "value": "1.5",  "type": "borderWidth" },
+      "spinner-duration": { "value": "1000", "type": "other", "description": "결제 버튼 로딩 스피너 시간 ms" }
+    }
+  }
+}
