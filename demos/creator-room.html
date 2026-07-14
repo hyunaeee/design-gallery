@@ -78,9 +78,9 @@ body{
 #o-plant{   left:16%;  top:61%; }
 
 /* 캐릭터 */
-.char{ z-index:3; }
+.char{ z-index:3; pointer-events:none; }   /* 레이어는 클릭 통과 — 오브젝트 핫스팟이 눌리도록 */
 .char .bob{ position:absolute; left:39%; bottom:15%; width:22%;
-  animation:bob 4.2s ease-in-out infinite; cursor:pointer; }
+  animation:bob 4.2s ease-in-out infinite; cursor:pointer; pointer-events:auto; }
 .char .bob img{ width:100%; display:block; filter:drop-shadow(0 16px 15px rgba(0,0,0,.55)); transition:filter .3s; }
 .char .bob:hover img{ filter:drop-shadow(0 16px 15px rgba(0,0,0,.55)) drop-shadow(0 0 12px color-mix(in srgb,var(--accent) 70%,#fff)); }
 @keyframes bob{ 0%,100%{ transform:translateY(0) rotate(-.6deg);} 50%{ transform:translateY(-8px) rotate(.6deg);} }
@@ -111,10 +111,20 @@ body{
   background:transparent; color:var(--dim); font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer;
   transition:background .25s, color .25s; }
 .seg button.on{ background:color-mix(in srgb, var(--accent) 88%, #fff); color:#12101f; }
-.lightbtn{ display:flex; align-items:center; gap:7px; padding:8px 14px; border-radius:20px;
+/* 불 켜기 스위치 */
+.lswitch{ display:flex; align-items:center; gap:9px; padding:6px 13px 6px 11px; border-radius:22px;
   border:1px solid var(--line); background:rgba(255,255,255,.05); color:var(--text);
-  font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer; transition:.25s; }
-.lightbtn.on{ background:color-mix(in srgb, #ffcf8a 80%, transparent); color:#3a2410; border-color:transparent; }
+  font-family:inherit; font-weight:600; font-size:12.5px; cursor:pointer; transition:background .25s, border-color .25s; }
+.lswitch.on{ background:color-mix(in srgb, #ffcf8a 20%, transparent); border-color:color-mix(in srgb,#ffcf8a 45%,transparent); }
+.lswitch .ls-ico{ font-size:15px; filter:grayscale(.6); transition:filter .25s; }
+.lswitch.on .ls-ico{ filter:none; }
+.lswitch .ls-track{ position:relative; width:38px; height:22px; border-radius:99px;
+  background:rgba(255,255,255,.16); transition:background .25s; }
+.lswitch.on .ls-track{ background:linear-gradient(135deg,#ffd89a,#ffb85c); }
+.lswitch .ls-knob{ position:absolute; top:3px; left:3px; width:16px; height:16px; border-radius:50%;
+  background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.45); transition:left .25s cubic-bezier(.2,.9,.3,1.4); }
+.lswitch.on .ls-knob{ left:19px; }
+.lswitch .ls-tx{ min-width:1.6em; }
 .lang{ font-family:inherit; font-weight:600; font-size:12px; letter-spacing:.08em; background:rgba(255,255,255,.05);
   color:var(--text); border:1px solid var(--line); border-radius:20px; padding:8px 13px; cursor:pointer; }
 @media(max-width:640px){ .seg button span.tx,.lightbtn span.tx{ display:none; } }
@@ -190,7 +200,11 @@ body{
           <button data-mode="sunset"><span>🌆</span><span class="tx" data-i18n>노을</span></button>
           <button data-mode="night" class="on"><span>🌙</span><span class="tx" data-i18n>밤</span></button>
         </div>
-        <button class="lightbtn on" id="lightBtn"><span>💡</span><span class="tx" data-i18n>불 켜짐</span></button>
+        <button class="lswitch on" id="lightBtn" role="switch" aria-checked="true" aria-label="불 켜기">
+          <span class="ls-ico">💡</span>
+          <span class="ls-track"><span class="ls-knob"></span></span>
+          <span class="ls-tx tx" data-i18n>불</span>
+        </button>
         <button class="lang" id="lang">EN</button>
       </div>
     </div>
@@ -278,7 +292,7 @@ function setLit(v){
   lit = v;
   room.classList.toggle('lit', lit);
   lightBtn.classList.toggle('on', lit);
-  lightBtn.querySelector('.tx').textContent = EN ? (lit?'Lights on':'Lights off') : (lit?'불 켜짐':'불 꺼짐');
+  lightBtn.setAttribute('aria-checked', lit ? 'true' : 'false');
   say(LINES[EN?'en':'ko'][lit?'lightOn':'lightOff']);
 }
 lightBtn.addEventListener('click', ()=> setLit(!lit));
@@ -328,7 +342,7 @@ const STR = {
   '시간이 흐르는<br>작업실':'A studio where<br>the hours pass',
   '낮·노을·밤을 바꿔보고, 램프를 눌러 불을 켜보세요. 방 안의 물건을 클릭하면 방 주인이 반응합니다.':
     'Switch between day, sunset and night, and tap the lamp to toggle the lights. Click the objects and the room’s owner reacts.',
-  '낮':'Day','노을':'Sunset','밤':'Night','불 켜짐':'Lights on','불 꺼짐':'Lights off',
+  '낮':'Day','노을':'Sunset','밤':'Night','불':'Light',
   '불 켜기 / 끄기':'Toggle the light','모니터 · 작업':'Monitor · Work','책장 · 소개':'Bookshelf · About','화분 · 연락':'Plant · Contact',
   '화면 속에서 <em>자라는</em> 작업':'Work that <em>grows</em> in the screen',
   '브랜드, 웹, 인터랙션. 시간이 어떻게 흐르든 모니터 불빛 앞에서 스케치가 화면이 되고, 화면이 제품이 됩니다.':
@@ -352,7 +366,6 @@ function applyLang(){
     el.innerHTML = EN ? (STR[ko] ?? orig.get(el)) : orig.get(el);
   });
   document.getElementById('lang').textContent = EN ? 'KO' : 'EN';
-  lightBtn.querySelector('.tx').textContent = EN ? (lit?'Lights on':'Lights off') : (lit?'불 켜짐':'불 꺼짐');
   document.documentElement.lang = EN ? 'en' : 'ko';
   if(EN) document.title = 'STUDIO HOURS — a studio portfolio through the hours';
 }
