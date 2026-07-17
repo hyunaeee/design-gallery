@@ -15,7 +15,8 @@
 
 /* Y2K 드래그 옷입히기 — 하나의 실루엣에서 파생한 5인(피부톤 변형) 패션돌.
    선택한 인형이 중앙에 크게 서고, 나머지는 하단에 '입은 채로' 대기한다.
-   옷장에서 아이템을 끌어 인형 위에 놓으면 착용(슬롯 스냅), 끌어내면 벗김.
+   옷장에서 아이템을 끌어 인형 위에 놓으면 '놓은 자리에 그대로' 착용(자유 배치),
+   입은 아이템은 다시 끌어 위치를 옮기거나 밖으로 끌어 벗기고, 휠로 크기를 조절한다.
    모든 인형·아이템은 AI(Higgsfield) 생성 후 배경 제거한 투명 PNG, 배경은 일러스트 5종. */
 *{ margin:0; padding:0; box-sizing:border-box; }
 :root{
@@ -112,10 +113,10 @@ header{ display:flex; align-items:center; justify-content:space-between; gap:10p
 .hintbar{ padding:8px 13px 10px; font-size:10.5px; line-height:1.5; color:var(--dim);
   border-top:1px dashed var(--line); }
 
-/* 드래그 고스트 */
-.ghost{ position:fixed; z-index:99; pointer-events:none; width:120px; height:120px;
-  transform:translate(-50%,-55%) scale(1.08); filter:drop-shadow(0 10px 16px rgba(0,0,0,.28)); }
-.ghost img{ width:100%; height:100%; object-fit:contain; }
+/* 드래그 고스트 — 실제 착용될 크기 그대로(WYSIWYG), 놓은 자리에 그대로 입는다 */
+.ghost{ position:fixed; z-index:99; pointer-events:none; transform:translate(-50%,-50%);
+  filter:drop-shadow(0 10px 16px rgba(0,0,0,.28)); }
+.ghost img{ display:block; width:100%; height:auto; }
 
 .toast{ position:fixed; left:50%; bottom:110px; transform:translate(-50%,10px); z-index:60;
   background:var(--ink); color:#fff; font-weight:600; font-size:13px; padding:11px 20px;
@@ -153,7 +154,7 @@ body.anim-paused *{ animation-play-state:paused !important; }
       <h3 data-i18n>옷장 <span>· 끌어서 입히기</span></h3>
       <div class="cats" id="cats"></div>
       <div class="rack" id="rack"></div>
-      <div class="hintbar" data-i18n>아이템을 가운데 인형 위로 끌어 놓으면 입고, 입은 아이템을 밖으로 끌면 벗어요. 아래 친구를 누르면 교체!</div>
+      <div class="hintbar" data-i18n>아이템을 끌어 원하는 자리에 놓으면 그 자리에 입어요. 입은 아이템은 끌어서 옮기고, 밖으로 끌면 벗고, 휠을 굴리면 크기 조절! 아래 친구를 누르면 교체.</div>
     </aside>
   </div>
 </div>
@@ -213,28 +214,38 @@ var CATS=[
 ];
 function itemById(id){ for(var i=0;i<ITEMS.length;i++) if(ITEMS[i].id===id) return ITEMS[i]; return null; }
 
-/* ── 상태 ── */
-var worn=DOLLS.map(function(){ return {}; });   /* worn[i][slot]=itemId */
+/* ── 상태 ──
+   자유 배치: worn[i]는 {id,slot,l,t,w} 배열. 좌표는 사용자가 놓은 자리 그대로(인형 박스 % 기준).
+   같은 슬롯은 한 벌만(액세서리는 여러 개 중첩 가능), ITEMS의 pos는 랜덤/초기 코디용 기본값. */
+var worn=DOLLS.map(function(){ return []; });
 var sel=0, cat='hair', bg='bedroom';
+function wornEntry(i,id){ for(var k=0;k<worn[i].length;k++) if(worn[i][k].id===id) return worn[i][k]; return null; }
+function wearAt(i, it, l, t, w){
+  if(it.slot!=='acc') worn[i]=worn[i].filter(function(e){ return e.slot!==it.slot; });
+  else worn[i]=worn[i].filter(function(e){ return e.id!==it.id; });
+  worn[i].push({ id:it.id, slot:it.slot, l:l, t:t, w:w });
+}
+function wearDefault(i, it){ wearAt(i, it, it.pos.l, it.pos.t, it.pos.w); }
 
 /* ── 인형 렌더(중앙/미니 공용) ── */
+var ORDER=['shoe','bot','top','hair','acc'];   /* 뒤→앞 */
 function renderInto(container, dollIdx, big){
   container.querySelectorAll('.worn,.witem').forEach(function(n){ n.remove(); });
   var baseImg=container.querySelector('.base');
   baseImg.src='../assets/gen/y2-doll-'+DOLLS[dollIdx].id+'.png';
-  var order=['shoe','bot','top','hair','acc'];   /* 뒤→앞 */
-  order.forEach(function(slot){
-    var id=worn[dollIdx][slot]; if(!id) return;
-    var it=itemById(id); if(!it) return;
-    var img=document.createElement('img');
-    img.className= big ? 'worn' : 'witem';
-    img.src='../assets/gen/y2-'+it.id+'.png';
-    img.style.left=it.pos.l+'%';
-    img.style.top=it.pos.t+'%';
-    img.style.width=it.pos.w+'%';
-    if(big){ img.dataset.slot=slot; img.dataset.item=id; }
-    else{ img.style.position='absolute'; img.style.pointerEvents='none'; }
-    container.appendChild(img);
+  ORDER.forEach(function(slot){
+    worn[dollIdx].forEach(function(en,idx){
+      if(en.slot!==slot) return;
+      var img=document.createElement('img');
+      img.className= big ? 'worn' : 'witem';
+      img.src='../assets/gen/y2-'+en.id+'.png';
+      img.style.left=en.l+'%';
+      img.style.top=en.t+'%';
+      img.style.width=en.w+'%';
+      if(big){ img.dataset.idx=idx; img.dataset.item=en.id; }
+      else{ img.style.position='absolute'; img.style.pointerEvents='none'; }
+      container.appendChild(img);
+    });
   });
 }
 var dollbox=document.getElementById('dollbox');
@@ -274,7 +285,7 @@ function renderRack(){
     return;
   }
   rack.innerHTML=ITEMS.filter(function(i){ return i.slot===cat; }).map(function(it){
-    var on = worn[sel][it.slot]===it.id;
+    var on = !!wornEntry(sel, it.id);
     return '<div class="chip'+(on?' on':'')+'" data-item="'+it.id+'">'+
       '<img src="../assets/gen/y2-'+it.id+'.png"><div class="nm">'+(EN?it.en:it.ko)+'</div></div>';
   }).join('');
@@ -287,46 +298,55 @@ document.getElementById('rack').addEventListener('click', function(e){
   if(bgc){ bg=bgc.dataset.bg; document.getElementById('bgimg').src='../assets/gen/y2-bg-'+bg+'.jpg'; renderRack(); }
 });
 
-/* ── 드래그 착용/해제 ── */
-var drag=null, ghost=null, moved=false;
-function makeGhost(id){
+/* ── 드래그 착용/이동/해제 (자유 배치) ──
+   고스트는 인형 위에 실제로 입혀질 크기 그대로 렌더되고, 놓은 자리 % 좌표를 그대로 저장한다.
+   드래그 중(또는 입은 아이템 위에서) 휠을 굴리면 크기 조절. */
+var drag=null, ghost=null;
+function boxRect(){ return dollbox.getBoundingClientRect(); }
+function makeGhost(id, wPct){
   ghost=document.createElement('div'); ghost.className='ghost';
   ghost.innerHTML='<img src="../assets/gen/y2-'+id+'.png">';
   document.body.appendChild(ghost);
+  sizeGhost(wPct);
 }
+function sizeGhost(wPct){ if(ghost) ghost.style.width=(boxRect().width*wPct/100)+'px'; }
 function moveGhost(x,y){ if(ghost){ ghost.style.left=x+'px'; ghost.style.top=y+'px'; } }
 function killGhost(){ if(ghost){ ghost.remove(); ghost=null; } }
 function overDoll(x,y){
-  var r=dollbox.getBoundingClientRect();
-  return x>=r.left-24 && x<=r.right+24 && y>=r.top-24 && y<=r.bottom+24;
+  var r=boxRect();
+  return x>=r.left-30 && x<=r.right+30 && y>=r.top-30 && y<=r.bottom+30;
 }
 /* 옷장에서 집기 */
 document.getElementById('rack').addEventListener('pointerdown', function(e){
   var c=e.target.closest('.chip[data-item]'); if(!c) return;
   e.preventDefault();
   var it=itemById(c.dataset.item);
-  drag={ id:it.id, slot:it.slot, from:null }; moved=false;
-  makeGhost(it.id); moveGhost(e.clientX,e.clientY);
+  drag={ it:it, w:it.pos.w, from:null };
+  makeGhost(it.id, drag.w); moveGhost(e.clientX,e.clientY);
 });
-/* 인형에서 벗기기 */
+/* 인형 위 아이템: 다시 집어 위치 이동 or 밖으로 끌어 벗기기 */
 dollbox.addEventListener('pointerdown', function(e){
   var w=e.target.closest('.worn'); if(!w) return;
   e.preventDefault();
-  drag={ id:w.dataset.item, slot:w.dataset.slot, from:sel }; moved=false;
-  delete worn[sel][w.dataset.slot];
+  var en=worn[sel][+w.dataset.idx]; if(!en) return;
+  drag={ it:itemById(en.id), w:en.w, from:sel };
+  worn[sel].splice(+w.dataset.idx,1);
   renderMain(false); renderBench();
-  makeGhost(drag.id); moveGhost(e.clientX,e.clientY);
+  makeGhost(en.id, drag.w); moveGhost(e.clientX,e.clientY);
 });
 addEventListener('pointermove', function(e){
-  if(!drag) return; moved=true;
+  if(!drag) return;
   moveGhost(e.clientX,e.clientY);
   dollbox.classList.toggle('armed', overDoll(e.clientX,e.clientY));
 });
 addEventListener('pointerup', function(e){
   if(!drag) return;
-  var dropOn=overDoll(e.clientX,e.clientY);
-  if(dropOn || (!moved && drag.from===null)){        /* 클릭만 해도 착용 */
-    worn[sel][drag.slot]=drag.id;
+  if(overDoll(e.clientX,e.clientY)){
+    var r=boxRect(), g=ghost.getBoundingClientRect();
+    wearAt(sel, drag.it,
+      (g.left-r.left)/r.width*100,
+      (g.top -r.top )/r.height*100,
+      drag.w);
     renderMain(false); renderBench(); renderRack();
   } else if(drag.from!=null){
     toast(EN?'Took it off':'벗었어요');
@@ -335,27 +355,48 @@ addEventListener('pointerup', function(e){
   dollbox.classList.remove('armed');
   killGhost(); drag=null;
 });
+/* 휠 크기 조절: 드래그 중엔 고스트를, 아니면 마우스 아래 입은 아이템을 키우고 줄인다 */
+addEventListener('wheel', function(e){
+  var dir = e.deltaY<0 ? 1 : -1;
+  if(drag){
+    e.preventDefault();
+    drag.w=Math.max(6, Math.min(90, drag.w*(1+dir*0.07)));
+    sizeGhost(drag.w);
+    return;
+  }
+  var w=e.target.closest ? e.target.closest('.worn') : null;
+  if(!w) return;
+  e.preventDefault();
+  var en=worn[sel][+w.dataset.idx]; if(!en) return;
+  var nw=Math.max(6, Math.min(90, en.w*(1+dir*0.07)));
+  var r=boxRect(), er=w.getBoundingClientRect();
+  var hPct=er.height/r.height*100;           /* 현재 렌더 높이(%) 기준으로 중심 유지 */
+  en.l += (en.w-nw)/2;
+  en.t += hPct*(1-nw/en.w)/2;
+  en.w  = nw;
+  renderMain(false); renderBench();
+}, { passive:false });
 
 /* ── 버튼 ── */
-function pick(arr){ return arr[Math.floor(Math.random()*arr.length)].id; }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 document.getElementById('randomBtn').addEventListener('click', function(){
-  var hair=ITEMS.filter(function(i){return i.slot==='hair';});
-  var top =ITEMS.filter(function(i){return i.slot==='top';});
-  var bot =ITEMS.filter(function(i){return i.slot==='bot';});
-  var shoe=ITEMS.filter(function(i){return i.slot==='shoe';});
-  var acc =ITEMS.filter(function(i){return i.slot==='acc';});
-  worn=DOLLS.map(function(){
-    var w={ hair:pick(hair), top:pick(top), bot:pick(bot), shoe:pick(shoe) };
-    if(Math.random()<.6) w.acc=pick(acc);
-    return w;
+  var bySlot={}; ['hair','top','bot','shoe','acc'].forEach(function(s){
+    bySlot[s]=ITEMS.filter(function(i){return i.slot===s;});
   });
-  bg=BGS[Math.floor(Math.random()*BGS.length)].id;
+  worn=DOLLS.map(function(_,i){
+    worn[i]=[];
+    wearDefault(i, pick(bySlot.hair)); wearDefault(i, pick(bySlot.top));
+    wearDefault(i, pick(bySlot.bot));  wearDefault(i, pick(bySlot.shoe));
+    if(Math.random()<.6) wearDefault(i, pick(bySlot.acc));
+    return worn[i];
+  });
+  bg=pick(BGS).id;
   document.getElementById('bgimg').src='../assets/gen/y2-bg-'+bg+'.jpg';
   renderMain(true); renderBench(); renderRack();
   toast(EN?'Random fits for everyone! 🎲':'모두 랜덤 코디 완성! 🎲');
 });
 document.getElementById('resetBtn').addEventListener('click', function(){
-  worn[sel]={};
+  worn[sel]=[];
   renderMain(true); renderBench(); renderRack();
   toast(EN?'Undressed':'다 벗었어요');
 });
@@ -378,8 +419,8 @@ var STR={
   '스타 스타일리스트':'star stylist',
   '🎲 랜덤 코디':'🎲 Random fits','📸 화보 촬영':'📸 Photo shoot','↺ 벗기기':'↺ Undress',
   '옷장 <span>· 끌어서 입히기</span>':'Closet <span>· drag to dress</span>',
-  '아이템을 가운데 인형 위로 끌어 놓으면 입고, 입은 아이템을 밖으로 끌면 벗어요. 아래 친구를 누르면 교체!':
-    'Drag an item onto the doll to wear it, drag a worn item away to remove it. Tap a friend below to switch!'
+  '아이템을 끌어 원하는 자리에 놓으면 그 자리에 입어요. 입은 아이템은 끌어서 옮기고, 밖으로 끌면 벗고, 휠을 굴리면 크기 조절! 아래 친구를 누르면 교체.':
+    'Drop an item exactly where you want it. Drag worn items to move them, drag them away to undress, scroll to resize! Tap a friend below to switch.'
 };
 var EN=new URLSearchParams(location.search).get('lang')==='en';
 var orig=new WeakMap();
@@ -396,14 +437,14 @@ function applyLang(){
 }
 document.getElementById('lang').addEventListener('click',function(){ EN=!EN; applyLang(); });
 
-/* 초기 코디: 시작부터 예쁘게 입혀 둔다 */
-worn=[
-  { hair:'hair-blonde',   top:'top-cami',    bot:'bot-jeans', shoe:'shoe-sneaker' },
-  { hair:'hair-pinkbob',  top:'top-hoodie',  bot:'bot-mini',  shoe:'shoe-boots' },
-  { hair:'hair-twintails',top:'top-babytee', bot:'bot-track', shoe:'shoe-sneaker', acc:'acc-shades' },
-  { hair:'hair-buns',     top:'top-halter',  bot:'bot-cargo', shoe:'shoe-jelly',  acc:'acc-chain' },
-  { hair:'hair-shag',     top:'top-denim',   bot:'bot-jeans', shoe:'shoe-boots',  acc:'acc-bag' }
-];
+/* 초기 코디: 시작부터 예쁘게 입혀 둔다(기본 위치, 이후엔 전부 자유 배치) */
+[
+  ['hair-blonde','top-cami','bot-jeans','shoe-sneaker'],
+  ['hair-pinkbob','top-hoodie','bot-mini','shoe-boots'],
+  ['hair-twintails','top-babytee','bot-track','shoe-sneaker','acc-shades'],
+  ['hair-buns','top-halter','bot-cargo','shoe-jelly','acc-chain'],
+  ['hair-shag','top-denim','bot-jeans','shoe-boots','acc-bag']
+].forEach(function(ids,i){ ids.forEach(function(id){ wearDefault(i, itemById(id)); }); });
 applyLang();
 renderMain(true);
 })();
