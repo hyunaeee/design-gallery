@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CREW CLOSET — 5인 동시 옷입히기</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+
+/* 5명을 동시에 코디하는 옷입히기. 캐릭터를 클릭해 선택하고 의상을 바꾸며,
+   무대(배경)·소품·포즈까지 조합해 팀 전체 룩을 완성한다.
+   AI(Higgsfield)로 생성한 치비 캐릭터 15컷을 배경 제거해 사용. */
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --bg:#fff6f9; --panel:#ffffff; --ink:#3a2f3f; --dim:#9b8ba5;
+  --line:#f0e2ea; --pink:#ff6fa5; --mint:#5fd4c4; --sun:#ffc93c; --lav:#a98cff;
+  --stage:#ffe9f2;
+}
+html,body{ height:100%; }
+body{ font-family:'Fredoka','Noto Sans KR',sans-serif; background:var(--bg); color:var(--ink);
+  overflow:hidden; -webkit-font-smoothing:antialiased; user-select:none; }
+.app{ height:100vh; display:grid; grid-template-rows:auto 1fr auto; }
+
+/* ── 헤더 ── */
+header{ display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:14px min(3vw,26px); border-bottom:2px dashed var(--line); background:var(--panel); }
+.logo{ font-weight:700; font-size:clamp(16px,2.2vw,22px); letter-spacing:-.01em; }
+.logo b{ color:var(--pink); } .logo i{ font-style:normal; color:var(--mint); }
+.hbtns{ display:flex; gap:8px; flex-wrap:wrap; }
+.btn{ font-family:inherit; font-weight:600; font-size:13px; border:none; border-radius:22px;
+  padding:10px 16px; cursor:pointer; transition:transform .12s, filter .2s; }
+.btn:active{ transform:scale(.94); }
+.btn.p{ background:var(--pink); color:#fff; box-shadow:0 4px 0 #d9稲; box-shadow:0 4px 0 #d94f83; }
+.btn.m{ background:var(--mint); color:#fff; box-shadow:0 4px 0 #3aa99b; }
+.btn.l{ background:var(--lav); color:#fff; box-shadow:0 4px 0 #7f66d1; }
+.btn.g{ background:#fff; color:var(--ink); border:2px solid var(--line); }
+.btn:hover{ filter:brightness(1.06); }
+
+/* ── 무대 ── */
+.stage{ position:relative; overflow:hidden; display:flex; align-items:flex-end;
+  justify-content:center; padding-bottom:min(9vh,72px); transition:background .5s; }
+.stage.bg-studio{ background:radial-gradient(120% 90% at 50% 20%, #fff, var(--stage) 70%); }
+.stage.bg-stage{ background:radial-gradient(90% 70% at 50% 0%, #ffd9a8, #ff8fb1 45%, #7a4d8f 100%); }
+.stage.bg-space{ background:radial-gradient(90% 80% at 50% 25%, #4b3a8f, #1b1440 60%, #0a0820 100%); }
+.stage.bg-forest{ background:radial-gradient(90% 80% at 50% 15%, #cdf5c9, #6fc48a 55%, #2f7a52 100%); }
+/* 무대 장식 */
+.deco{ position:absolute; inset:0; pointer-events:none; }
+.deco .star{ position:absolute; width:6px; height:6px; background:#fff; border-radius:50%;
+  opacity:0; animation:tw 3s ease-in-out infinite; }
+.stage.bg-space .deco .star, .stage.bg-stage .deco .star{ opacity:.9; }
+@keyframes tw{ 0%,100%{ transform:scale(.5); opacity:.25;} 50%{ transform:scale(1.2); opacity:1;} }
+.floor{ position:absolute; left:0; right:0; bottom:0; height:26%;
+  background:linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.14)); }
+.stage.bg-space .floor, .stage.bg-stage .floor{ background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.14)); }
+
+/* 캐릭터 줄 */
+.crew{ position:relative; z-index:2; display:flex; align-items:flex-end; justify-content:center;
+  gap:clamp(4px,1.4vw,20px); padding:0 12px; width:100%; }
+.slot{ position:relative; cursor:pointer; text-align:center; }
+.slot .fig{ position:relative; width:clamp(88px,13vw,170px); }
+.slot .fig img{ width:100%; display:block; filter:drop-shadow(0 12px 10px rgba(0,0,0,.28));
+  transition:transform .35s cubic-bezier(.2,.9,.3,1.3), filter .3s; }
+.slot .fig img.swap{ animation:pop .45s cubic-bezier(.2,.9,.3,1.5); }
+@keyframes pop{ 0%{ transform:scale(.82) translateY(6px); opacity:.4; } 60%{ transform:scale(1.06);} 100%{ transform:scale(1);} }
+.slot .shadow{ position:absolute; left:50%; bottom:-6px; width:70%; height:12px;
+  transform:translateX(-50%); border-radius:50%;
+  background:radial-gradient(closest-side, rgba(0,0,0,.32), transparent 75%); }
+/* 아이들 애니메이션 */
+.slot .fig{ animation:idle 3.4s ease-in-out infinite; }
+.slot:nth-child(2) .fig{ animation-delay:-.5s; } .slot:nth-child(3) .fig{ animation-delay:-1s; }
+.slot:nth-child(4) .fig{ animation-delay:-1.6s; } .slot:nth-child(5) .fig{ animation-delay:-2.2s; }
+@keyframes idle{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-7px);} }
+/* 포즈 */
+.slot.pose-jump .fig{ animation:jump .8s ease-in-out infinite; }
+@keyframes jump{ 0%,100%{ transform:translateY(0);} 45%{ transform:translateY(-24px) rotate(-3deg);} }
+.slot.pose-wave .fig img{ transform:rotate(-6deg); }
+.slot.pose-spin .fig img{ animation:spin 2.4s linear infinite; }
+@keyframes spin{ to{ transform:rotateY(360deg); } }
+/* 선택 */
+.slot .ring{ position:absolute; left:50%; bottom:-14px; transform:translateX(-50%) scale(.6);
+  width:78%; height:16px; border-radius:50%; border:3px solid var(--pink); opacity:0;
+  transition:opacity .25s, transform .25s; }
+.slot.sel .ring{ opacity:1; transform:translateX(-50%) scale(1); }
+.slot.sel .fig img{ filter:drop-shadow(0 12px 10px rgba(0,0,0,.28)) drop-shadow(0 0 12px rgba(255,111,165,.85)); }
+.slot .tag{ margin-top:14px; font-weight:600; font-size:clamp(10px,1.3vw,13px); color:var(--dim);
+  background:rgba(255,255,255,.72); border-radius:20px; padding:3px 10px; display:inline-block; }
+.stage.bg-space .slot .tag, .stage.bg-stage .slot .tag{ background:rgba(0,0,0,.35); color:#fff; }
+.slot.sel .tag{ background:var(--pink); color:#fff; }
+/* 말풍선 */
+.slot .bub{ position:absolute; left:50%; top:-6px; transform:translate(-50%,-100%) scale(.8);
+  background:#fff; color:var(--ink); font-family:'Gaegu','Noto Sans KR',cursive; font-weight:700;
+  font-size:14px; padding:8px 13px; border-radius:14px 14px 14px 4px; white-space:nowrap;
+  box-shadow:0 8px 20px rgba(0,0,0,.18); opacity:0; transition:.28s; pointer-events:none; z-index:3; }
+.slot .bub.on{ opacity:1; transform:translate(-50%,-100%) scale(1); }
+.slot .bub::after{ content:""; position:absolute; left:12px; bottom:-6px;
+  border:7px solid transparent; border-top-color:#fff; border-bottom:0; }
+/* 소품 */
+.slot .prop{ position:absolute; left:50%; top:-2px; transform:translateX(-50%);
+  font-size:clamp(20px,3vw,34px); z-index:2; pointer-events:none;
+  animation:idle 3.4s ease-in-out infinite; }
+
+/* ── 하단 컨트롤 ── */
+.dock{ background:var(--panel); border-top:2px dashed var(--line); padding:12px min(3vw,26px) 16px; }
+.tabs{ display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
+.tab{ font-family:inherit; font-weight:600; font-size:12.5px; border:2px solid var(--line);
+  background:#fff; color:var(--dim); border-radius:20px; padding:7px 14px; cursor:pointer; transition:.2s; }
+.tab.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+.rack{ display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
+.item{ flex:0 0 auto; width:96px; border:2px solid var(--line); border-radius:16px; background:#fff;
+  padding:10px 8px; cursor:pointer; text-align:center; transition:transform .15s, border-color .2s, box-shadow .2s; }
+.item:hover{ transform:translateY(-4px); border-color:var(--pink); box-shadow:0 8px 18px rgba(255,111,165,.2); }
+.item.on{ border-color:var(--pink); background:#fff2f7; }
+.item .ico{ font-size:24px; }
+.item .nm{ margin-top:5px; font-size:11.5px; font-weight:600; color:var(--ink); }
+.item .sw{ height:26px; border-radius:8px; }
+.who{ font-size:12px; color:var(--dim); margin-bottom:8px; }
+.who b{ color:var(--pink); }
+@media(max-width:700px){ .item{ width:80px; } }
+
+/* 토스트 */
+.toast{ position:fixed; left:50%; bottom:120px; transform:translate(-50%,10px); z-index:50;
+  background:var(--ink); color:#fff; font-weight:600; font-size:13.5px; padding:12px 22px;
+  border-radius:24px; opacity:0; pointer-events:none; transition:.28s; }
+.toast.on{ opacity:1; transform:translate(-50%,0); }
+.lang{ font-family:inherit; font-weight:700; font-size:11.5px; background:#fff; color:var(--dim);
+  border:2px solid var(--line); border-radius:20px; padding:8px 12px; cursor:pointer; }
+body.anim-paused *{ animation-play-state:paused !important; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <div class="logo"><b>CREW</b> <i>CLOSET</i> · <span data-i18n>5인 코디</span></div>
+    <div class="hbtns">
+      <button class="btn m" id="randomBtn" data-i18n>🎲 전체 랜덤</button>
+      <button class="btn l" id="allBtn" data-i18n>👥 전체 선택</button>
+      <button class="btn p" id="shotBtn" data-i18n>📸 단체사진</button>
+      <button class="btn g" id="resetBtn" data-i18n>↺ 초기화</button>
+      <button class="lang" id="lang">EN</button>
+    </div>
+  </header>
+
+  <div class="stage bg-studio" id="stage">
+    <div class="deco" id="deco"></div>
+    <div class="floor"></div>
+    <div class="crew" id="crew"></div>
+  </div>
+
+  <div class="dock">
+    <div class="who" id="who"></div>
+    <div class="tabs" id="tabs">
+      <button class="tab on" data-tab="outfit" data-i18n>👗 의상</button>
+      <button class="tab" data-tab="prop" data-i18n>🎁 소품</button>
+      <button class="tab" data-tab="pose" data-i18n>🕺 포즈</button>
+      <button class="tab" data-tab="bg" data-i18n>🌈 무대</button>
+    </div>
+    <div class="rack" id="rack"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+/* ── 캐릭터 ── */
+var CHARS=[
+  { id:'girl', ko:'로지',  en:'Rosie', line:{ko:'오늘 나 어때? ✨', en:'How do I look? ✨'} },
+  { id:'boy',  ko:'테오',  en:'Theo',  line:{ko:'음… 이게 나은가?', en:'Hmm… is this better?'} },
+  { id:'cat',  ko:'모모',  en:'Momo',  line:{ko:'냥! 마음에 들어!', en:'Meow! I love it!'} },
+  { id:'bot',  ko:'삐용',  en:'Bee',   line:{ko:'삐- 코디 완료.', en:'Beep- outfit set.'} },
+  { id:'gran', ko:'봄자',  en:'Nana',  line:{ko:'아이고 예쁘다~', en:'Oh my, lovely~'} }
+];
+var OUTFITS=[
+  { id:'casual',  ko:'캐주얼', en:'Casual',  ico:'👕' },
+  { id:'formal',  ko:'포멀',   en:'Formal',  ico:'🎩' },
+  { id:'costume', ko:'코스튬', en:'Costume', ico:'🦸' }
+];
+var PROPS=[
+  { id:'',        ko:'없음',   en:'None',    ico:'🚫' },
+  { id:'🎈',      ko:'풍선',   en:'Balloon', ico:'🎈' },
+  { id:'🍦',      ko:'아이스크림', en:'Ice cream', ico:'🍦' },
+  { id:'🎸',      ko:'기타',   en:'Guitar',  ico:'🎸' },
+  { id:'👑',      ko:'왕관',   en:'Crown',   ico:'👑' },
+  { id:'🌸',      ko:'꽃',     en:'Flower',  ico:'🌸' },
+  { id:'⭐',      ko:'별',     en:'Star',    ico:'⭐' }
+];
+var POSES=[
+  { id:'',      ko:'기본', en:'Idle',  ico:'🧍' },
+  { id:'jump',  ko:'점프', en:'Jump',  ico:'⬆️' },
+  { id:'wave',  ko:'인사', en:'Wave',  ico:'👋' },
+  { id:'spin',  ko:'회전', en:'Spin',  ico:'🔄' }
+];
+var BGS=[
+  { id:'studio', ko:'스튜디오', en:'Studio', sw:'linear-gradient(160deg,#fff,#ffe9f2)' },
+  { id:'stage',  ko:'무대',     en:'Stage',  sw:'linear-gradient(160deg,#ffd9a8,#ff8fb1 45%,#7a4d8f)' },
+  { id:'space',  ko:'우주',     en:'Space',  sw:'linear-gradient(160deg,#4b3a8f,#1b1440 60%,#0a0820)' },
+  { id:'forest', ko:'숲',       en:'Forest', sw:'linear-gradient(160deg,#cdf5c9,#6fc48a 55%,#2f7a52)' }
+];
+
+/* ── 상태 ── */
+var state=CHARS.map(function(){ return { outfit:'casual', prop:'', pose:'' }; });
+var sel=[0];                 // 선택된 캐릭터 인덱스들
+var tab='outfit', bg='studio';
+
+/* ── 무대 별 장식 ── */
+var deco=document.getElementById('deco');
+for(var i=0;i<26;i++){
+  var s=document.createElement('span'); s.className='star';
+  s.style.left=(Math.random()*100)+'%'; s.style.top=(Math.random()*70)+'%';
+  s.style.animationDelay=(Math.random()*3)+'s';
+  s.style.width=s.style.height=(3+Math.random()*4)+'px';
+  deco.appendChild(s);
+}
+
+/* ── 캐릭터 렌더 ── */
+var crew=document.getElementById('crew');
+CHARS.forEach(function(c,i){
+  crew.insertAdjacentHTML('beforeend',
+    '<div class="slot" data-i="'+i+'">'+
+      '<div class="bub" id="bub'+i+'"></div>'+
+      '<div class="prop" id="prop'+i+'"></div>'+
+      '<div class="fig"><img id="img'+i+'" src="../assets/gen/dz-'+c.id+'-casual.png" alt="'+c.en+'"></div>'+
+      '<div class="shadow"></div><div class="ring"></div>'+
+      '<div class="tag" id="tag'+i+'">'+c.ko+'</div>'+
+    '</div>');
+});
+
+function paint(i, animate){
+  var c=CHARS[i], st=state[i];
+  var img=document.getElementById('img'+i);
+  var src='../assets/gen/dz-'+c.id+'-'+st.outfit+'.png';
+  if(img.getAttribute('src')!==src){
+    img.setAttribute('src',src);
+    if(animate){ img.classList.remove('swap'); void img.offsetWidth; img.classList.add('swap'); }
+  }
+  document.getElementById('prop'+i).textContent=st.prop;
+  var slot=crew.children[i];
+  slot.className='slot'+(sel.indexOf(i)>=0?' sel':'')+(st.pose?' pose-'+st.pose:'');
+  document.getElementById('tag'+i).textContent=EN?c.en:c.ko;
+}
+function paintAll(a){ CHARS.forEach(function(_,i){ paint(i,a); }); updWho(); }
+
+/* 캐릭터 선택 */
+crew.addEventListener('click', function(e){
+  var s=e.target.closest('.slot'); if(!s) return;
+  var i=+s.dataset.i;
+  sel=[i];
+  paintAll(false);
+  say(i);
+});
+function say(i){
+  var b=document.getElementById('bub'+i);
+  b.textContent=EN?CHARS[i].line.en:CHARS[i].line.ko;
+  b.classList.add('on');
+  clearTimeout(b._t); b._t=setTimeout(function(){ b.classList.remove('on'); },1800);
+}
+
+/* ── 탭 & 랙 ── */
+document.getElementById('tabs').addEventListener('click', function(e){
+  var t=e.target.closest('.tab'); if(!t) return;
+  tab=t.dataset.tab;
+  document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on', x===t); });
+  renderRack();
+});
+function renderRack(){
+  var rack=document.getElementById('rack'); rack.innerHTML='';
+  var cur = sel.length===1 ? state[sel[0]] : null;
+  if(tab==='outfit'){
+    OUTFITS.forEach(function(o){
+      var on = cur && cur.outfit===o.id;
+      rack.insertAdjacentHTML('beforeend','<div class="item'+(on?' on':'')+'" data-v="'+o.id+'"><div class="ico">'+o.ico+'</div><div class="nm">'+(EN?o.en:o.ko)+'</div></div>');
+    });
+  } else if(tab==='prop'){
+    PROPS.forEach(function(p){
+      var on = cur && cur.prop===p.id;
+      rack.insertAdjacentHTML('beforeend','<div class="item'+(on?' on':'')+'" data-v="'+p.id+'"><div class="ico">'+p.ico+'</div><div class="nm">'+(EN?p.en:p.ko)+'</div></div>');
+    });
+  } else if(tab==='pose'){
+    POSES.forEach(function(p){
+      var on = cur && cur.pose===p.id;
+      rack.insertAdjacentHTML('beforeend','<div class="item'+(on?' on':'')+'" data-v="'+p.id+'"><div class="ico">'+p.ico+'</div><div class="nm">'+(EN?p.en:p.ko)+'</div></div>');
+    });
+  } else {
+    BGS.forEach(function(b){
+      rack.insertAdjacentHTML('beforeend','<div class="item'+(bg===b.id?' on':'')+'" data-v="'+b.id+'"><div class="sw" style="background:'+b.sw+'"></div><div class="nm">'+(EN?b.en:b.ko)+'</div></div>');
+    });
+  }
+}
+document.getElementById('rack').addEventListener('click', function(e){
+  var it=e.target.closest('.item'); if(!it) return;
+  var v=it.dataset.v;
+  if(tab==='bg'){
+    bg=v;
+    document.getElementById('stage').className='stage bg-'+bg;
+  } else {
+    sel.forEach(function(i){
+      if(tab==='outfit') state[i].outfit=v;
+      else if(tab==='prop') state[i].prop=v;
+      else if(tab==='pose') state[i].pose=v;
+      paint(i,true);
+    });
+    if(sel.length===1) say(sel[0]);
+  }
+  renderRack(); updWho();
+});
+
+/* ── 헤더 버튼 ── */
+document.getElementById('allBtn').addEventListener('click', function(){
+  sel = sel.length===CHARS.length ? [0] : CHARS.map(function(_,i){ return i; });
+  paintAll(false); renderRack(); updWho();
+  toast(sel.length>1 ? (EN?'All 5 selected — style them together!':'5명 전체 선택 — 한 번에 코디돼요!')
+                     : (EN?'Single select':'개별 선택'));
+});
+document.getElementById('randomBtn').addEventListener('click', function(){
+  state.forEach(function(st){
+    st.outfit=OUTFITS[Math.floor(Math.random()*OUTFITS.length)].id;
+    st.prop=PROPS[Math.floor(Math.random()*PROPS.length)].id;
+    st.pose=POSES[Math.floor(Math.random()*POSES.length)].id;
+  });
+  bg=BGS[Math.floor(Math.random()*BGS.length)].id;
+  document.getElementById('stage').className='stage bg-'+bg;
+  paintAll(true); renderRack();
+  toast(EN?'Randomised the whole crew! 🎲':'전체 랜덤 코디 완성! 🎲');
+});
+document.getElementById('resetBtn').addEventListener('click', function(){
+  state.forEach(function(st){ st.outfit='casual'; st.prop=''; st.pose=''; });
+  bg='studio'; sel=[0];
+  document.getElementById('stage').className='stage bg-studio';
+  paintAll(true); renderRack();
+  toast(EN?'Reset':'초기화했어요');
+});
+document.getElementById('shotBtn').addEventListener('click', function(){
+  CHARS.forEach(function(_,i){ setTimeout(function(){ say(i); }, i*140); });
+  var st=document.getElementById('stage');
+  st.animate([{filter:'brightness(1)'},{filter:'brightness(2.4)'},{filter:'brightness(1)'}],{duration:420});
+  toast(EN?'📸 Cheese! Say hi, everyone!':'📸 김치! 다 같이 인사~');
+});
+
+function updWho(){
+  var el=document.getElementById('who');
+  if(sel.length>1){ el.innerHTML=(EN?'Styling: ':'코디 중: ')+'<b>'+(EN?'ALL 5':'전체 5명')+'</b>'; }
+  else{ var c=CHARS[sel[0]]; el.innerHTML=(EN?'Styling: ':'코디 중: ')+'<b>'+(EN?c.en:c.ko)+'</b>'; }
+}
+var tT=null;
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on');
+  clearTimeout(tT); tT=setTimeout(function(){ t.classList.remove('on'); },2000); }
+
+/* 썸네일 성능 */
+setInterval(function(){ var p=!!window.__paused;
+  if(p!==document.body.classList.contains('anim-paused')) document.body.classList.toggle('anim-paused',p);
+},450);
+
+/* ── 언어 ── */
+var STR={
+  '5인 코디':'5-crew styling',
+  '🎲 전체 랜덤':'🎲 Random all','👥 전체 선택':'👥 Select all','📸 단체사진':'📸 Group photo','↺ 초기화':'↺ Reset',
+  '👗 의상':'👗 Outfit','🎁 소품':'🎁 Prop','🕺 포즈':'🕺 Pose','🌈 무대':'🌈 Stage'
+};
+var EN=new URLSearchParams(location.search).get('lang')==='en';
+var orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    if(!orig.has(el)) orig.set(el, el.innerHTML);
+    var ko=orig.get(el).trim();
+    el.innerHTML = EN ? (STR[ko]!==undefined?STR[ko]:orig.get(el)) : orig.get(el);
+  });
+  document.getElementById('lang').textContent=EN?'KO':'EN';
+  document.documentElement.lang=EN?'en':'ko';
+  if(EN) document.title='CREW CLOSET — dress five characters at once';
+  paintAll(false); renderRack();
+}
+document.getElementById('lang').addEventListener('click',function(){ EN=!EN; applyLang(); });
+applyLang();
+setTimeout(function(){ say(0); }, 700);
+})();
+</script>
+</body>
+</html>

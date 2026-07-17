@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PIXEL POND — 비트맵 연못 도감</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Galmuri11:wght@400;700&display=swap');
+
+/* 비트맵 연못 키우기 — 클릭해 먹이를 주면 물고기들이 몰려오고,
+   먹이를 줄 때마다 새 어종이 찾아와 도감이 채워진다. 낮/밤 전환.
+   (픽셀 스프라이트·디더링·CRT 프레임 — 전부 캔버스/CSS로 그린 비트맵) */
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{
+  --bg:#0d1a12; --shell:#1c3324; --shell-hi:#2c4a35; --ink:#eaf5df;
+  --acc:#8ef0a0; --acc2:#ffd23c; --dim:#7fae8d;
+}
+html,body{ height:100%; overflow:hidden; }
+body{ font-family:'Galmuri11','Press Start 2P',monospace; background:
+  repeating-conic-gradient(#0b160f 0% 25%, #0d1a12 0% 50%) 0 0/26px 26px;
+  color:var(--ink); -webkit-font-smoothing:none; image-rendering:pixelated;
+  display:grid; place-items:center; user-select:none; }
+
+/* 장치 프레임 */
+.device{ position:relative; width:min(94vw, 980px); }
+.frame{ background:var(--shell); border:4px solid #0a130d;
+  box-shadow:0 0 0 4px var(--shell-hi), 0 0 0 8px #0a130d, 0 24px 0 #071009,
+  0 40px 80px rgba(0,0,0,.7); padding:18px; }
+.head{ display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:2px 4px 14px; flex-wrap:wrap; }
+.logo{ font-family:'Press Start 2P',monospace; font-size:clamp(11px,2vw,17px);
+  color:var(--acc); text-shadow:2px 2px 0 #071009; letter-spacing:1px; }
+.logo span{ color:var(--acc2); }
+.head .stat{ display:flex; gap:14px; font-size:clamp(10px,1.6vw,13px); color:var(--dim); }
+.head .stat b{ color:var(--ink); }
+
+.screenwrap{ position:relative; border:4px solid #0a130d; background:#000; }
+canvas#pond{ display:block; width:100%; height:auto; image-rendering:pixelated; cursor:crosshair; }
+/* CRT 스캔라인 */
+.scan{ position:absolute; inset:0; pointer-events:none; opacity:.5; mix-blend-mode:multiply;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.32) 0 2px, transparent 2px 4px); }
+.vig{ position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(115% 100% at 50% 50%, transparent 62%, rgba(0,0,0,.5)); }
+
+/* 하단 컨트롤 */
+.ctrl{ display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:14px 4px 2px; flex-wrap:wrap; }
+.btns{ display:flex; gap:8px; flex-wrap:wrap; }
+.pbtn{ font-family:'Galmuri11',monospace; font-weight:700; font-size:clamp(11px,1.7vw,14px);
+  color:#0d1a12; background:var(--acc); border:none; padding:9px 14px; cursor:pointer;
+  box-shadow:0 4px 0 #3f7a4c, 0 4px 0 3px #0a130d; transition:transform .05s, box-shadow .05s; }
+.pbtn:active{ transform:translateY(3px); box-shadow:0 1px 0 #3f7a4c, 0 1px 0 3px #0a130d; }
+.pbtn.alt{ background:var(--acc2); box-shadow:0 4px 0 #a37800, 0 4px 0 3px #0a130d; }
+.pbtn.alt:active{ box-shadow:0 1px 0 #a37800, 0 1px 0 3px #0a130d; }
+.pbtn.ghost{ background:#345c41; color:var(--ink); box-shadow:0 4px 0 #1b3325, 0 4px 0 3px #0a130d; }
+.hintline{ font-size:clamp(10px,1.5vw,12.5px); color:var(--dim); }
+
+/* 도감 패널 */
+.dex{ position:absolute; right:-4px; top:-4px; bottom:-4px; width:min(280px, 76vw);
+  background:var(--shell); border:4px solid #0a130d; box-shadow:-10px 0 0 rgba(0,0,0,.25);
+  transform:translateX(calc(100% + 30px)); transition:transform .35s steps(6);
+  padding:16px; overflow-y:auto; z-index:5; }
+.dex.on{ transform:translateX(0); }
+.dex h3{ font-family:'Press Start 2P',monospace; font-size:12px; color:var(--acc2);
+  text-shadow:2px 2px 0 #071009; }
+.dex .cnt{ margin-top:6px; font-size:11.5px; color:var(--dim); }
+.dexlist{ margin-top:14px; display:flex; flex-direction:column; gap:10px; }
+.dexrow{ display:flex; align-items:center; gap:12px; padding:9px 10px;
+  background:#14251a; border:3px solid #0a130d; }
+.dexrow canvas{ width:44px; height:32px; image-rendering:pixelated; background:#0d1a12;
+  border:2px solid #0a130d; }
+.dexrow .nm{ font-weight:700; font-size:13px; }
+.dexrow .ds{ font-size:10.5px; color:var(--dim); margin-top:2px; line-height:1.5; }
+.dexrow.lock{ opacity:.45; }
+.dexrow.lock .nm::after{ content:" ???"; color:var(--dim); }
+.dex .close{ position:absolute; right:10px; top:10px; background:none; border:none;
+  color:var(--dim); font-family:inherit; font-size:14px; cursor:pointer; }
+
+/* 토스트(신규 어종) */
+.newfish{ position:absolute; left:50%; top:16%; transform:translate(-50%,-8px);
+  z-index:6; font-family:'Press Start 2P',monospace; font-size:clamp(9px,1.6vw,13px);
+  color:var(--acc2); background:#0a130dee; border:3px solid var(--acc2);
+  padding:12px 18px; opacity:0; pointer-events:none; text-shadow:2px 2px 0 #000;
+  transition:opacity .25s, transform .3s; }
+.newfish.on{ opacity:1; transform:translate(-50%,0); }
+
+.lang{ position:fixed; right:16px; top:14px; z-index:20; font-family:'Galmuri11',monospace;
+  font-weight:700; font-size:12px; background:#14251a; color:var(--ink);
+  border:3px solid #0a130d; padding:7px 12px; cursor:pointer; }
+body.anim-paused *{ animation-play-state:paused !important; }
+</style>
+</head>
+<body>
+
+<div class="device">
+  <div class="frame">
+    <div class="head">
+      <div class="logo">PIXEL<span>*</span>POND</div>
+      <div class="stat">
+        <span data-i18n>먹이</span> <b id="feedN">0</b>
+        <span data-i18n>물고기</span> <b id="fishN">0</b>
+        <span data-i18n>도감</span> <b id="dexN">1/6</b>
+      </div>
+    </div>
+
+    <div class="screenwrap">
+      <canvas id="pond" width="640" height="380"></canvas>
+      <div class="scan"></div><div class="vig"></div>
+      <div class="newfish" id="newfish"></div>
+      <!-- 도감 -->
+      <aside class="dex" id="dex">
+        <button class="close" id="dexClose">✕</button>
+        <h3>FISH DEX</h3>
+        <div class="cnt" id="dexCnt"></div>
+        <div class="dexlist" id="dexList"></div>
+      </aside>
+    </div>
+
+    <div class="ctrl">
+      <div class="btns">
+        <button class="pbtn" id="feedBtn" data-i18n>🍞 먹이 주기</button>
+        <button class="pbtn alt" id="dayBtn" data-i18n>🌙 밤으로</button>
+        <button class="pbtn ghost" id="dexBtn" data-i18n>📖 도감</button>
+      </div>
+      <div class="hintline" data-i18n>연못을 클릭해도 먹이를 줄 수 있어요 · 5번 줄 때마다 새 친구가 찾아옵니다</div>
+    </div>
+  </div>
+</div>
+
+<button class="lang" id="lang">EN</button>
+
+<script>
+(function(){
+"use strict";
+
+/* ── 어종 정의 (픽셀 스프라이트 문자열) ── */
+var PAL={ '.':null,'K':'#0a130d','W':'#ffffff',
+  'O':'#ff9a3c','o':'#c46a1e','Y':'#ffd23c','y':'#c9a022',
+  'B':'#57c8ff','b':'#2f7fb0','P':'#ff7ac1','p':'#c04f8a',
+  'G':'#8ef0a0','g':'#4f9e63','R':'#ff5c5c','r':'#b03535','V':'#b48cff','v':'#7a58c0' };
+var SPECIES=[
+  { id:'pico',  ko:'피코', en:'Pico', dsKo:'제일 먼저 사는 꼬마 붕어. 겁이 없다.', dsEn:'The fearless little crucian who lived here first.',
+    spr:['..KKK...','.KOOOK.K','KOWOOOKK','KOOOOOK.','.KOOOK.K','..KKK...'] },
+  { id:'luna',  ko:'루나', en:'Luna', dsKo:'달빛을 먹고 자라는 파란 열대어.', dsEn:'A blue tropical fish raised on moonlight.',
+    spr:['..KKKK..','.KBBBBK.','KBWBBBKK','KBBBBBBK','.KBBBK.K','..KKKK..'] },
+  { id:'moti',  ko:'모티', en:'Moti', dsKo:'찹쌀떡을 닮은 분홍 복어. 놀라면 커진다.', dsEn:'A mochi-like pink puffer. Puffs up when startled.',
+    spr:['..KKK...','.KPPPK..','KPWPPPK.','KPPPPPKK','.KPPPK..','..KKK...'] },
+  { id:'zeni',  ko:'제니', en:'Zeni', dsKo:'금화 비늘의 부자 물고기. 반짝인다.', dsEn:'A rich fish with gold-coin scales. It sparkles.',
+    spr:['..KKKK..','.KYYYYK.','KYWYYYKK','KYYYYYYK','.KYYYK.K','..KKKK..'] },
+  { id:'gaia',  ko:'가이아', en:'Gaia', dsKo:'이끼를 두른 초록 거북 물고기. 아주 느긋하다.', dsEn:'A mossy green turtle-fish. Extremely laid back.',
+    spr:['..KKKK..','.KGGGGK.','KGWGGGKK','KGGGGGGK','.KGGGK.K','..KKKK..'] },
+  { id:'nox',   ko:'녹스', en:'Nox', dsKo:'밤에만 무늬가 빛나는 보랏빛 수수께끼.', dsEn:'A violet mystery whose pattern glows only at night.',
+    spr:['..KKKK..','.KVVVVK.','KVWVVVKK','KVVVVVVK','.KVVVK.K','..KKKK..'] },
+];
+
+/* ── 상태 ── */
+var canvas=document.getElementById('pond'), ctx=canvas.getContext('2d');
+var W=640,H=380;
+var night=false, feeds=0, unlocked=1;
+var fishes=[], pellets=[], bubbles=[], weeds=[];
+var frames=0;
+
+/* 수초 */
+for(var i=0;i<7;i++) weeds.push({x:40+i*90+Math.random()*30, h:40+Math.random()*46, ph:Math.random()*6});
+
+/* ── 물고기 ── */
+function addFish(sp){
+  fishes.push({ sp:sp, x:Math.random()*W, y:60+Math.random()*(H-140),
+    vx:(Math.random()<.5?-1:1)*(0.4+Math.random()*0.5), vy:0,
+    ph:Math.random()*6, size:2+Math.random()*0.8, tx:null, ty:null });
+}
+addFish(SPECIES[0]); addFish(SPECIES[0]);
+
+/* ── 먹이 ── */
+function drop(x){
+  pellets.push({x:x, y:26, vy:0.4});
+  feeds++;
+  document.getElementById('feedN').textContent=feeds;
+  if(feeds%5===0 && unlocked<SPECIES.length){
+    var sp=SPECIES[unlocked]; unlocked++;
+    addFish(sp); addFish(sp);
+    showNew(sp); renderDex(); updHud();
+  } else {
+    /* 기존 어종 한 마리 추가(최대 18) */
+    if(fishes.length<18 && Math.random()<.4) addFish(SPECIES[Math.floor(Math.random()*unlocked)]);
+  }
+  updHud();
+}
+canvas.addEventListener('click', function(e){
+  var r=canvas.getBoundingClientRect();
+  drop((e.clientX-r.left)/r.width*W);
+});
+document.getElementById('feedBtn').addEventListener('click', function(){ drop(80+Math.random()*(W-160)); });
+
+/* ── 낮/밤 ── */
+var dayBtn=document.getElementById('dayBtn');
+dayBtn.addEventListener('click', function(){
+  night=!night;
+  dayBtn.textContent = EN ? (night?'☀️ To day':'🌙 To night') : (night?'☀️ 낮으로':'🌙 밤으로');
+});
+
+/* ── 도감 ── */
+var dex=document.getElementById('dex');
+document.getElementById('dexBtn').addEventListener('click', function(){ dex.classList.toggle('on'); });
+document.getElementById('dexClose').addEventListener('click', function(){ dex.classList.remove('on'); });
+function drawSprite(c2,spr,px,ox,oy,flip){
+  for(var y=0;y<spr.length;y++){ var row=spr[y];
+    for(var x=0;x<row.length;x++){ var col=PAL[row[flip? row.length-1-x : x]];
+      if(!col) continue; c2.fillStyle=col; c2.fillRect(ox+x*px, oy+y*px, px, px); } }
+}
+function renderDex(){
+  var list=document.getElementById('dexList'); list.innerHTML='';
+  SPECIES.forEach(function(sp,i){
+    var row=document.createElement('div');
+    row.className='dexrow'+(i<unlocked?'':' lock');
+    var cv=document.createElement('canvas'); cv.width=44; cv.height=32;
+    if(i<unlocked){ var c2=cv.getContext('2d'); drawSprite(c2,sp.spr,4,6,4,false); }
+    var tx=document.createElement('div');
+    tx.innerHTML='<div class="nm">'+(i<unlocked?(EN?sp.en:sp.ko):'NO.'+(i+1))+'</div>'+
+      (i<unlocked?'<div class="ds">'+(EN?sp.dsEn:sp.dsKo)+'</div>':'');
+    row.appendChild(cv); row.appendChild(tx); list.appendChild(row);
+  });
+  document.getElementById('dexCnt').textContent=(EN?'Collected ':'수집 ')+unlocked+' / '+SPECIES.length;
+}
+function updHud(){
+  document.getElementById('fishN').textContent=fishes.length;
+  document.getElementById('dexN').textContent=unlocked+'/'+SPECIES.length;
+}
+var newT=null;
+function showNew(sp){
+  var el=document.getElementById('newfish');
+  el.textContent=(EN?'NEW FRIEND! ':'새 친구! ')+(EN?sp.en:sp.ko)+' ♪';
+  el.classList.add('on'); clearTimeout(newT);
+  newT=setTimeout(function(){ el.classList.remove('on'); },2600);
+}
+
+/* ── 렌더 루프 ── */
+function loop(){
+  if(window.__paused && frames>5){ setTimeout(function(){ requestAnimationFrame(loop); },300); return; }
+  requestAnimationFrame(loop); frames++;
+  var t=frames*0.016;
+
+  /* 물 배경(디더 밴드) */
+  var top= night? '#0a1030' : '#8ef0e0';
+  var bands= night? ['#0a1030','#0c1440','#0e1850','#101c60'] : ['#57c8d8','#3fb2c8','#2f9cb8','#2486a8'];
+  ctx.fillStyle=top; ctx.fillRect(0,0,W,H);
+  for(var b=0;b<bands.length;b++){
+    ctx.fillStyle=bands[b];
+    var y0=30+b*((H-30)/bands.length);
+    ctx.fillRect(0,y0,W,H-y0);
+    /* 디더 경계 */
+    ctx.fillStyle=bands[Math.max(0,b-1)];
+    for(var dx=0;dx<W;dx+=8){ if(((dx/8)+b)%2===0) ctx.fillRect(dx,y0,4,4); }
+  }
+  /* 수면 */
+  ctx.fillStyle= night? '#1a2a6a':'#c9fff2';
+  for(var sx=0;sx<W;sx+=16){ ctx.fillRect(sx+((t*22)%16),24,8,3); }
+
+  /* 수초 */
+  weeds.forEach(function(w){
+    var sway=Math.sin(t*1.2+w.ph)*5;
+    ctx.fillStyle= night? '#123a2a' : '#2f7a4a';
+    for(var seg=0;seg<w.h;seg+=8){
+      var off=Math.sin(t*1.2+w.ph+seg*0.08)*(seg/w.h)*8;
+      ctx.fillRect(w.x+off, H-14-seg, 6, 8);
+    }
+  });
+  /* 바닥 모래 */
+  ctx.fillStyle= night? '#232040' : '#d9b86a'; ctx.fillRect(0,H-14,W,14);
+  ctx.fillStyle= night? '#2c2850' : '#c4a455';
+  for(var gx=0;gx<W;gx+=12){ if((gx/12)%2===0) ctx.fillRect(gx,H-14,6,4); }
+
+  /* 먹이 */
+  for(var i=pellets.length-1;i>=0;i--){ var p=pellets[i];
+    p.vy=Math.min(0.8,p.vy+0.01); p.y+=p.vy; p.x+=Math.sin(t*3+i)*0.3;
+    ctx.fillStyle='#ffd23c'; ctx.fillRect(Math.round(p.x)-2,Math.round(p.y)-2,4,4);
+    ctx.fillStyle='#fff6c9'; ctx.fillRect(Math.round(p.x)-2,Math.round(p.y)-2,2,2);
+    if(p.y>H-18) pellets.splice(i,1);
+  }
+
+  /* 물고기 */
+  fishes.forEach(function(f,fi){
+    /* 가장 가까운 먹이 추적 */
+    var best=null,bd=1e9;
+    pellets.forEach(function(p){ var d=(p.x-f.x)*(p.x-f.x)+(p.y-f.y)*(p.y-f.y); if(d<bd){bd=d;best=p;} });
+    if(best && bd<26000){
+      f.vx+=(best.x-f.x)*0.0016; f.vy+=(best.y-f.y)*0.0016;
+      if(bd<130){ pellets.splice(pellets.indexOf(best),1); }
+    } else {
+      f.vy+=Math.sin(t*0.9+f.ph)*0.004;
+      if(Math.random()<0.004) f.vx+= (Math.random()-0.5)*0.5;
+    }
+    f.vx=Math.max(-1.4,Math.min(1.4,f.vx)); f.vy=Math.max(-0.7,Math.min(0.7,f.vy*0.98));
+    f.x+=f.vx; f.y+=f.vy;
+    if(f.x<14){f.x=14;f.vx=Math.abs(f.vx);} if(f.x>W-14){f.x=W-14;f.vx=-Math.abs(f.vx);}
+    if(f.y<40){f.y=40;f.vy=0.2;} if(f.y>H-30){f.y=H-30;f.vy=-0.2;}
+    var px=Math.round(f.size);
+    /* 밤엔 녹스가 발광 */
+    if(night && f.sp.id==='nox'){ ctx.fillStyle='rgba(180,140,255,.16)';
+      ctx.fillRect(Math.round(f.x)-8*px, Math.round(f.y)-5*px, 16*px, 10*px); }
+    drawSprite(ctx, f.sp.spr, px, Math.round(f.x)-4*px, Math.round(f.y)-3*px, f.vx>0);
+    /* 꼬리 물결 */
+    if(frames%14<7){ ctx.fillStyle='rgba(255,255,255,.25)';
+      ctx.fillRect(Math.round(f.x)+(f.vx>0?-6*px:5*px), Math.round(f.y), px, px); }
+  });
+
+  /* 기포 */
+  if(frames%22===0) bubbles.push({x:20+Math.random()*(W-40), y:H-16, r:1+Math.random()*2});
+  for(var bi=bubbles.length-1;bi>=0;bi--){ var bb=bubbles[bi];
+    bb.y-=0.7; bb.x+=Math.sin(t*2+bi)*0.4;
+    ctx.fillStyle= night?'rgba(150,170,255,.5)':'rgba(255,255,255,.6)';
+    ctx.fillRect(Math.round(bb.x),Math.round(bb.y),bb.r*2,bb.r*2);
+    if(bb.y<30) bubbles.splice(bi,1);
+  }
+
+  /* 달/해 */
+  if(night){ ctx.fillStyle='#f4f0ff';
+    ctx.fillRect(W-70,8,10,10); ctx.fillRect(W-74,12,4,4);
+    ctx.fillStyle='#0a1030'; ctx.fillRect(W-66,10,4,4);
+  }
+}
+requestAnimationFrame(loop);
+
+/* 썸네일 성능 */
+setInterval(function(){ var p=!!window.__paused;
+  if(p!==document.body.classList.contains('anim-paused')) document.body.classList.toggle('anim-paused',p);
+},450);
+
+/* ── 언어 ── */
+var STR={
+  '먹이':'FEED','물고기':'FISH','도감':'DEX',
+  '🍞 먹이 주기':'🍞 Feed','🌙 밤으로':'🌙 To night','📖 도감':'📖 Dex',
+  '연못을 클릭해도 먹이를 줄 수 있어요 · 5번 줄 때마다 새 친구가 찾아옵니다':
+    'Click the pond to feed · every 5 feeds a new friend arrives'
+};
+var EN=new URLSearchParams(location.search).get('lang')==='en';
+var orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    if(!orig.has(el)) orig.set(el, el.innerHTML);
+    var ko=orig.get(el).trim();
+    el.innerHTML = EN ? (STR[ko]!==undefined?STR[ko]:orig.get(el)) : orig.get(el);
+  });
+  document.getElementById('lang').textContent=EN?'KO':'EN';
+  document.documentElement.lang=EN?'en':'ko';
+  if(EN) document.title='PIXEL POND — a bitmap pond dex';
+  dayBtn.textContent = EN ? (night?'☀️ To day':'🌙 To night') : (night?'☀️ 낮으로':'🌙 밤으로');
+  renderDex();
+}
+document.getElementById('lang').addEventListener('click',function(){ EN=!EN; applyLang(); });
+applyLang(); updHud();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+  This demo loads three.js (r128, MIT) from a CDN.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COSMOS — 우주 생명체 · 스크롤 입자</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Archivo+Black&family=Space+Grotesk:wght@400;500;600;700&family=Noto+Sans+KR:wght@300;400;700;900&display=swap');
+
+/* AI(Higgsfield)로 만든 우주 해파리 영상을 거대한 글자 안에 마스킹해 채우고,
+   스크롤을 내리면 three.js 입자가 점점 화면을 가득 채운다.
+   글자 마스크: SVG <text>를 clipPath로 써서 <video>를 글자 모양으로 오려냄. */
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{ --cy:#5fe6ff; --mg:#ff5ce0; --vi:#9d7bff; --ink:#e9f4ff; }
+html{ scroll-behavior:smooth; }
+body{ font-family:'Space Grotesk','Noto Sans KR',sans-serif; background:#03030a; color:var(--ink);
+  -webkit-font-smoothing:antialiased; }
+
+/* ── 입자 캔버스(고정 배경) ── */
+#gl{ position:fixed; inset:0; z-index:0; display:block; }
+/* 성운 글로우 */
+.neb{ position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.75;
+  background:
+    radial-gradient(50% 45% at 22% 28%, rgba(93,60,180,.5), transparent 60%),
+    radial-gradient(45% 40% at 78% 62%, rgba(255,92,224,.28), transparent 62%),
+    radial-gradient(60% 50% at 50% 100%, rgba(95,230,255,.22), transparent 65%); }
+
+/* ── 히어로: 글자 안에 영상 ── */
+.hero{ position:relative; z-index:2; height:100vh; display:grid; place-items:center; }
+.masked{ position:relative; width:min(94vw,1180px); aspect-ratio:1180/300; }
+.masked video{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  clip-path:url(#txtClip); -webkit-clip-path:url(#txtClip);
+  /* 글자 실루엣을 따라 번지는 글로우 — 클립된 모양에 그대로 적용돼 항상 정렬됨 */
+  filter:drop-shadow(0 0 16px rgba(95,230,255,.5)) drop-shadow(0 0 42px rgba(157,123,255,.35)); }
+.hero .sub{ position:absolute; left:50%; bottom:16vh; transform:translateX(-50%);
+  text-align:center; width:min(92vw,620px); }
+.hero .sub .kr{ font-weight:300; font-size:clamp(14px,2vw,19px); color:#a9c6e0;
+  line-height:1.9; word-break:keep-all; }
+.hero .sub .cue{ margin-top:26px; font-size:11.5px; letter-spacing:.3em; color:#6f8db0;
+  animation:bob 2.2s ease-in-out infinite; }
+@keyframes bob{ 50%{ transform:translateY(8px); } }
+.eyebrow{ position:absolute; left:50%; top:14vh; transform:translateX(-50%);
+  font-size:11.5px; letter-spacing:.44em; color:var(--cy); font-weight:600; }
+
+/* ── 스크롤 섹션 ── */
+.sec{ position:relative; z-index:2; min-height:100vh; display:grid; place-items:center;
+  padding:0 6vw; text-align:center; }
+.sec .in{ max-width:660px; opacity:0; transform:translateY(30px);
+  transition:opacity .9s ease, transform 1s cubic-bezier(.2,.7,.2,1); }
+.sec.on .in{ opacity:1; transform:translateY(0); }
+.sec h2{ font-family:'Archivo Black',sans-serif; font-size:clamp(30px,5.6vw,68px);
+  line-height:1.02; letter-spacing:-.02em;
+  background:linear-gradient(100deg,var(--cy),var(--vi) 50%,var(--mg));
+  -webkit-background-clip:text; background-clip:text; color:transparent; }
+.sec p{ margin-top:22px; font-weight:300; font-size:clamp(14px,1.8vw,18px); line-height:1.95;
+  color:#a9c6e0; word-break:keep-all; }
+.sec .num{ font-size:11px; letter-spacing:.4em; color:#5f7a9a; margin-bottom:18px; }
+
+/* HUD */
+.hud{ position:fixed; right:22px; top:50%; transform:translateY(-50%); z-index:5;
+  display:flex; flex-direction:column; align-items:flex-end; gap:12px; pointer-events:none; }
+.hud .bar{ width:3px; height:34vh; background:rgba(150,200,255,.16); border-radius:99px; position:relative; }
+.hud .bar i{ position:absolute; left:0; top:0; width:100%; height:0%; border-radius:99px;
+  background:linear-gradient(var(--cy),var(--mg)); box-shadow:0 0 10px rgba(95,230,255,.7); }
+.hud .cnt{ font-size:10.5px; letter-spacing:.18em; color:#6f8db0; }
+.hud .cnt b{ color:var(--cy); }
+
+.lang{ position:fixed; right:20px; top:20px; z-index:9; font-family:inherit; font-weight:600;
+  font-size:11.5px; letter-spacing:.1em; background:rgba(10,14,30,.55); color:var(--ink);
+  border:1px solid rgba(150,200,255,.3); border-radius:20px; padding:7px 13px; cursor:pointer;
+  backdrop-filter:blur(6px); }
+.fallback{ position:fixed; inset:0; z-index:8; display:none; place-items:center; text-align:center;
+  padding:0 10vw; background:#05030f; }
+.fallback.on{ display:grid; }
+</style>
+</head>
+<body>
+
+<canvas id="gl"></canvas>
+<div class="neb"></div>
+
+<!-- 글자 클립패스 (영상이 이 글자 모양으로 잘림) -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <clipPath id="txtClip" clipPathUnits="userSpaceOnUse">
+      <text id="clipText" x="0" y="0" text-anchor="middle"
+            font-family="'Archivo Black', sans-serif" font-size="100"
+            lengthAdjust="spacingAndGlyphs">COSMOS</text>
+    </clipPath>
+  </defs>
+</svg>
+
+<header class="hero">
+  <div class="eyebrow" data-i18n>우주 생명체 · 心 LIFEFORM</div>
+  <div class="masked">
+    <video id="bgv" muted loop playsinline autoplay preload="auto">
+      <source src="../assets/gen/cosmos-life.mp4" type="video/mp4">
+    </video>
+  </div>
+  <div class="sub">
+    <p class="kr" data-i18n>빛을 삼킨 채 성운을 헤엄치는 것들이 있다.<br>이름 붙일 수 없어서, 우리는 그저 <b>우주</b>라고 부른다.</p>
+    <div class="cue" data-i18n>스크롤 ↓</div>
+  </div>
+</header>
+
+<section class="sec" data-p="0.25"><div class="in">
+  <div class="num">SEQUENCE 01</div>
+  <h2 data-i18n>숨을 쉰다</h2>
+  <p data-i18n>진공 속에서도 그것은 팽창하고 수축한다. 심장이 없어도 리듬이 있고, 폐가 없어도 숨이 있다.</p>
+</div></section>
+
+<section class="sec" data-p="0.5"><div class="in">
+  <div class="num">SEQUENCE 02</div>
+  <h2 data-i18n>흩어진다</h2>
+  <p data-i18n>몸의 경계가 풀리기 시작한다. 하나였던 것이 수천 개의 입자가 되어 어둠 속으로 번져 나간다.</p>
+</div></section>
+
+<section class="sec" data-p="0.75"><div class="in">
+  <div class="num">SEQUENCE 03</div>
+  <h2 data-i18n>가득 찬다</h2>
+  <p data-i18n>이제 어디까지가 그것이고 어디부터가 우주인지 알 수 없다. 화면 전체가 하나의 생명이 된다.</p>
+</div></section>
+
+<section class="sec" data-p="1"><div class="in">
+  <div class="num">SEQUENCE 04</div>
+  <h2 data-i18n>당신도 그중 하나</h2>
+  <p data-i18n>같은 먼지에서 왔고, 같은 빛으로 돌아간다. 이 입자들 사이 어딘가에 당신이 있다.</p>
+</div></section>
+
+<div class="hud">
+  <div class="bar"><i id="pbar"></i></div>
+  <div class="cnt"><b id="pcount">0</b> <span data-i18n>입자</span></div>
+</div>
+
+<button class="lang" id="lang">EN</button>
+<div class="fallback" id="fallback"><div>
+  <h2 style="font-family:'Archivo Black'" data-i18n>WebGL을 켤 수 없습니다</h2>
+  <p style="margin-top:14px;color:#8fa8c8" data-i18n>이 데모는 3D 그래픽(WebGL)을 사용합니다.</p>
+</div></div>
+
+<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
+<script>
+(function(){
+"use strict";
+
+/* ── 글자 클립을 요소 실제 픽셀 크기에 맞춤 (userSpaceOnUse) ── */
+var maskedEl=document.querySelector('.masked'), clipText=document.getElementById('clipText');
+function fitClip(){
+  var r=maskedEl.getBoundingClientRect();
+  if(!r.width) return;
+  /* 대문자 잉크 높이 ≈ 0.72em 이므로, 박스를 알맞게 채우도록 1.15배로 잡고
+     베이스라인을 0.92 지점에 둬 위아래가 잘리지 않게 한다 */
+  clipText.setAttribute('x', r.width/2);
+  clipText.setAttribute('y', r.height*0.92);
+  clipText.setAttribute('font-size', r.height*1.15);
+  clipText.setAttribute('textLength', r.width*0.97);
+}
+fitClip();
+addEventListener('resize', fitClip);
+if(document.fonts && document.fonts.ready) document.fonts.ready.then(fitClip);
+setTimeout(fitClip, 400); setTimeout(fitClip, 1200);
+
+/* ── 영상 재생 보장 ── */
+var bgv=document.getElementById('bgv');
+function playV(){ var p=bgv.play(); if(p&&p.catch) p.catch(function(){}); }
+playV();
+addEventListener('pointerdown', playV, {once:true});
+addEventListener('scroll', playV, {once:true, passive:true});
+
+/* ── three.js 입자 ── */
+if(typeof THREE==='undefined' || !window.WebGLRenderingContext){
+  document.getElementById('fallback').classList.add('on');
+}else{
+  var canvas=document.getElementById('gl'), renderer;
+  try{ renderer=new THREE.WebGLRenderer({canvas:canvas, alpha:true, antialias:true}); }
+  catch(e){ document.getElementById('fallback').classList.add('on'); }
+
+  if(renderer){
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+    renderer.setSize(innerWidth, innerHeight);
+    var scene=new THREE.Scene();
+    var camera=new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000);
+    camera.position.z=120;
+
+    var MAX=9000;
+    var pos=new Float32Array(MAX*3), col=new Float32Array(MAX*3), rnd=new Float32Array(MAX*3);
+    var C=[ new THREE.Color(0x5fe6ff), new THREE.Color(0xff5ce0), new THREE.Color(0x9d7bff), new THREE.Color(0xffffff) ];
+    for(var i=0;i<MAX;i++){
+      /* 시작: 중앙 근처의 작은 덩어리(생명체) — 나중에 넓게 퍼짐 */
+      var r=Math.pow(Math.random(),0.6)*10, th=Math.random()*Math.PI*2, ph=Math.acos(2*Math.random()-1);
+      pos[i*3]  =r*Math.sin(ph)*Math.cos(th);
+      pos[i*3+1]=r*Math.sin(ph)*Math.sin(th);
+      pos[i*3+2]=r*Math.cos(ph);
+      /* 최종 확산 목표 방향 */
+      rnd[i*3]  =(Math.random()-0.5);
+      rnd[i*3+1]=(Math.random()-0.5);
+      rnd[i*3+2]=(Math.random()-0.5);
+      var c=C[Math.floor(Math.random()*C.length)];
+      col[i*3]=c.r; col[i*3+1]=c.g; col[i*3+2]=c.b;
+    }
+    var geo=new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.BufferAttribute(pos,3));
+    geo.setAttribute('color', new THREE.BufferAttribute(col,3));
+    geo.setDrawRange(0, 400);   /* 처음엔 소수만 */
+    var mat=new THREE.PointsMaterial({ size:1.5, vertexColors:true, transparent:true,
+      opacity:.9, blending:THREE.AdditiveBlending, depthWrite:false });
+    var pts=new THREE.Points(geo, mat);
+    scene.add(pts);
+
+    /* 스크롤 진행도 */
+    var target=0, prog=0, frames=0;
+    function onScroll(){
+      var max=document.documentElement.scrollHeight-innerHeight;
+      target = max>0 ? Math.min(1, Math.max(0, (scrollY||pageYOffset||0)/max)) : 0;
+    }
+    addEventListener('scroll', onScroll, {passive:true});
+    addEventListener('resize', function(){
+      camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight); onScroll();
+    });
+    onScroll();
+
+    var tmx=0,tmy=0,cmx=0,cmy=0;
+    addEventListener('mousemove', function(e){ tmx=e.clientX/innerWidth-.5; tmy=e.clientY/innerHeight-.5; });
+
+    var pbar=document.getElementById('pbar'), pcount=document.getElementById('pcount');
+    var basePos=pos.slice(0);
+
+    (function loop(){
+      if(window.__paused && frames>5){ setTimeout(function(){ requestAnimationFrame(loop); },300); return; }
+      requestAnimationFrame(loop); frames++;
+      var t=frames*0.016;
+      prog += (target-prog)*0.06;
+
+      /* 스크롤 → 입자 수 증가 (400 → 9000) */
+      var n=Math.floor(400 + prog*(MAX-400));
+      geo.setDrawRange(0, n);
+
+      /* 스크롤 → 확산 반경 증가 + 입자 커짐 */
+      var spread = 10 + prog*prog*170;
+      var p=geo.attributes.position.array;
+      for(var i=0;i<n;i++){
+        var i3=i*3;
+        var sw=Math.sin(t*0.6 + i*0.02)*1.6*(0.3+prog);
+        p[i3]  = basePos[i3]   + rnd[i3]  *spread + sw;
+        p[i3+1]= basePos[i3+1] + rnd[i3+1]*spread + Math.cos(t*0.5+i*0.03)*1.4*(0.3+prog);
+        p[i3+2]= basePos[i3+2] + rnd[i3+2]*spread;
+      }
+      geo.attributes.position.needsUpdate=true;
+      mat.size = 1.2 + prog*1.6;
+      mat.opacity = 0.55 + prog*0.42;
+
+      /* 카메라: 스크롤에 따라 안으로 들어가며 회전 */
+      cmx+=(tmx-cmx)*0.04; cmy+=(tmy-cmy)*0.04;
+      camera.position.z = 120 - prog*74;
+      pts.rotation.y = t*0.04 + cmx*0.5;
+      pts.rotation.x = cmy*0.35;
+
+      /* HUD */
+      pbar.style.height=(prog*100)+'%';
+      pcount.textContent=n.toLocaleString();
+
+      renderer.render(scene, camera);
+    })();
+  }
+}
+
+/* ── 섹션 등장 ── */
+var io=new IntersectionObserver(function(es){ es.forEach(function(e){
+  e.target.classList.toggle('on', e.isIntersecting && e.intersectionRatio>0.35); });
+}, {threshold:[0,0.35,0.6]});
+document.querySelectorAll('.sec').forEach(function(s){ io.observe(s); });
+
+/* ── 언어 ── */
+var CLIP={ ko:'COSMOS', en:'COSMOS' };
+var STR={
+  '우주 생명체 · 心 LIFEFORM':'COSMIC LIFEFORM · 心',
+  '빛을 삼킨 채 성운을 헤엄치는 것들이 있다.<br>이름 붙일 수 없어서, 우리는 그저 <b>우주</b>라고 부른다.':
+    'There are things that swim the nebula with light swallowed whole.<br>Having no name for them, we simply call them <b>cosmos</b>.',
+  '스크롤 ↓':'SCROLL ↓',
+  '숨을 쉰다':'IT BREATHES',
+  '진공 속에서도 그것은 팽창하고 수축한다. 심장이 없어도 리듬이 있고, 폐가 없어도 숨이 있다.':
+    'Even in vacuum it expands and contracts. No heart, yet a rhythm; no lungs, yet a breath.',
+  '흩어진다':'IT SCATTERS',
+  '몸의 경계가 풀리기 시작한다. 하나였던 것이 수천 개의 입자가 되어 어둠 속으로 번져 나간다.':
+    'The border of its body comes undone. What was one becomes thousands of particles, bleeding into the dark.',
+  '가득 찬다':'IT FILLS',
+  '이제 어디까지가 그것이고 어디부터가 우주인지 알 수 없다. 화면 전체가 하나의 생명이 된다.':
+    'Now there is no telling where it ends and the cosmos begins. The whole screen becomes one life.',
+  '당신도 그중 하나':'YOU ARE ONE OF THEM',
+  '같은 먼지에서 왔고, 같은 빛으로 돌아간다. 이 입자들 사이 어딘가에 당신이 있다.':
+    'From the same dust, returning to the same light. Somewhere among these particles, there is you.',
+  '입자':'PARTICLES',
+  'WebGL을 켤 수 없습니다':'WebGL is unavailable',
+  '이 데모는 3D 그래픽(WebGL)을 사용합니다.':'This demo uses 3D graphics (WebGL).'
+};
+var EN=new URLSearchParams(location.search).get('lang')==='en';
+var orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    if(!orig.has(el)) orig.set(el, el.innerHTML);
+    var ko=orig.get(el).trim();
+    el.innerHTML = EN ? (STR[ko]!==undefined?STR[ko]:orig.get(el)) : orig.get(el);
+  });
+  document.getElementById('lang').textContent=EN?'KO':'EN';
+  document.documentElement.lang=EN?'en':'ko';
+  if(EN) document.title='COSMOS — cosmic lifeform · scroll particles';
+}
+document.getElementById('lang').addEventListener('click',function(){ EN=!EN; applyLang(); });
+applyLang();
+})();
+</script>
+</body>
+</html>
