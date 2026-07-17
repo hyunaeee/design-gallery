@@ -9,127 +9,118 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CREW CLOSET — 5인 동시 옷입히기</title>
+<title>Y2K CLOSET — 드래그 옷입히기 스튜디오</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Gaegu:wght@400;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Noto+Sans+KR:wght@400;500;700;900&display=swap');
 
-/* 5명을 동시에 코디하는 옷입히기. 캐릭터를 클릭해 선택하고 의상을 바꾸며,
-   무대(배경)·소품·포즈까지 조합해 팀 전체 룩을 완성한다.
-   AI(Higgsfield)로 생성한 치비 캐릭터 15컷을 배경 제거해 사용. */
+/* Y2K 드래그 옷입히기 — 하나의 실루엣에서 파생한 5인(피부톤 변형) 패션돌.
+   선택한 인형이 중앙에 크게 서고, 나머지는 하단에 '입은 채로' 대기한다.
+   옷장에서 아이템을 끌어 인형 위에 놓으면 착용(슬롯 스냅), 끌어내면 벗김.
+   모든 인형·아이템은 AI(Higgsfield) 생성 후 배경 제거한 투명 PNG, 배경은 일러스트 5종. */
 *{ margin:0; padding:0; box-sizing:border-box; }
 :root{
-  --bg:#fff6f9; --panel:#ffffff; --ink:#3a2f3f; --dim:#9b8ba5;
-  --line:#f0e2ea; --pink:#ff6fa5; --mint:#5fd4c4; --sun:#ffc93c; --lav:#a98cff;
-  --stage:#ffe9f2;
+  --ink:#3a2f45; --dim:#9b8aa8; --line:#efe3f2; --panel:#fff;
+  --pink:#ff6fb0; --lav:#a98cff; --mint:#5fd4c4; --sun:#ffc93c;
 }
 html,body{ height:100%; }
-body{ font-family:'Fredoka','Noto Sans KR',sans-serif; background:var(--bg); color:var(--ink);
+body{ font-family:'Fredoka','Noto Sans KR',sans-serif; background:#fdf4fb; color:var(--ink);
   overflow:hidden; -webkit-font-smoothing:antialiased; user-select:none; }
-.app{ height:100vh; display:grid; grid-template-rows:auto 1fr auto; }
+.app{ height:100vh; display:grid; grid-template-rows:auto 1fr; }
 
 /* ── 헤더 ── */
-header{ display:flex; align-items:center; justify-content:space-between; gap:12px;
-  padding:14px min(3vw,26px); border-bottom:2px dashed var(--line); background:var(--panel); }
-.logo{ font-weight:700; font-size:clamp(16px,2.2vw,22px); letter-spacing:-.01em; }
-.logo b{ color:var(--pink); } .logo i{ font-style:normal; color:var(--mint); }
-.hbtns{ display:flex; gap:8px; flex-wrap:wrap; }
-.btn{ font-family:inherit; font-weight:600; font-size:13px; border:none; border-radius:22px;
-  padding:10px 16px; cursor:pointer; transition:transform .12s, filter .2s; }
-.btn:active{ transform:scale(.94); }
-.btn.p{ background:var(--pink); color:#fff; box-shadow:0 4px 0 #d9稲; box-shadow:0 4px 0 #d94f83; }
-.btn.m{ background:var(--mint); color:#fff; box-shadow:0 4px 0 #3aa99b; }
-.btn.l{ background:var(--lav); color:#fff; box-shadow:0 4px 0 #7f66d1; }
+header{ display:flex; align-items:center; justify-content:space-between; gap:10px;
+  padding:11px min(2.6vw,20px); background:var(--panel); border-bottom:2px dashed var(--line); z-index:30; }
+.logo{ font-weight:700; font-size:clamp(15px,2vw,20px); letter-spacing:.01em; }
+.logo b{ color:var(--pink); } .logo i{ font-style:normal; color:var(--lav); }
+.hbtns{ display:flex; gap:7px; align-items:center; flex-wrap:wrap; }
+.btn{ font-family:inherit; font-weight:600; font-size:12.5px; border:none; border-radius:20px;
+  padding:9px 14px; cursor:pointer; color:#fff; transition:transform .12s, filter .2s; }
+.btn:active{ transform:scale(.94); } .btn:hover{ filter:brightness(1.06); }
+.btn.p{ background:var(--pink); box-shadow:0 3px 0 #d94f8c; }
+.btn.l{ background:var(--lav); box-shadow:0 3px 0 #7f66d1; }
 .btn.g{ background:#fff; color:var(--ink); border:2px solid var(--line); }
-.btn:hover{ filter:brightness(1.06); }
+.lang{ font-family:inherit; font-weight:700; font-size:11px; background:#fff; color:var(--dim);
+  border:2px solid var(--line); border-radius:18px; padding:7px 11px; cursor:pointer; }
 
-/* ── 무대 ── */
-.stage{ position:relative; overflow:hidden; display:flex; align-items:flex-end;
-  justify-content:center; padding-bottom:min(9vh,72px); transition:background .5s; }
-.stage.bg-studio{ background:radial-gradient(120% 90% at 50% 20%, #fff, var(--stage) 70%); }
-.stage.bg-stage{ background:radial-gradient(90% 70% at 50% 0%, #ffd9a8, #ff8fb1 45%, #7a4d8f 100%); }
-.stage.bg-space{ background:radial-gradient(90% 80% at 50% 25%, #4b3a8f, #1b1440 60%, #0a0820 100%); }
-.stage.bg-forest{ background:radial-gradient(90% 80% at 50% 15%, #cdf5c9, #6fc48a 55%, #2f7a52 100%); }
-/* 무대 장식 */
-.deco{ position:absolute; inset:0; pointer-events:none; }
-.deco .star{ position:absolute; width:6px; height:6px; background:#fff; border-radius:50%;
-  opacity:0; animation:tw 3s ease-in-out infinite; }
-.stage.bg-space .deco .star, .stage.bg-stage .deco .star{ opacity:.9; }
-@keyframes tw{ 0%,100%{ transform:scale(.5); opacity:.25;} 50%{ transform:scale(1.2); opacity:1;} }
-.floor{ position:absolute; left:0; right:0; bottom:0; height:26%;
-  background:linear-gradient(180deg, rgba(0,0,0,.06), rgba(0,0,0,.14)); }
-.stage.bg-space .floor, .stage.bg-stage .floor{ background:linear-gradient(180deg, rgba(255,255,255,.06), rgba(255,255,255,.14)); }
+/* ── 본체 ── */
+.main{ display:grid; grid-template-columns:1fr 292px; overflow:hidden; }
+@media(max-width:840px){ .main{ grid-template-columns:1fr 200px; } }
 
-/* 캐릭터 줄 */
-.crew{ position:relative; z-index:2; display:flex; align-items:flex-end; justify-content:center;
-  gap:clamp(4px,1.4vw,20px); padding:0 12px; width:100%; }
-.slot{ position:relative; cursor:pointer; text-align:center; }
-.slot .fig{ position:relative; width:clamp(88px,13vw,170px); }
-.slot .fig img{ width:100%; display:block; filter:drop-shadow(0 12px 10px rgba(0,0,0,.28));
-  transition:transform .35s cubic-bezier(.2,.9,.3,1.3), filter .3s; }
-.slot .fig img.swap{ animation:pop .45s cubic-bezier(.2,.9,.3,1.5); }
-@keyframes pop{ 0%{ transform:scale(.82) translateY(6px); opacity:.4; } 60%{ transform:scale(1.06);} 100%{ transform:scale(1);} }
-.slot .shadow{ position:absolute; left:50%; bottom:-6px; width:70%; height:12px;
-  transform:translateX(-50%); border-radius:50%;
-  background:radial-gradient(closest-side, rgba(0,0,0,.32), transparent 75%); }
-/* 아이들 애니메이션 */
-.slot .fig{ animation:idle 3.4s ease-in-out infinite; }
-.slot:nth-child(2) .fig{ animation-delay:-.5s; } .slot:nth-child(3) .fig{ animation-delay:-1s; }
-.slot:nth-child(4) .fig{ animation-delay:-1.6s; } .slot:nth-child(5) .fig{ animation-delay:-2.2s; }
-@keyframes idle{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(-7px);} }
-/* 포즈 */
-.slot.pose-jump .fig{ animation:jump .8s ease-in-out infinite; }
-@keyframes jump{ 0%,100%{ transform:translateY(0);} 45%{ transform:translateY(-24px) rotate(-3deg);} }
-.slot.pose-wave .fig img{ transform:rotate(-6deg); }
-.slot.pose-spin .fig img{ animation:spin 2.4s linear infinite; }
-@keyframes spin{ to{ transform:rotateY(360deg); } }
-/* 선택 */
-.slot .ring{ position:absolute; left:50%; bottom:-14px; transform:translateX(-50%) scale(.6);
-  width:78%; height:16px; border-radius:50%; border:3px solid var(--pink); opacity:0;
-  transition:opacity .25s, transform .25s; }
-.slot.sel .ring{ opacity:1; transform:translateX(-50%) scale(1); }
-.slot.sel .fig img{ filter:drop-shadow(0 12px 10px rgba(0,0,0,.28)) drop-shadow(0 0 12px rgba(255,111,165,.85)); }
-.slot .tag{ margin-top:14px; font-weight:600; font-size:clamp(10px,1.3vw,13px); color:var(--dim);
-  background:rgba(255,255,255,.72); border-radius:20px; padding:3px 10px; display:inline-block; }
-.stage.bg-space .slot .tag, .stage.bg-stage .slot .tag{ background:rgba(0,0,0,.35); color:#fff; }
-.slot.sel .tag{ background:var(--pink); color:#fff; }
-/* 말풍선 */
-.slot .bub{ position:absolute; left:50%; top:-6px; transform:translate(-50%,-100%) scale(.8);
-  background:#fff; color:var(--ink); font-family:'Gaegu','Noto Sans KR',cursive; font-weight:700;
-  font-size:14px; padding:8px 13px; border-radius:14px 14px 14px 4px; white-space:nowrap;
-  box-shadow:0 8px 20px rgba(0,0,0,.18); opacity:0; transition:.28s; pointer-events:none; z-index:3; }
-.slot .bub.on{ opacity:1; transform:translate(-50%,-100%) scale(1); }
-.slot .bub::after{ content:""; position:absolute; left:12px; bottom:-6px;
-  border:7px solid transparent; border-top-color:#fff; border-bottom:0; }
-/* 소품 */
-.slot .prop{ position:absolute; left:50%; top:-2px; transform:translateX(-50%);
-  font-size:clamp(20px,3vw,34px); z-index:2; pointer-events:none;
-  animation:idle 3.4s ease-in-out infinite; }
+/* 무대 */
+.stagewrap{ position:relative; display:grid; grid-template-rows:1fr auto; overflow:hidden; }
+.stage{ position:relative; overflow:hidden; display:grid; place-items:end center; }
+.stage .bgimg{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
+  transition:opacity .45s; }
+.stage::after{ content:""; position:absolute; inset:0;
+  background:linear-gradient(180deg, rgba(255,255,255,.06), transparent 30%, rgba(0,0,0,.10)); }
 
-/* ── 하단 컨트롤 ── */
-.dock{ background:var(--panel); border-top:2px dashed var(--line); padding:12px min(3vw,26px) 16px; }
-.tabs{ display:flex; gap:6px; margin-bottom:12px; flex-wrap:wrap; }
-.tab{ font-family:inherit; font-weight:600; font-size:12.5px; border:2px solid var(--line);
-  background:#fff; color:var(--dim); border-radius:20px; padding:7px 14px; cursor:pointer; transition:.2s; }
-.tab.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
-.rack{ display:flex; gap:10px; overflow-x:auto; padding-bottom:4px; }
-.item{ flex:0 0 auto; width:96px; border:2px solid var(--line); border-radius:16px; background:#fff;
-  padding:10px 8px; cursor:pointer; text-align:center; transition:transform .15s, border-color .2s, box-shadow .2s; }
-.item:hover{ transform:translateY(-4px); border-color:var(--pink); box-shadow:0 8px 18px rgba(255,111,165,.2); }
-.item.on{ border-color:var(--pink); background:#fff2f7; }
-.item .ico{ font-size:24px; }
-.item .nm{ margin-top:5px; font-size:11.5px; font-weight:600; color:var(--ink); }
-.item .sw{ height:26px; border-radius:8px; }
-.who{ font-size:12px; color:var(--dim); margin-bottom:8px; }
-.who b{ color:var(--pink); }
-@media(max-width:700px){ .item{ width:80px; } }
+/* 중앙 인형(선택된 1명, 크게) */
+.dollbox{ position:relative; z-index:3; height:min(78vh,calc(100% - 20px)); aspect-ratio:3/4;
+  margin-bottom:6px; }
+.dollbox img{ position:absolute; -webkit-user-drag:none; }
+.dollbox .base{ left:0; top:0; width:100%; height:100%; object-fit:contain;
+  filter:drop-shadow(0 14px 14px rgba(0,0,0,.28)); }
+.dollbox .swapfx{ animation:swapin .4s cubic-bezier(.2,.9,.3,1.3); }
+@keyframes swapin{ 0%{ opacity:0; transform:translateY(14px) scale(.94);} 100%{ opacity:1; transform:none;} }
+/* 착용 아이템(슬롯 위치는 JS의 POS가 지정) */
+.dollbox .worn{ position:absolute; cursor:grab; filter:drop-shadow(0 4px 6px rgba(0,0,0,.18)); }
+.dollbox .worn:active{ cursor:grabbing; }
+/* 드롭 하이라이트 */
+.dollbox .hint{ position:absolute; inset:-3%; border-radius:26px; opacity:0; transition:opacity .18s;
+  border:3px dashed var(--pink); background:rgba(255,111,176,.10); pointer-events:none; }
+.dollbox.armed .hint{ opacity:1; }
 
-/* 토스트 */
-.toast{ position:fixed; left:50%; bottom:120px; transform:translate(-50%,10px); z-index:50;
-  background:var(--ink); color:#fff; font-weight:600; font-size:13.5px; padding:12px 22px;
-  border-radius:24px; opacity:0; pointer-events:none; transition:.28s; }
+/* 하단 대기 줄(나머지 4명, 입은 채로) */
+.bench{ position:relative; z-index:4; display:flex; align-items:flex-end; justify-content:center;
+  gap:clamp(8px,2vw,22px); padding:10px 12px 12px; background:rgba(255,255,255,.78);
+  backdrop-filter:blur(8px); border-top:2px dashed var(--line); }
+.mini{ position:relative; width:clamp(52px,6.4vw,76px); aspect-ratio:3/4; cursor:pointer;
+  transition:transform .18s; }
+.mini:hover{ transform:translateY(-6px); }
+.mini img{ position:absolute; pointer-events:none; -webkit-user-drag:none; }
+.mini .base{ left:0; top:0; width:100%; height:100%; object-fit:contain; }
+.mini.sel{ transform:translateY(-6px); }
+.mini.sel::after{ content:""; position:absolute; left:12%; right:12%; bottom:-7px; height:4px;
+  border-radius:99px; background:var(--pink); }
+.mini .nm{ position:absolute; left:50%; bottom:-24px; transform:translateX(-50%);
+  font-size:10px; font-weight:600; color:var(--dim); white-space:nowrap; }
+.bench{ padding-bottom:26px; }
+.mini.sel .nm{ color:var(--pink); }
+
+/* ── 옷장 ── */
+.closet{ background:var(--panel); border-left:2px dashed var(--line);
+  display:grid; grid-template-rows:auto auto 1fr auto; overflow:hidden; }
+.closet h3{ padding:12px 14px 4px; font-size:13.5px; font-weight:700; }
+.closet h3 span{ color:var(--dim); font-weight:500; font-size:11px; }
+.cats{ display:flex; gap:5px; padding:8px 12px 10px; flex-wrap:wrap; }
+.cat{ font-family:inherit; font-weight:600; font-size:11.5px; border:2px solid var(--line);
+  background:#fff; color:var(--dim); border-radius:16px; padding:5px 10px; cursor:pointer; transition:.2s; }
+.cat.on{ background:var(--ink); color:#fff; border-color:var(--ink); }
+.rack{ overflow-y:auto; padding:0 12px 12px; display:grid;
+  grid-template-columns:repeat(2,1fr); gap:9px; align-content:start; }
+.chip{ position:relative; aspect-ratio:1; border:2px solid var(--line); border-radius:16px;
+  background:#fefaff; display:grid; place-items:center; cursor:grab;
+  transition:transform .12s, border-color .2s, box-shadow .2s; }
+.chip:hover{ transform:translateY(-3px); border-color:var(--pink);
+  box-shadow:0 6px 14px rgba(255,111,176,.18); }
+.chip:active{ cursor:grabbing; }
+.chip img{ width:80%; height:74%; object-fit:contain; pointer-events:none; -webkit-user-drag:none; }
+.chip.bgchip img{ width:88%; height:78%; object-fit:cover; border-radius:10px; }
+.chip .nm{ position:absolute; left:2px; right:2px; bottom:3px; text-align:center;
+  font-size:9.5px; font-weight:600; color:var(--dim); }
+.chip.on{ border-color:var(--pink); background:#fff2f8; }
+.hintbar{ padding:8px 13px 10px; font-size:10.5px; line-height:1.5; color:var(--dim);
+  border-top:1px dashed var(--line); }
+
+/* 드래그 고스트 */
+.ghost{ position:fixed; z-index:99; pointer-events:none; width:120px; height:120px;
+  transform:translate(-50%,-55%) scale(1.08); filter:drop-shadow(0 10px 16px rgba(0,0,0,.28)); }
+.ghost img{ width:100%; height:100%; object-fit:contain; }
+
+.toast{ position:fixed; left:50%; bottom:110px; transform:translate(-50%,10px); z-index:60;
+  background:var(--ink); color:#fff; font-weight:600; font-size:13px; padding:11px 20px;
+  border-radius:22px; opacity:0; pointer-events:none; transition:.28s; }
 .toast.on{ opacity:1; transform:translate(-50%,0); }
-.lang{ font-family:inherit; font-weight:700; font-size:11.5px; background:#fff; color:var(--dim);
-  border:2px solid var(--line); border-radius:20px; padding:8px 12px; cursor:pointer; }
 body.anim-paused *{ animation-play-state:paused !important; }
 </style>
 </head>
@@ -137,31 +128,33 @@ body.anim-paused *{ animation-play-state:paused !important; }
 <div class="app">
 
   <header>
-    <div class="logo"><b>CREW</b> <i>CLOSET</i> · <span data-i18n>5인 코디</span></div>
+    <div class="logo"><b>Y2K</b> <i>CLOSET</i> · <span data-i18n>스타 스타일리스트</span></div>
     <div class="hbtns">
-      <button class="btn m" id="randomBtn" data-i18n>🎲 전체 랜덤</button>
-      <button class="btn l" id="allBtn" data-i18n>👥 전체 선택</button>
-      <button class="btn p" id="shotBtn" data-i18n>📸 단체사진</button>
-      <button class="btn g" id="resetBtn" data-i18n>↺ 초기화</button>
+      <button class="btn l" id="randomBtn" data-i18n>🎲 랜덤 코디</button>
+      <button class="btn p" id="shotBtn" data-i18n>📸 화보 촬영</button>
+      <button class="btn g" id="resetBtn" data-i18n>↺ 벗기기</button>
       <button class="lang" id="lang">EN</button>
     </div>
   </header>
 
-  <div class="stage bg-studio" id="stage">
-    <div class="deco" id="deco"></div>
-    <div class="floor"></div>
-    <div class="crew" id="crew"></div>
-  </div>
-
-  <div class="dock">
-    <div class="who" id="who"></div>
-    <div class="tabs" id="tabs">
-      <button class="tab on" data-tab="outfit" data-i18n>👗 의상</button>
-      <button class="tab" data-tab="prop" data-i18n>🎁 소품</button>
-      <button class="tab" data-tab="pose" data-i18n>🕺 포즈</button>
-      <button class="tab" data-tab="bg" data-i18n>🌈 무대</button>
+  <div class="main">
+    <div class="stagewrap">
+      <div class="stage" id="stage">
+        <img class="bgimg" id="bgimg" src="../assets/gen/y2-bg-bedroom.jpg" alt="">
+        <div class="dollbox" id="dollbox">
+          <div class="hint"></div>
+          <img class="base" id="dollBase" src="../assets/gen/y2-doll-1.png" alt="doll">
+        </div>
+      </div>
+      <div class="bench" id="bench"></div>
     </div>
-    <div class="rack" id="rack"></div>
+
+    <aside class="closet">
+      <h3 data-i18n>옷장 <span>· 끌어서 입히기</span></h3>
+      <div class="cats" id="cats"></div>
+      <div class="rack" id="rack"></div>
+      <div class="hintbar" data-i18n>아이템을 가운데 인형 위로 끌어 놓으면 입고, 입은 아이템을 밖으로 끌면 벗어요. 아래 친구를 누르면 교체!</div>
+    </aside>
   </div>
 </div>
 
@@ -171,199 +164,222 @@ body.anim-paused *{ animation-play-state:paused !important; }
 (function(){
 "use strict";
 
-/* ── 캐릭터 ── */
-var CHARS=[
-  { id:'girl', ko:'로지',  en:'Rosie', line:{ko:'오늘 나 어때? ✨', en:'How do I look? ✨'} },
-  { id:'boy',  ko:'테오',  en:'Theo',  line:{ko:'음… 이게 나은가?', en:'Hmm… is this better?'} },
-  { id:'cat',  ko:'모모',  en:'Momo',  line:{ko:'냥! 마음에 들어!', en:'Meow! I love it!'} },
-  { id:'bot',  ko:'삐용',  en:'Bee',   line:{ko:'삐- 코디 완료.', en:'Beep- outfit set.'} },
-  { id:'gran', ko:'봄자',  en:'Nana',  line:{ko:'아이고 예쁘다~', en:'Oh my, lovely~'} }
+/* ── 데이터 ── */
+var DOLLS=[
+  { id:1, ko:'하니', en:'Hani' },
+  { id:2, ko:'루아', en:'Rua' },
+  { id:3, ko:'제니스', en:'Zenith' },
+  { id:4, ko:'미오', en:'Mio' },
+  { id:5, ko:'설', en:'Seol' }
 ];
-var OUTFITS=[
-  { id:'casual',  ko:'캐주얼', en:'Casual',  ico:'👕' },
-  { id:'formal',  ko:'포멀',   en:'Formal',  ico:'🎩' },
-  { id:'costume', ko:'코스튬', en:'Costume', ico:'🦸' }
-];
-var PROPS=[
-  { id:'',        ko:'없음',   en:'None',    ico:'🚫' },
-  { id:'🎈',      ko:'풍선',   en:'Balloon', ico:'🎈' },
-  { id:'🍦',      ko:'아이스크림', en:'Ice cream', ico:'🍦' },
-  { id:'🎸',      ko:'기타',   en:'Guitar',  ico:'🎸' },
-  { id:'👑',      ko:'왕관',   en:'Crown',   ico:'👑' },
-  { id:'🌸',      ko:'꽃',     en:'Flower',  ico:'🌸' },
-  { id:'⭐',      ko:'별',     en:'Star',    ico:'⭐' }
-];
-var POSES=[
-  { id:'',      ko:'기본', en:'Idle',  ico:'🧍' },
-  { id:'jump',  ko:'점프', en:'Jump',  ico:'⬆️' },
-  { id:'wave',  ko:'인사', en:'Wave',  ico:'👋' },
-  { id:'spin',  ko:'회전', en:'Spin',  ico:'🔄' }
+/* slot: hair | top | bot | shoe | acc  /  pos: 인형 박스 기준 % (left, top, width) */
+var ITEMS=[
+  { id:'hair-blonde',   slot:'hair', ko:'블론드 롱',    en:'Blonde long',   pos:{l:32,t:-3.5,w:36} },
+  { id:'hair-buns',     slot:'hair', ko:'스페이스 번',  en:'Space buns',    pos:{l:34,t:-4.5,w:32} },
+  { id:'hair-pinkbob',  slot:'hair', ko:'핑크 밥',      en:'Pink bob',      pos:{l:34,t:-3.5,w:32} },
+  { id:'hair-twintails',slot:'hair', ko:'트윈테일',     en:'Twin tails',    pos:{l:29,t:-3.5,w:42} },
+  { id:'hair-shag',     slot:'hair', ko:'카퍼 샤기',    en:'Copper shag',   pos:{l:32,t:-3.5,w:36} },
+  { id:'top-cami',      slot:'top',  ko:'하트 캐미',    en:'Heart cami',    pos:{l:36,t:17.5,w:28} },
+  { id:'top-hoodie',    slot:'top',  ko:'벨루어 후디',  en:'Velour hoodie', pos:{l:29,t:18,w:42} },
+  { id:'top-babytee',   slot:'top',  ko:'버터플라이 티',en:'Butterfly tee', pos:{l:32,t:18.5,w:36} },
+  { id:'top-denim',     slot:'top',  ko:'데님 자켓',    en:'Denim jacket',  pos:{l:29,t:18,w:42} },
+  { id:'top-halter',    slot:'top',  ko:'홀터 탑',      en:'Halter top',    pos:{l:35,t:18,w:30} },
+  { id:'bot-jeans',     slot:'bot',  ko:'로라이즈 진',  en:'Low-rise jeans',pos:{l:31,t:40,w:38} },
+  { id:'bot-mini',      slot:'bot',  ko:'플리츠 미니',  en:'Pleated mini',  pos:{l:33,t:40.5,w:34} },
+  { id:'bot-cargo',     slot:'bot',  ko:'카고 스커트',  en:'Cargo skirt',   pos:{l:31,t:40,w:38} },
+  { id:'bot-track',     slot:'bot',  ko:'트랙 팬츠',    en:'Track pants',   pos:{l:31,t:40,w:38} },
+  { id:'shoe-sneaker',  slot:'shoe', ko:'플랫폼 스니커즈', en:'Platform kicks', pos:{l:38,t:88,w:24} },
+  { id:'shoe-boots',    slot:'shoe', ko:'플랫폼 부츠',  en:'Platform boots',pos:{l:38,t:87,w:24} },
+  { id:'shoe-jelly',    slot:'shoe', ko:'젤리 샌들',    en:'Jelly sandals', pos:{l:38,t:89,w:24} },
+  { id:'acc-shades',    slot:'acc',  ko:'틴트 선글라스',en:'Tinted shades', pos:{l:42,t:8.5,w:16} },
+  { id:'acc-chain',     slot:'acc',  ko:'체인 목걸이',  en:'Chunky chain',  pos:{l:42,t:14.5,w:16} },
+  { id:'acc-bag',       slot:'acc',  ko:'바게트 백',    en:'Baguette bag',  pos:{l:62,t:36,w:20} },
+  { id:'acc-bucket',    slot:'acc',  ko:'퍼지 버킷햇',  en:'Fuzzy bucket',  pos:{l:36,t:-2,w:28} }
 ];
 var BGS=[
-  { id:'studio', ko:'스튜디오', en:'Studio', sw:'linear-gradient(160deg,#fff,#ffe9f2)' },
-  { id:'stage',  ko:'무대',     en:'Stage',  sw:'linear-gradient(160deg,#ffd9a8,#ff8fb1 45%,#7a4d8f)' },
-  { id:'space',  ko:'우주',     en:'Space',  sw:'linear-gradient(160deg,#4b3a8f,#1b1440 60%,#0a0820)' },
-  { id:'forest', ko:'숲',       en:'Forest', sw:'linear-gradient(160deg,#cdf5c9,#6fc48a 55%,#2f7a52)' }
+  { id:'bedroom',  ko:'Y2K 침실',   en:'Y2K bedroom' },
+  { id:'purikura', ko:'스티커 부스',en:'Purikura' },
+  { id:'mall',     ko:'쇼핑몰',     en:'Mall' },
+  { id:'rooftop',  ko:'노을 옥상',  en:'Rooftop' },
+  { id:'neon',     ko:'네온 거리',  en:'Neon street' }
 ];
+var CATS=[
+  { id:'hair', ko:'헤어', en:'Hair' },
+  { id:'top',  ko:'상의', en:'Tops' },
+  { id:'bot',  ko:'하의', en:'Bottoms' },
+  { id:'shoe', ko:'신발', en:'Shoes' },
+  { id:'acc',  ko:'액세서리', en:'Acc' },
+  { id:'bg',   ko:'배경', en:'BG' }
+];
+function itemById(id){ for(var i=0;i<ITEMS.length;i++) if(ITEMS[i].id===id) return ITEMS[i]; return null; }
 
 /* ── 상태 ── */
-var state=CHARS.map(function(){ return { outfit:'casual', prop:'', pose:'' }; });
-var sel=[0];                 // 선택된 캐릭터 인덱스들
-var tab='outfit', bg='studio';
+var worn=DOLLS.map(function(){ return {}; });   /* worn[i][slot]=itemId */
+var sel=0, cat='hair', bg='bedroom';
 
-/* ── 무대 별 장식 ── */
-var deco=document.getElementById('deco');
-for(var i=0;i<26;i++){
-  var s=document.createElement('span'); s.className='star';
-  s.style.left=(Math.random()*100)+'%'; s.style.top=(Math.random()*70)+'%';
-  s.style.animationDelay=(Math.random()*3)+'s';
-  s.style.width=s.style.height=(3+Math.random()*4)+'px';
-  deco.appendChild(s);
+/* ── 인형 렌더(중앙/미니 공용) ── */
+function renderInto(container, dollIdx, big){
+  container.querySelectorAll('.worn,.witem').forEach(function(n){ n.remove(); });
+  var baseImg=container.querySelector('.base');
+  baseImg.src='../assets/gen/y2-doll-'+DOLLS[dollIdx].id+'.png';
+  var order=['shoe','bot','top','hair','acc'];   /* 뒤→앞 */
+  order.forEach(function(slot){
+    var id=worn[dollIdx][slot]; if(!id) return;
+    var it=itemById(id); if(!it) return;
+    var img=document.createElement('img');
+    img.className= big ? 'worn' : 'witem';
+    img.src='../assets/gen/y2-'+it.id+'.png';
+    img.style.left=it.pos.l+'%';
+    img.style.top=it.pos.t+'%';
+    img.style.width=it.pos.w+'%';
+    if(big){ img.dataset.slot=slot; img.dataset.item=id; }
+    else{ img.style.position='absolute'; img.style.pointerEvents='none'; }
+    container.appendChild(img);
+  });
 }
-
-/* ── 캐릭터 렌더 ── */
-var crew=document.getElementById('crew');
-CHARS.forEach(function(c,i){
-  crew.insertAdjacentHTML('beforeend',
-    '<div class="slot" data-i="'+i+'">'+
-      '<div class="bub" id="bub'+i+'"></div>'+
-      '<div class="prop" id="prop'+i+'"></div>'+
-      '<div class="fig"><img id="img'+i+'" src="../assets/gen/dz-'+c.id+'-casual.png" alt="'+c.en+'"></div>'+
-      '<div class="shadow"></div><div class="ring"></div>'+
-      '<div class="tag" id="tag'+i+'">'+c.ko+'</div>'+
-    '</div>');
+var dollbox=document.getElementById('dollbox');
+function renderMain(fx){
+  renderInto(dollbox, sel, true);
+  if(fx){ var b=dollbox.querySelector('.base'); b.classList.remove('swapfx'); void b.offsetWidth; b.classList.add('swapfx'); }
+}
+function renderBench(){
+  var bench=document.getElementById('bench'); bench.innerHTML='';
+  DOLLS.forEach(function(d,i){
+    var m=document.createElement('div');
+    m.className='mini'+(i===sel?' sel':''); m.dataset.i=i;
+    m.innerHTML='<img class="base" src="../assets/gen/y2-doll-'+d.id+'.png">'+
+      '<div class="nm">'+(EN?d.en:d.ko)+'</div>';
+    bench.appendChild(m);
+    renderInto(m, i, false);
+  });
+}
+document.getElementById('bench').addEventListener('click', function(e){
+  var m=e.target.closest('.mini'); if(!m) return;
+  sel=+m.dataset.i; renderMain(true); renderBench(); renderRack();
 });
 
-function paint(i, animate){
-  var c=CHARS[i], st=state[i];
-  var img=document.getElementById('img'+i);
-  var src='../assets/gen/dz-'+c.id+'-'+st.outfit+'.png';
-  if(img.getAttribute('src')!==src){
-    img.setAttribute('src',src);
-    if(animate){ img.classList.remove('swap'); void img.offsetWidth; img.classList.add('swap'); }
-  }
-  document.getElementById('prop'+i).textContent=st.prop;
-  var slot=crew.children[i];
-  slot.className='slot'+(sel.indexOf(i)>=0?' sel':'')+(st.pose?' pose-'+st.pose:'');
-  document.getElementById('tag'+i).textContent=EN?c.en:c.ko;
+/* ── 옷장 ── */
+function renderCats(){
+  document.getElementById('cats').innerHTML=CATS.map(function(c){
+    return '<button class="cat'+(cat===c.id?' on':'')+'" data-c="'+c.id+'">'+(EN?c.en:c.ko)+'</button>';
+  }).join('');
 }
-function paintAll(a){ CHARS.forEach(function(_,i){ paint(i,a); }); updWho(); }
-
-/* 캐릭터 선택 */
-crew.addEventListener('click', function(e){
-  var s=e.target.closest('.slot'); if(!s) return;
-  var i=+s.dataset.i;
-  sel=[i];
-  paintAll(false);
-  say(i);
-});
-function say(i){
-  var b=document.getElementById('bub'+i);
-  b.textContent=EN?CHARS[i].line.en:CHARS[i].line.ko;
-  b.classList.add('on');
-  clearTimeout(b._t); b._t=setTimeout(function(){ b.classList.remove('on'); },1800);
-}
-
-/* ── 탭 & 랙 ── */
-document.getElementById('tabs').addEventListener('click', function(e){
-  var t=e.target.closest('.tab'); if(!t) return;
-  tab=t.dataset.tab;
-  document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on', x===t); });
-  renderRack();
-});
 function renderRack(){
-  var rack=document.getElementById('rack'); rack.innerHTML='';
-  var cur = sel.length===1 ? state[sel[0]] : null;
-  if(tab==='outfit'){
-    OUTFITS.forEach(function(o){
-      var on = cur && cur.outfit===o.id;
-      rack.insertAdjacentHTML('beforeend','<div class="item'+(on?' on':'')+'" data-v="'+o.id+'"><div class="ico">'+o.ico+'</div><div class="nm">'+(EN?o.en:o.ko)+'</div></div>');
-    });
-  } else if(tab==='prop'){
-    PROPS.forEach(function(p){
-      var on = cur && cur.prop===p.id;
-      rack.insertAdjacentHTML('beforeend','<div class="item'+(on?' on':'')+'" data-v="'+p.id+'"><div class="ico">'+p.ico+'</div><div class="nm">'+(EN?p.en:p.ko)+'</div></div>');
-    });
-  } else if(tab==='pose'){
-    POSES.forEach(function(p){
-      var on = cur && cur.pose===p.id;
-      rack.insertAdjacentHTML('beforeend','<div class="item'+(on?' on':'')+'" data-v="'+p.id+'"><div class="ico">'+p.ico+'</div><div class="nm">'+(EN?p.en:p.ko)+'</div></div>');
-    });
-  } else {
-    BGS.forEach(function(b){
-      rack.insertAdjacentHTML('beforeend','<div class="item'+(bg===b.id?' on':'')+'" data-v="'+b.id+'"><div class="sw" style="background:'+b.sw+'"></div><div class="nm">'+(EN?b.en:b.ko)+'</div></div>');
-    });
+  var rack=document.getElementById('rack');
+  if(cat==='bg'){
+    rack.innerHTML=BGS.map(function(b){
+      return '<div class="chip bgchip'+(bg===b.id?' on':'')+'" data-bg="'+b.id+'">'+
+        '<img src="../assets/gen/y2-bg-'+b.id+'.jpg"><div class="nm">'+(EN?b.en:b.ko)+'</div></div>';
+    }).join('');
+    return;
   }
+  rack.innerHTML=ITEMS.filter(function(i){ return i.slot===cat; }).map(function(it){
+    var on = worn[sel][it.slot]===it.id;
+    return '<div class="chip'+(on?' on':'')+'" data-item="'+it.id+'">'+
+      '<img src="../assets/gen/y2-'+it.id+'.png"><div class="nm">'+(EN?it.en:it.ko)+'</div></div>';
+  }).join('');
 }
+document.getElementById('cats').addEventListener('click', function(e){
+  var b=e.target.closest('.cat'); if(!b) return; cat=b.dataset.c; renderCats(); renderRack();
+});
 document.getElementById('rack').addEventListener('click', function(e){
-  var it=e.target.closest('.item'); if(!it) return;
-  var v=it.dataset.v;
-  if(tab==='bg'){
-    bg=v;
-    document.getElementById('stage').className='stage bg-'+bg;
-  } else {
-    sel.forEach(function(i){
-      if(tab==='outfit') state[i].outfit=v;
-      else if(tab==='prop') state[i].prop=v;
-      else if(tab==='pose') state[i].pose=v;
-      paint(i,true);
-    });
-    if(sel.length===1) say(sel[0]);
-  }
-  renderRack(); updWho();
+  var bgc=e.target.closest('[data-bg]');
+  if(bgc){ bg=bgc.dataset.bg; document.getElementById('bgimg').src='../assets/gen/y2-bg-'+bg+'.jpg'; renderRack(); }
 });
 
-/* ── 헤더 버튼 ── */
-document.getElementById('allBtn').addEventListener('click', function(){
-  sel = sel.length===CHARS.length ? [0] : CHARS.map(function(_,i){ return i; });
-  paintAll(false); renderRack(); updWho();
-  toast(sel.length>1 ? (EN?'All 5 selected — style them together!':'5명 전체 선택 — 한 번에 코디돼요!')
-                     : (EN?'Single select':'개별 선택'));
+/* ── 드래그 착용/해제 ── */
+var drag=null, ghost=null, moved=false;
+function makeGhost(id){
+  ghost=document.createElement('div'); ghost.className='ghost';
+  ghost.innerHTML='<img src="../assets/gen/y2-'+id+'.png">';
+  document.body.appendChild(ghost);
+}
+function moveGhost(x,y){ if(ghost){ ghost.style.left=x+'px'; ghost.style.top=y+'px'; } }
+function killGhost(){ if(ghost){ ghost.remove(); ghost=null; } }
+function overDoll(x,y){
+  var r=dollbox.getBoundingClientRect();
+  return x>=r.left-24 && x<=r.right+24 && y>=r.top-24 && y<=r.bottom+24;
+}
+/* 옷장에서 집기 */
+document.getElementById('rack').addEventListener('pointerdown', function(e){
+  var c=e.target.closest('.chip[data-item]'); if(!c) return;
+  e.preventDefault();
+  var it=itemById(c.dataset.item);
+  drag={ id:it.id, slot:it.slot, from:null }; moved=false;
+  makeGhost(it.id); moveGhost(e.clientX,e.clientY);
 });
+/* 인형에서 벗기기 */
+dollbox.addEventListener('pointerdown', function(e){
+  var w=e.target.closest('.worn'); if(!w) return;
+  e.preventDefault();
+  drag={ id:w.dataset.item, slot:w.dataset.slot, from:sel }; moved=false;
+  delete worn[sel][w.dataset.slot];
+  renderMain(false); renderBench();
+  makeGhost(drag.id); moveGhost(e.clientX,e.clientY);
+});
+addEventListener('pointermove', function(e){
+  if(!drag) return; moved=true;
+  moveGhost(e.clientX,e.clientY);
+  dollbox.classList.toggle('armed', overDoll(e.clientX,e.clientY));
+});
+addEventListener('pointerup', function(e){
+  if(!drag) return;
+  var dropOn=overDoll(e.clientX,e.clientY);
+  if(dropOn || (!moved && drag.from===null)){        /* 클릭만 해도 착용 */
+    worn[sel][drag.slot]=drag.id;
+    renderMain(false); renderBench(); renderRack();
+  } else if(drag.from!=null){
+    toast(EN?'Took it off':'벗었어요');
+    renderRack();
+  }
+  dollbox.classList.remove('armed');
+  killGhost(); drag=null;
+});
+
+/* ── 버튼 ── */
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)].id; }
 document.getElementById('randomBtn').addEventListener('click', function(){
-  state.forEach(function(st){
-    st.outfit=OUTFITS[Math.floor(Math.random()*OUTFITS.length)].id;
-    st.prop=PROPS[Math.floor(Math.random()*PROPS.length)].id;
-    st.pose=POSES[Math.floor(Math.random()*POSES.length)].id;
+  var hair=ITEMS.filter(function(i){return i.slot==='hair';});
+  var top =ITEMS.filter(function(i){return i.slot==='top';});
+  var bot =ITEMS.filter(function(i){return i.slot==='bot';});
+  var shoe=ITEMS.filter(function(i){return i.slot==='shoe';});
+  var acc =ITEMS.filter(function(i){return i.slot==='acc';});
+  worn=DOLLS.map(function(){
+    var w={ hair:pick(hair), top:pick(top), bot:pick(bot), shoe:pick(shoe) };
+    if(Math.random()<.6) w.acc=pick(acc);
+    return w;
   });
   bg=BGS[Math.floor(Math.random()*BGS.length)].id;
-  document.getElementById('stage').className='stage bg-'+bg;
-  paintAll(true); renderRack();
-  toast(EN?'Randomised the whole crew! 🎲':'전체 랜덤 코디 완성! 🎲');
+  document.getElementById('bgimg').src='../assets/gen/y2-bg-'+bg+'.jpg';
+  renderMain(true); renderBench(); renderRack();
+  toast(EN?'Random fits for everyone! 🎲':'모두 랜덤 코디 완성! 🎲');
 });
 document.getElementById('resetBtn').addEventListener('click', function(){
-  state.forEach(function(st){ st.outfit='casual'; st.prop=''; st.pose=''; });
-  bg='studio'; sel=[0];
-  document.getElementById('stage').className='stage bg-studio';
-  paintAll(true); renderRack();
-  toast(EN?'Reset':'초기화했어요');
+  worn[sel]={};
+  renderMain(true); renderBench(); renderRack();
+  toast(EN?'Undressed':'다 벗었어요');
 });
 document.getElementById('shotBtn').addEventListener('click', function(){
-  CHARS.forEach(function(_,i){ setTimeout(function(){ say(i); }, i*140); });
   var st=document.getElementById('stage');
-  st.animate([{filter:'brightness(1)'},{filter:'brightness(2.4)'},{filter:'brightness(1)'}],{duration:420});
-  toast(EN?'📸 Cheese! Say hi, everyone!':'📸 김치! 다 같이 인사~');
+  st.animate([{filter:'brightness(1)'},{filter:'brightness(2.2)'},{filter:'brightness(1)'}],{duration:420});
+  toast(EN?'📸 Gorgeous!':'📸 완벽한 화보!');
 });
 
-function updWho(){
-  var el=document.getElementById('who');
-  if(sel.length>1){ el.innerHTML=(EN?'Styling: ':'코디 중: ')+'<b>'+(EN?'ALL 5':'전체 5명')+'</b>'; }
-  else{ var c=CHARS[sel[0]]; el.innerHTML=(EN?'Styling: ':'코디 중: ')+'<b>'+(EN?c.en:c.ko)+'</b>'; }
-}
 var tT=null;
 function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on');
-  clearTimeout(tT); tT=setTimeout(function(){ t.classList.remove('on'); },2000); }
+  clearTimeout(tT); tT=setTimeout(function(){ t.classList.remove('on'); },1900); }
 
-/* 썸네일 성능 */
 setInterval(function(){ var p=!!window.__paused;
   if(p!==document.body.classList.contains('anim-paused')) document.body.classList.toggle('anim-paused',p);
 },450);
 
 /* ── 언어 ── */
 var STR={
-  '5인 코디':'5-crew styling',
-  '🎲 전체 랜덤':'🎲 Random all','👥 전체 선택':'👥 Select all','📸 단체사진':'📸 Group photo','↺ 초기화':'↺ Reset',
-  '👗 의상':'👗 Outfit','🎁 소품':'🎁 Prop','🕺 포즈':'🕺 Pose','🌈 무대':'🌈 Stage'
+  '스타 스타일리스트':'star stylist',
+  '🎲 랜덤 코디':'🎲 Random fits','📸 화보 촬영':'📸 Photo shoot','↺ 벗기기':'↺ Undress',
+  '옷장 <span>· 끌어서 입히기</span>':'Closet <span>· drag to dress</span>',
+  '아이템을 가운데 인형 위로 끌어 놓으면 입고, 입은 아이템을 밖으로 끌면 벗어요. 아래 친구를 누르면 교체!':
+    'Drag an item onto the doll to wear it, drag a worn item away to remove it. Tap a friend below to switch!'
 };
 var EN=new URLSearchParams(location.search).get('lang')==='en';
 var orig=new WeakMap();
@@ -375,12 +391,21 @@ function applyLang(){
   });
   document.getElementById('lang').textContent=EN?'KO':'EN';
   document.documentElement.lang=EN?'en':'ko';
-  if(EN) document.title='CREW CLOSET — dress five characters at once';
-  paintAll(false); renderRack();
+  if(EN) document.title='Y2K CLOSET — drag-and-drop dress-up studio';
+  renderCats(); renderRack(); renderBench();
 }
 document.getElementById('lang').addEventListener('click',function(){ EN=!EN; applyLang(); });
+
+/* 초기 코디: 시작부터 예쁘게 입혀 둔다 */
+worn=[
+  { hair:'hair-blonde',   top:'top-cami',    bot:'bot-jeans', shoe:'shoe-sneaker' },
+  { hair:'hair-pinkbob',  top:'top-hoodie',  bot:'bot-mini',  shoe:'shoe-boots' },
+  { hair:'hair-twintails',top:'top-babytee', bot:'bot-track', shoe:'shoe-sneaker', acc:'acc-shades' },
+  { hair:'hair-buns',     top:'top-halter',  bot:'bot-cargo', shoe:'shoe-jelly',  acc:'acc-chain' },
+  { hair:'hair-shag',     top:'top-denim',   bot:'bot-jeans', shoe:'shoe-boots',  acc:'acc-bag' }
+];
 applyLang();
-setTimeout(function(){ say(0); }, 700);
+renderMain(true);
 })();
 </script>
 </body>
