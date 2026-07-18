@@ -50,10 +50,14 @@ header{ display:flex; align-items:center; justify-content:space-between; gap:10p
 /* 무대 */
 .stagewrap{ position:relative; display:grid; grid-template-rows:1fr auto; overflow:hidden; }
 .stage{ position:relative; overflow:hidden; display:grid; place-items:end center; }
-.stage .bgimg{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover;
-  transition:opacity .45s; }
-.stage::after{ content:""; position:absolute; inset:0;
-  background:linear-gradient(180deg, rgba(255,255,255,.06), transparent 30%, rgba(0,0,0,.10)); }
+/* 배경: 이미지 대신 단순한 CSS 배경(그라디언트·패턴) — 소품이 없어 인형과 크기 충돌이 없다 */
+.stage .bgimg{ position:absolute; inset:0; transition:background .45s; }
+/* 조작 안내(드래그 중엔 크기 조절 안내로 바뀜) */
+.stagehint{ position:absolute; left:12px; top:10px; z-index:5; font-size:11.5px; font-weight:600;
+  color:var(--ink); background:rgba(255,255,255,.82); backdrop-filter:blur(4px);
+  border:2px solid var(--line); border-radius:14px; padding:6px 12px; pointer-events:none;
+  transition:.2s; }
+.stagehint.drag{ background:var(--ink); color:#fff; border-color:var(--ink); }
 
 /* 중앙 인형(선택된 1명, 크게) */
 .dollbox{ position:relative; z-index:3; height:min(78vh,calc(100% - 20px)); aspect-ratio:3/4;
@@ -66,10 +70,6 @@ header{ display:flex; align-items:center; justify-content:space-between; gap:10p
 /* 착용 아이템(슬롯 위치는 JS의 POS가 지정) */
 .dollbox .worn{ position:absolute; cursor:grab; filter:drop-shadow(0 4px 6px rgba(0,0,0,.18)); }
 .dollbox .worn:active{ cursor:grabbing; }
-/* 드롭 하이라이트 */
-.dollbox .hint{ position:absolute; inset:-3%; border-radius:26px; opacity:0; transition:opacity .18s;
-  border:3px dashed var(--pink); background:rgba(255,111,176,.10); pointer-events:none; }
-.dollbox.armed .hint{ opacity:1; }
 
 /* 하단 대기 줄(나머지 4명, 입은 채로) */
 .bench{ position:relative; z-index:4; display:flex; align-items:flex-end; justify-content:center;
@@ -106,7 +106,7 @@ header{ display:flex; align-items:center; justify-content:space-between; gap:10p
   box-shadow:0 6px 14px rgba(255,111,176,.18); }
 .chip:active{ cursor:grabbing; }
 .chip img{ width:80%; height:74%; object-fit:contain; pointer-events:none; -webkit-user-drag:none; }
-.chip.bgchip img{ width:88%; height:78%; object-fit:cover; border-radius:10px; }
+.chip .bgprev{ width:88%; height:74%; border-radius:10px; border:1px solid var(--line); pointer-events:none; }
 .chip .nm{ position:absolute; left:2px; right:2px; bottom:3px; text-align:center;
   font-size:9.5px; font-weight:600; color:var(--dim); }
 .chip.on{ border-color:var(--pink); background:#fff2f8; }
@@ -118,6 +118,25 @@ header{ display:flex; align-items:center; justify-content:space-between; gap:10p
   filter:drop-shadow(0 10px 16px rgba(0,0,0,.28)); }
 .ghost img{ display:block; width:100%; height:auto; }
 
+/* 화보(폴라로이드) 모달 */
+.shot{ position:fixed; inset:0; z-index:70; background:rgba(58,47,69,.5); backdrop-filter:blur(5px);
+  display:none; place-items:center; }
+.shot.on{ display:grid; }
+.pol{ position:relative; background:#fff; padding:14px 14px 52px; border-radius:6px;
+  box-shadow:0 24px 60px rgba(0,0,0,.35); transform:rotate(-2deg);
+  animation:polin .45s cubic-bezier(.2,.9,.3,1.25); }
+@keyframes polin{ 0%{ opacity:0; transform:rotate(-2deg) translateY(30px) scale(.9);} 100%{ opacity:1; transform:rotate(-2deg);} }
+.pol canvas{ display:block; width:min(60vw,340px); height:auto; border-radius:3px; }
+.pol .bub{ position:absolute; right:-26px; top:26px; max-width:190px; background:#fff; color:var(--ink);
+  font-weight:600; font-size:13.5px; line-height:1.45; padding:11px 15px; border-radius:16px;
+  border:2.5px solid var(--ink); transform:rotate(2deg); box-shadow:0 6px 14px rgba(0,0,0,.18); }
+.pol .bub::after{ content:""; position:absolute; left:-11px; bottom:14px; width:16px; height:16px;
+  background:#fff; border-left:2.5px solid var(--ink); border-bottom:2.5px solid var(--ink);
+  transform:rotate(45deg); }
+.pol .cap{ position:absolute; left:0; right:0; bottom:14px; text-align:center;
+  font-size:13px; font-weight:600; color:#8a7d97; letter-spacing:.06em; }
+.shotx{ position:absolute; right:-14px; top:-14px; width:34px; height:34px; border-radius:50%;
+  border:none; background:var(--ink); color:#fff; font-size:15px; cursor:pointer; }
 .toast{ position:fixed; left:50%; bottom:110px; transform:translate(-50%,10px); z-index:60;
   background:var(--ink); color:#fff; font-weight:600; font-size:13px; padding:11px 20px;
   border-radius:22px; opacity:0; pointer-events:none; transition:.28s; }
@@ -141,9 +160,9 @@ body.anim-paused *{ animation-play-state:paused !important; }
   <div class="main">
     <div class="stagewrap">
       <div class="stage" id="stage">
-        <img class="bgimg" id="bgimg" src="../assets/gen/y2-bg-bedroom.jpg" alt="">
+        <div class="bgimg" id="bgimg"></div>
+        <div class="stagehint" id="stagehint" data-i18n>🖱 끌어서 입히기 · 입은 옷 위에서 휠 = 크기 조절 · 밖으로 끌면 벗어요</div>
         <div class="dollbox" id="dollbox">
-          <div class="hint"></div>
           <img class="base" id="dollBase" src="../assets/gen/y2-doll-1.png" alt="doll">
         </div>
       </div>
@@ -156,6 +175,16 @@ body.anim-paused *{ animation-play-state:paused !important; }
       <div class="rack" id="rack"></div>
       <div class="hintbar" data-i18n>아이템을 끌어 원하는 자리에 놓으면 그 자리에 입어요. 입은 아이템은 끌어서 옮기고, 밖으로 끌면 벗고, 휠을 굴리면 크기 조절! 아래 친구를 누르면 교체.</div>
     </aside>
+  </div>
+</div>
+
+<!-- 화보 모달 -->
+<div class="shot" id="shot">
+  <div class="pol">
+    <button class="shotx" id="shotClose">✕</button>
+    <canvas id="shotCv" width="540" height="720"></canvas>
+    <div class="bub" id="shotBub"></div>
+    <div class="cap" id="shotCap"></div>
   </div>
 </div>
 
@@ -197,13 +226,24 @@ var ITEMS=[
   { id:'acc-bag',       slot:'acc',  ko:'바게트 백',    en:'Baguette bag',  pos:{l:62,t:36,w:20} },
   { id:'acc-bucket',    slot:'acc',  ko:'퍼지 버킷햇',  en:'Fuzzy bucket',  pos:{l:36,t:-2,w:28} }
 ];
+/* 배경: 소품 없는 단순 배경(벽+바닥 또는 균일 패턴) — 인형과 크기 비교될 물건이 없다.
+   c1/c2 는 화보 캔버스에 쓰는 대표색 */
 var BGS=[
-  { id:'bedroom',  ko:'Y2K 침실',   en:'Y2K bedroom' },
-  { id:'purikura', ko:'스티커 부스',en:'Purikura' },
-  { id:'mall',     ko:'쇼핑몰',     en:'Mall' },
-  { id:'rooftop',  ko:'노을 옥상',  en:'Rooftop' },
-  { id:'neon',     ko:'네온 거리',  en:'Neon street' }
+  { id:'studio', ko:'핑크 스튜디오', en:'Pink studio', c1:'#ffe6f3', c2:'#f3aed4',
+    css:'linear-gradient(180deg,#ffe6f3 0%,#ffd3e9 62%,#f3aed4 62%,#eda0cb 100%)' },
+  { id:'sky',    ko:'파스텔 하늘',   en:'Pastel sky',  c1:'#dff4ff', c2:'#bfe4f7',
+    css:'linear-gradient(180deg,#dff4ff 0%,#cdeafc 62%,#eafaff 62%,#d8f1fb 100%)' },
+  { id:'checker',ko:'민트 체커',     en:'Mint checker',c1:'#e8fbf4', c2:'#bdeedd',
+    css:'repeating-conic-gradient(#dff8ee 0% 25%, #f6fffb 0% 50%) 50%/72px 72px' },
+  { id:'dots',   ko:'도트 크림',     en:'Dotty cream', c1:'#fff8e8', c2:'#ffe1b8',
+    css:'#fff8e8 radial-gradient(#ffd9a1 12%, transparent 13%) 0 0/58px 58px' },
+  { id:'grid',   ko:'네온 그리드',   en:'Neon grid',   c1:'#241a3e', c2:'#3a2a5e',
+    css:'linear-gradient(rgba(255,111,176,.35) 1px, transparent 1px) 0 0/100% 54px,'+
+        'linear-gradient(90deg, rgba(169,140,255,.35) 1px, transparent 1px) 0 0/54px 100%, '+
+        'linear-gradient(180deg,#241a3e,#3a2a5e)' }
 ];
+function bgById(id){ for(var i=0;i<BGS.length;i++) if(BGS[i].id===id) return BGS[i]; return BGS[0]; }
+function applyBg(id){ bg=id; document.getElementById('bgimg').style.background=bgById(id).css; }
 var CATS=[
   { id:'hair', ko:'헤어', en:'Hair' },
   { id:'top',  ko:'상의', en:'Tops' },
@@ -218,7 +258,7 @@ function itemById(id){ for(var i=0;i<ITEMS.length;i++) if(ITEMS[i].id===id) retu
    자유 배치: worn[i]는 {id,slot,l,t,w} 배열. 좌표는 사용자가 놓은 자리 그대로(인형 박스 % 기준).
    같은 슬롯은 한 벌만(액세서리는 여러 개 중첩 가능), ITEMS의 pos는 랜덤/초기 코디용 기본값. */
 var worn=DOLLS.map(function(){ return []; });
-var sel=0, cat='hair', bg='bedroom';
+var sel=0, cat='hair', bg='studio';
 function wornEntry(i,id){ for(var k=0;k<worn[i].length;k++) if(worn[i][k].id===id) return worn[i][k]; return null; }
 function wearAt(i, it, l, t, w){
   if(it.slot!=='acc') worn[i]=worn[i].filter(function(e){ return e.slot!==it.slot; });
@@ -280,7 +320,8 @@ function renderRack(){
   if(cat==='bg'){
     rack.innerHTML=BGS.map(function(b){
       return '<div class="chip bgchip'+(bg===b.id?' on':'')+'" data-bg="'+b.id+'">'+
-        '<img src="../assets/gen/y2-bg-'+b.id+'.jpg"><div class="nm">'+(EN?b.en:b.ko)+'</div></div>';
+        '<div class="bgprev" style="background:'+b.css.replace(/"/g,'&quot;')+'"></div>'+
+        '<div class="nm">'+(EN?b.en:b.ko)+'</div></div>';
     }).join('');
     return;
   }
@@ -295,7 +336,7 @@ document.getElementById('cats').addEventListener('click', function(e){
 });
 document.getElementById('rack').addEventListener('click', function(e){
   var bgc=e.target.closest('[data-bg]');
-  if(bgc){ bg=bgc.dataset.bg; document.getElementById('bgimg').src='../assets/gen/y2-bg-'+bg+'.jpg'; renderRack(); }
+  if(bgc){ applyBg(bgc.dataset.bg); renderRack(); }
 });
 
 /* ── 드래그 착용/이동/해제 (자유 배치) ──
@@ -322,7 +363,7 @@ document.getElementById('rack').addEventListener('pointerdown', function(e){
   e.preventDefault();
   var it=itemById(c.dataset.item);
   drag={ it:it, w:it.pos.w, from:null };
-  makeGhost(it.id, drag.w); moveGhost(e.clientX,e.clientY);
+  makeGhost(it.id, drag.w); moveGhost(e.clientX,e.clientY); dragHint(true);
 });
 /* 인형 위 아이템: 다시 집어 위치 이동 or 밖으로 끌어 벗기기 */
 dollbox.addEventListener('pointerdown', function(e){
@@ -332,12 +373,19 @@ dollbox.addEventListener('pointerdown', function(e){
   drag={ it:itemById(en.id), w:en.w, from:sel };
   worn[sel].splice(+w.dataset.idx,1);
   renderMain(false); renderBench();
-  makeGhost(en.id, drag.w); moveGhost(e.clientX,e.clientY);
+  makeGhost(en.id, drag.w); moveGhost(e.clientX,e.clientY); dragHint(true);
 });
+/* 드래그 중엔 안내문이 크기 조절 방법으로 바뀐다 */
+function dragHint(on){
+  var h=document.getElementById('stagehint');
+  h.classList.toggle('drag', on);
+  h.textContent = on
+    ? (EN?'Drop to wear it right there · scroll the wheel to resize!':'놓는 자리에 그대로 입어요 · 휠을 굴리면 크기 조절!')
+    : (EN?'🖱 Drag to dress · wheel over a worn item = resize · drag away to undress':'🖱 끌어서 입히기 · 입은 옷 위에서 휠 = 크기 조절 · 밖으로 끌면 벗어요');
+}
 addEventListener('pointermove', function(e){
   if(!drag) return;
   moveGhost(e.clientX,e.clientY);
-  dollbox.classList.toggle('armed', overDoll(e.clientX,e.clientY));
 });
 addEventListener('pointerup', function(e){
   if(!drag) return;
@@ -352,8 +400,7 @@ addEventListener('pointerup', function(e){
     toast(EN?'Took it off':'벗었어요');
     renderRack();
   }
-  dollbox.classList.remove('armed');
-  killGhost(); drag=null;
+  killGhost(); drag=null; dragHint(false);
 });
 /* 휠 크기 조절: 드래그 중엔 고스트를, 아니면 마우스 아래 입은 아이템을 키우고 줄인다 */
 addEventListener('wheel', function(e){
@@ -390,8 +437,7 @@ document.getElementById('randomBtn').addEventListener('click', function(){
     if(Math.random()<.6) wearDefault(i, pick(bySlot.acc));
     return worn[i];
   });
-  bg=pick(BGS).id;
-  document.getElementById('bgimg').src='../assets/gen/y2-bg-'+bg+'.jpg';
+  applyBg(pick(BGS).id);
   renderMain(true); renderBench(); renderRack();
   toast(EN?'Random fits for everyone! 🎲':'모두 랜덤 코디 완성! 🎲');
 });
@@ -400,10 +446,45 @@ document.getElementById('resetBtn').addEventListener('click', function(){
   renderMain(true); renderBench(); renderRack();
   toast(EN?'Undressed':'다 벗었어요');
 });
+/* ── 화보 촬영: 현재 착장을 캔버스에 그대로 캡처해 폴라로이드 + 말풍선으로 보여준다 ── */
+var LINES_KO=['오늘 나 좀 괜찮은데?','이 조합, 저장 각이야 📌','Y2K는 영원해 ✨','다음은 네 차례야!','헤어 어때? 방금 바꿨어','이 신발이 포인트야'];
+var LINES_EN=['Not bad today, right?','This combo is a keeper 📌','Y2K is forever ✨','Your turn next!','New hair — thoughts?','The shoes make it.'];
+function buildShot(){
+  var cv=document.getElementById('shotCv'), ctx=cv.getContext('2d');
+  var W=cv.width, H=cv.height;
+  var b=bgById(bg);
+  /* 벽+바닥 느낌의 단순 배경 */
+  ctx.fillStyle=b.c1; ctx.fillRect(0,0,W,H*0.62);
+  ctx.fillStyle=b.c2; ctx.fillRect(0,H*0.62,W,H*0.38);
+  /* 인형 박스와 같은 3:4 좌표계로 base + 착용 아이템을 순서대로 드로잉 */
+  var base=dollbox.querySelector('.base');
+  if(base && base.naturalWidth){
+    var s=Math.min(W/base.naturalWidth, H/base.naturalHeight);
+    var bw=base.naturalWidth*s, bh=base.naturalHeight*s;
+    ctx.drawImage(base,(W-bw)/2, H-bh, bw, bh);
+  }
+  dollbox.querySelectorAll('.worn').forEach(function(im){
+    if(!im.naturalWidth) return;
+    var x=parseFloat(im.style.left)/100*W;
+    var y=parseFloat(im.style.top)/100*H;
+    var w=parseFloat(im.style.width)/100*W;
+    ctx.drawImage(im, x, y, w, w*im.naturalHeight/im.naturalWidth);
+  });
+}
 document.getElementById('shotBtn').addEventListener('click', function(){
   var st=document.getElementById('stage');
   st.animate([{filter:'brightness(1)'},{filter:'brightness(2.2)'},{filter:'brightness(1)'}],{duration:420});
-  toast(EN?'📸 Gorgeous!':'📸 완벽한 화보!');
+  buildShot();
+  var L=EN?LINES_EN:LINES_KO;
+  document.getElementById('shotBub').textContent=L[Math.floor(Math.random()*L.length)];
+  document.getElementById('shotCap').textContent='★ '+(EN?DOLLS[sel].en:DOLLS[sel].ko)+' · Y2K FILM';
+  setTimeout(function(){ document.getElementById('shot').classList.add('on'); },240);
+});
+document.getElementById('shotClose').addEventListener('click', function(){
+  document.getElementById('shot').classList.remove('on');
+});
+document.getElementById('shot').addEventListener('click', function(e){
+  if(e.target===this) this.classList.remove('on');
 });
 
 var tT=null;
@@ -419,6 +500,8 @@ var STR={
   '스타 스타일리스트':'star stylist',
   '🎲 랜덤 코디':'🎲 Random fits','📸 화보 촬영':'📸 Photo shoot','↺ 벗기기':'↺ Undress',
   '옷장 <span>· 끌어서 입히기</span>':'Closet <span>· drag to dress</span>',
+  '🖱 끌어서 입히기 · 입은 옷 위에서 휠 = 크기 조절 · 밖으로 끌면 벗어요':
+    '🖱 Drag to dress · wheel over a worn item = resize · drag away to undress',
   '아이템을 끌어 원하는 자리에 놓으면 그 자리에 입어요. 입은 아이템은 끌어서 옮기고, 밖으로 끌면 벗고, 휠을 굴리면 크기 조절! 아래 친구를 누르면 교체.':
     'Drop an item exactly where you want it. Drag worn items to move them, drag them away to undress, scroll to resize! Tap a friend below to switch.'
 };
@@ -446,6 +529,7 @@ document.getElementById('lang').addEventListener('click',function(){ EN=!EN; app
   ['hair-shag','top-denim','bot-jeans','shoe-boots','acc-bag']
 ].forEach(function(ids,i){ ids.forEach(function(id){ wearDefault(i, itemById(id)); }); });
 applyLang();
+applyBg('studio');
 renderMain(true);
 })();
 </script>
