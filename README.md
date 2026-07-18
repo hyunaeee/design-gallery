@@ -11,7 +11,7 @@
 
 각 데모는 **하나의 HTML 파일**로 완결됩니다 — 인라인 CSS/JS, 빌드 도구 없음, 외부 의존성 최소화(Google Fonts `@import`, 일부 데모의 three.js CDN 정도). 갤러리(`index.html`)에서 카드를 열면 라이브 미리보기와 소스를 함께 볼 수 있습니다.
 
-- **63개 데모** — 어워드급 웹·랜딩·에디토리얼·포트폴리오·인터랙티브 실험 + 모바일 앱 UI
+- **68개 데모** — 어워드급 웹·랜딩·에디토리얼·포트폴리오·인터랙티브 실험 + 모바일 앱 UI
 - **KO / EN** — 데모 내부 텍스트까지 전부 이중언어 (`?lang=en`, 갤러리 토글로 자동 전파)
 - **AI 생성 에셋** — 이미지·영상은 Higgsfield로 생성 후 배경 제거(누끼)·경량화 (`assets/gen/`)
 - **WebGL / Three.js** — 실시간 3D를 활용한 데모 포함
@@ -21,6 +21,9 @@
 
 | 데모 | 설명 |
 |---|---|
+| **Y2K CLOSET** (`demos/dressup-crew.html`) | 한 실루엣에서 파생한 5인 패션돌 자유 배치 옷입히기 — 끌어서 입히고, 휠로 크기 조절, 21개 AI 아이템·일러스트 배경 5종 |
+| **COSMOS** (`demos/cosmos-life.html`) | 크레센도 모양 3D 압출 글자 안에서 AI 해파리 영상이 느리게 재생, 원근으로 멀어지며 물결 — 스크롤하면 별빛 입자 500→14,000개 |
+| **BLUESCREEN.SYS** (`demos/ascii-bluescreen.html`) | 이미지 0장, 전부 글자로 지은 블루스크린 홈페이지 — BSOD 부팅, 숫자키 내비, 걸어다니는 ASCII 행인 |
 | **INTERFACE PARK** (`demos/ride-map.html`) | AI 지도 위, 배경 제거한 놀이기구를 호버하면 실루엣이 빛나고 클릭하면 입장 |
 | **STUDIO HOURS** (`demos/creator-room.html`) | 같은 작업실의 낮/노을/밤 전환 · 불 켜기 · 방 안 오브젝트 클릭 · 3D 캐릭터 반응 |
 | **PERLE** (`demos/folio-pearl.html`) | AI 진주빛 실크 영상이 배경에서 이음매 없이 재생되고 스크롤로 속도가 변하는 럭셔리 포트폴리오 |
@@ -45,7 +48,7 @@ python -m http.server 5533       # 또는  npx serve .
 
 ```
 index.html            갤러리 플랫폼 (검색·태그/용도 필터·웹/앱 탭·즐겨찾기·코드 뷰어 모달·KO/EN)
-demos/                데모 본체 — 전부 자립형 단일 HTML (63개)
+demos/                데모 본체 — 전부 자립형 단일 HTML (68개)
   ├─ 💻 웹: 어워드급(비디오 히어로·WebGL·three.js·브루탈리즘·3D 씬) + 클래식 재현 + 포트폴리오/템플릿
   └─ 📱 앱: 폰 프레임 UI (뮤직·러닝·식물케어·채팅·커머스 등)
 assets/gen/           AI(Higgsfield) 생성 이미지·영상 (경량화됨)
