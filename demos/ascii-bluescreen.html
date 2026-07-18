@@ -94,6 +94,14 @@ nav{ display:flex; flex-wrap:wrap; gap:4px 18px; margin-bottom:20px; }
 .bar b{ font-weight:400; color:var(--wh); }
 footer{ margin-top:8px; color:var(--dim); font-size:.82em; }
 footer pre{ opacity:.75; }
+/* 걸어다니는 ASCII 행인 */
+#walkway{ position:fixed; left:0; right:0; bottom:0; z-index:44; height:64px; pointer-events:none;
+  border-top:1px dotted rgba(232,232,232,.35); background:linear-gradient(transparent, rgba(0,0,60,.35)); }
+#walker{ position:absolute; bottom:4px; left:0; font-size:24px; line-height:1.02; color:var(--wh);
+  text-shadow:2px 2px 0 rgba(0,0,0,.35); cursor:pointer; pointer-events:auto; will-change:transform; }
+body:not(.booted) #walkway{ display:none; }
+.wrap{ padding-bottom:84px; }
+
 .lang{ position:fixed; right:14px; top:10px; z-index:55; font-family:inherit; font-size:16px;
   background:var(--blue); color:var(--txt); border:2px solid var(--txt); padding:2px 12px; cursor:pointer; }
 .lang:hover{ background:var(--txt); color:var(--blue); }
@@ -201,6 +209,9 @@ body.anim-paused *{ animation-play-state:paused !important; }
     <p>© 2026 hyunaeee · MIT License · <span data-i18n>이 파란색은 의도된 것입니다</span></p>
   </footer>
 </div>
+
+<!-- 걸어다니는 ASCII 행인 -->
+<div id="walkway"><pre id="walker"></pre></div>
 
 <!-- 다이얼로그 -->
 <div class="dlg" id="dlg">
@@ -344,6 +355,42 @@ function applyLang(){
 }
 document.getElementById('lang').addEventListener('click', function(e){
   e.stopPropagation(); EN=!EN; applyLang();
+});
+
+/* ── 걸어다니는 ASCII 행인 ──
+   4프레임 걸음 사이클(디딤-모음-디딤-모음, 팔은 반대로 스윙)을 오른쪽/왼쪽 세트로 두고,
+   화면 끝에 닿으면 방향을 돌려 왕복한다. 클릭하면 잠깐 멈추고 인사. */
+var WALK_R=[
+' O \n/|\\\n/ \\',
+' O \n(|\\\n |\\',
+' O \n/|\\\n/ \\',
+' O \n/|)\n/| '
+];
+/* 왼쪽 세트는 오른쪽 프레임을 거울 반전해 만든다 */
+function mirror(f){
+  var M={'/':'\\','\\':'/','(':')',')':'(','<':'>','>':'<','[':']',']':'['};
+  return f.split('\n').map(function(line){
+    return line.split('').reverse().map(function(c){ return M[c]||c; }).join('');
+  }).join('\n');
+}
+var WALK_L=WALK_R.map(mirror);
+var WAVE=' O/\n\\| \n/ \\';
+var walker=document.getElementById('walker');
+var wx=-40, wdir=1, wf=0, waving=0;
+setInterval(function(){
+  if(window.__paused || !document.body.classList.contains('booted')) return;
+  if(waving>0){ waving--; walker.textContent = waving%6<3 ? WAVE : WALK_R[0]; return; }
+  wf=(wf+1)%4;
+  wx+=wdir*7;
+  var max=innerWidth-46;
+  if(wx>max){ wx=max; wdir=-1; }
+  if(wx<2){ wx=2; wdir=1; }
+  walker.textContent=(wdir>0?WALK_R:WALK_L)[wf];
+  walker.style.transform='translateX('+wx+'px)';
+},110);
+walker.addEventListener('click', function(){
+  waving=24;
+  toast(EN?'WALKER.EXE — walking since 1996. Do not disturb.':'WALKER.EXE — 1996년부터 걷는 중. 말 걸어줘서 고마워요.');
 });
 
 setInterval(function(){ var p=!!window.__paused;
