@@ -51,7 +51,7 @@ body.booted #boot{ display:none; }
 @keyframes tick{ from{ transform:translateX(100vw);} to{ transform:translateX(-100%);} }
 
 /* 로고 */
-.logo{ font-size:clamp(5px,1.05vw,14px); line-height:1.12; color:var(--wh);
+.logo{ font-size:clamp(7px,1.55vw,20px); line-height:1.12; color:var(--wh);
   text-shadow:3px 2px 0 rgba(0,0,0,.35); margin-bottom:6px; }
 .tag{ color:var(--dim); margin-bottom:22px; }
 
@@ -124,12 +124,11 @@ body.anim-paused *{ animation-play-state:paused !important; }
 
   <div class="ticker"><pre id="tick">*** STOP: 0x00000WOW (DESIGN_OVERFLOW) *** 이 사이트는 일부러 파랗습니다 *** 픽셀 대신 글자만 씁니다 *** EVERYTHING IS TEXT *** 1-5 키로 이동하세요 ***</pre></div>
 
-  <pre class="logo">██████╗ ██╗     ██╗   ██╗███████╗    ███████╗ ██████╗██████╗ ███████╗███████╗███╗   ██╗
-██╔══██╗██║     ██║   ██║██╔════╝    ██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝████╗  ██║
-██████╔╝██║     ██║   ██║█████╗      ███████╗██║     ██████╔╝█████╗  █████╗  ██╔██╗ ██║
-██╔══██╗██║     ██║   ██║██╔══╝      ╚════██║██║     ██╔══██╗██╔══╝  ██╔══╝  ██║╚██╗██║
-██████╔╝███████╗╚██████╔╝███████╗ ██ ███████║╚██████╗██║  ██║███████╗███████╗██║ ╚████║
-╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝ ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝</pre>
+  <pre class="logo"> ____   _      _   _  _____     ____    ____  ____   _____  _____  _   _
+| __ ) | |    | | | || ____|   / ___|  / ___||  _ \ | ____|| ____|| \ | |
+|  _ \ | |    | | | ||  _|     \___ \ | |    | |_) ||  _|  |  _|  |  \| |
+| |_) || |___ | |_| || |___  _  ___) || |___ |  _ &lt; | |___ | |___ | |\  |
+|____/ |_____| \___/ |_____|(_)|____/  \____||_| \_\|_____||_____||_| \_|</pre>
   <div class="tag" data-i18n>고장난 척하는 디자인 스튜디오 · SINCE 0x07EA · 텍스트 100% / 이미지 0%</div>
 
   <nav id="nav">
@@ -194,10 +193,10 @@ body.anim-paused *{ animation-play-state:paused !important; }
     <h2><span data-i18n>■ 연락 · CONTACT.BAT</span></h2>
     <p data-i18n>버그 리포트, 협업 제안, 혹은 그냥 파란 안부 인사도 좋습니다.</p>
     <br>
-    <pre>  ┌──[ MESSAGE.EXE ]─────────────────┐
-  │  TO      : hyunaeee@gmail.com    │
-  │  SUBJECT : RE: blue greetings    │
-  └──────────────────────────────────┘</pre>
+    <pre>  +==[ MESSAGE.EXE ]=================+
+  |  TO      : hyunaeee@gmail.com    |
+  |  SUBJECT : RE: blue greetings    |
+  +==================================+</pre>
     <br>
     <button class="nv" id="sendBtn" data-i18n>[ 보내기 ]</button>
     <button class="nv" id="cancelBtn" data-i18n>[ 취소 ]</button>
@@ -296,7 +295,7 @@ function renderDir(){
 document.getElementById('dir').addEventListener('click', function(e){
   var r=e.target.closest('[data-i]'); if(!r) return;
   var w=WORKS[+r.dataset.i];
-  openDlg(' '+w.n.trim()+'.EXE\n ────────────────────────────\n '+(EN?w.en:w.ko)+'\n\n '+(EN?'Status: shipped, still blue.':'상태: 출시됨. 여전히 파랗습니다.'));
+  openDlg(' '+w.n.trim()+'.EXE\n ----------------------------\n '+(EN?w.en:w.ko)+'\n\n '+(EN?'Status: shipped, still blue.':'상태: 출시됨. 여전히 파랗습니다.'));
 });
 
 /* ── LAB 스킬바 ── */
