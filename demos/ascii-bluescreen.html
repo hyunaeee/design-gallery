@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<!--
+  Design Gallery (front-design-test)
+  Copyright (c) 2026 hyunaeee · Licensed under the MIT License (see /LICENSE).
+  Some demos reproduce third-party brand or open-source designs for reference/education;
+  trademarks and any existing in-file attributions remain with their respective owners.
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLUESCREEN.SYS — ASCII 블루스크린 홈페이지</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=VT323&family=Nanum+Gothic+Coding:wght@400;700&display=swap');
+
+/* 클래식 블루스크린(0x0000AA) 위에 전부 텍스트로만 그린 홈페이지.
+   부팅(BSOD) → 아무 키/클릭 → ASCII UI. 숫자키 1~5로 섹션 전환. */
+*{ margin:0; padding:0; box-sizing:border-box; }
+:root{ --blue:#0000aa; --blue2:#0000c8; --txt:#e8e8e8; --dim:#9d9dde; --wh:#ffffff; }
+html{ scrollbar-color:var(--txt) var(--blue); }
+body{ background:var(--blue); color:var(--txt);
+  font-family:'VT323','Nanum Gothic Coding',monospace; font-size:20px; line-height:1.35;
+  min-height:100vh; overflow-x:hidden; }
+::selection{ background:var(--wh); color:var(--blue); }
+pre{ font-family:inherit; white-space:pre; }
+a{ color:inherit; }
+
+/* CRT 스캔라인 + 은은한 깜빡임 */
+.crt{ position:fixed; inset:0; z-index:40; pointer-events:none;
+  background:repeating-linear-gradient(0deg, rgba(0,0,0,.16) 0 1px, transparent 1px 3px); }
+.crt::after{ content:""; position:absolute; inset:0; background:rgba(120,140,255,.05);
+  animation:flick 4.2s steps(1) infinite; }
+@keyframes flick{ 0%,93%{opacity:.4} 94%{opacity:1} 95%{opacity:.2} 96%,100%{opacity:.5} }
+.blink{ animation:blink 1s steps(1) infinite; }
+@keyframes blink{ 50%{ opacity:0; } }
+
+/* ── 부팅(BSOD) 오버레이 ── */
+#boot{ position:fixed; inset:0; z-index:50; background:var(--blue); padding:9vh 8vw;
+  cursor:pointer; }
+#boot .face{ font-size:clamp(54px,9vw,110px); color:var(--wh); margin-bottom:26px; }
+#boot pre{ white-space:pre-wrap; font-size:clamp(15px,1.8vw,21px); }
+#boot .press{ margin-top:34px; color:var(--wh); }
+body.booted #boot{ display:none; }
+
+/* ── 본문 ── */
+.wrap{ max-width:1060px; margin:0 auto; padding:26px min(4vw,30px) 40px; }
+/* 티커 */
+.ticker{ overflow:hidden; border:2px solid var(--txt); border-left:none; border-right:none;
+  padding:2px 0; margin-bottom:18px; }
+.ticker pre{ display:inline-block; animation:tick 18s linear infinite; }
+@keyframes tick{ from{ transform:translateX(100vw);} to{ transform:translateX(-100%);} }
+
+/* 로고 */
+.logo{ font-size:clamp(5px,1.05vw,14px); line-height:1.12; color:var(--wh);
+  text-shadow:3px 2px 0 rgba(0,0,0,.35); margin-bottom:6px; }
+.tag{ color:var(--dim); margin-bottom:22px; }
+
+/* 내비 */
+nav{ display:flex; flex-wrap:wrap; gap:4px 18px; margin-bottom:20px; }
+.nv{ font-family:inherit; font-size:inherit; background:none; border:none; color:var(--txt);
+  cursor:pointer; padding:1px 6px; }
+.nv:hover,.nv.on{ background:var(--txt); color:var(--blue); }
+.nv.on::before{ content:"▶"; margin-right:6px; }
+
+/* 섹션 박스 */
+.box{ border:3px double var(--txt); padding:18px min(3vw,24px) 22px; margin-bottom:26px; }
+.box h2{ font-size:inherit; font-weight:400; margin:-31px 0 14px; }
+.box h2 span{ background:var(--blue); padding:0 10px; color:var(--wh); }
+.sec{ display:none; } .sec.on{ display:block; }
+.dimtx{ color:var(--dim); }
+.row2{ display:grid; grid-template-columns:1fr 1fr; gap:6px 34px; }
+@media(max-width:760px){ .row2{ grid-template-columns:1fr; } body{ font-size:17px; } }
+
+/* WORK 목록(DIR) */
+.dir div{ padding:1px 6px; cursor:pointer; white-space:pre-wrap; }
+.dir div:hover{ background:var(--txt); color:var(--blue); }
+
+/* 다이얼로그/토스트 */
+.dlg{ position:fixed; left:50%; top:50%; transform:translate(-50%,-50%); z-index:45;
+  background:var(--txt); color:var(--blue); padding:22px 30px; min-width:min(88vw,420px);
+  border:4px ridge #fff; box-shadow:10px 10px 0 rgba(0,0,0,.4); display:none; }
+.dlg.on{ display:block; }
+.dlg pre{ white-space:pre-wrap; }
+.dlg .bts{ display:flex; gap:14px; justify-content:center; margin-top:16px; }
+.dlg button{ font-family:inherit; font-size:inherit; background:var(--blue); color:var(--txt);
+  border:2px solid var(--blue); padding:2px 18px; cursor:pointer; }
+.dlg button:hover{ background:var(--blue2); }
+.toast{ position:fixed; left:50%; bottom:30px; transform:translateX(-50%); z-index:46;
+  background:var(--wh); color:var(--blue); padding:6px 18px; opacity:0; transition:.25s;
+  pointer-events:none; white-space:pre; }
+.toast.on{ opacity:1; }
+
+/* 스킬바/덤프 */
+.bar b{ font-weight:400; color:var(--wh); }
+footer{ margin-top:8px; color:var(--dim); font-size:.82em; }
+footer pre{ opacity:.75; }
+.lang{ position:fixed; right:14px; top:10px; z-index:55; font-family:inherit; font-size:16px;
+  background:var(--blue); color:var(--txt); border:2px solid var(--txt); padding:2px 12px; cursor:pointer; }
+.lang:hover{ background:var(--txt); color:var(--blue); }
+body.anim-paused *{ animation-play-state:paused !important; }
+</style>
+</head>
+<body>
+
+<button class="lang" id="lang">EN</button>
+<div class="crt"></div>
+
+<!-- 부팅 화면 -->
+<div id="boot">
+  <div class="face">:(</div>
+  <pre id="bootTx"></pre>
+  <div class="press blink" data-i18n>▶ 아무 키나 누르거나 화면을 클릭하세요 ▮</div>
+</div>
+
+<div class="wrap">
+
+  <div class="ticker"><pre id="tick">*** STOP: 0x00000WOW (DESIGN_OVERFLOW) *** 이 사이트는 일부러 파랗습니다 *** 픽셀 대신 글자만 씁니다 *** EVERYTHING IS TEXT *** 1-5 키로 이동하세요 ***</pre></div>
+
+  <pre class="logo">██████╗ ██╗     ██╗   ██╗███████╗    ███████╗ ██████╗██████╗ ███████╗███████╗███╗   ██╗
+██╔══██╗██║     ██║   ██║██╔════╝    ██╔════╝██╔════╝██╔══██╗██╔════╝██╔════╝████╗  ██║
+██████╔╝██║     ██║   ██║█████╗      ███████╗██║     ██████╔╝█████╗  █████╗  ██╔██╗ ██║
+██╔══██╗██║     ██║   ██║██╔══╝      ╚════██║██║     ██╔══██╗██╔══╝  ██╔══╝  ██║╚██╗██║
+██████╔╝███████╗╚██████╔╝███████╗ ██ ███████║╚██████╗██║  ██║███████╗███████╗██║ ╚████║
+╚═════╝ ╚══════╝ ╚═════╝ ╚══════╝ ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝</pre>
+  <div class="tag" data-i18n>고장난 척하는 디자인 스튜디오 · SINCE 0x07EA · 텍스트 100% / 이미지 0%</div>
+
+  <nav id="nav">
+    <button class="nv on" data-s="about">[1] <span data-i18n>소개</span></button>
+    <button class="nv" data-s="work">[2] <span data-i18n>작업물</span></button>
+    <button class="nv" data-s="lab">[3] <span data-i18n>실험실</span></button>
+    <button class="nv" data-s="contact">[4] <span data-i18n>연락</span></button>
+    <button class="nv" id="crashBtn">[5] <span data-i18n>다시 고장내기</span></button>
+  </nav>
+
+  <!-- ABOUT -->
+  <section class="sec box on" id="sec-about">
+    <h2><span data-i18n>■ 소개 · ABOUT.TXT</span></h2>
+    <div class="row2">
+      <div>
+        <p data-i18n>BLUESCREEN.SYS 는 오류 화면을 사랑하는 1인 스튜디오입니다. 픽셀도, 사진도, 그라디언트도 없습니다 — 여기 있는 모든 것은 글자입니다.</p>
+        <br>
+        <p class="dimtx" data-i18n>우리는 믿습니다: 잘 만든 실패 화면은 성공 화면보다 오래 기억된다고. 그래서 홈페이지를 통째로 블루스크린 위에 지었습니다.</p>
+      </div>
+      <pre>+------------------+-----------+
+| UPTIME           |  404 days |
+| COFFEE.SYS       |  OVERFLOW |
+| PIXELS USED      |         0 |
+| CHARACTERS USED  |    18,732 |
+| MOOD             |   #0000AA |
++------------------+-----------+</pre>
+    </div>
+  </section>
+
+  <!-- WORK -->
+  <section class="sec box" id="sec-work">
+    <h2><span data-i18n>■ 작업물 · DIR /W</span></h2>
+    <pre class="dimtx"> C:\PORTFOLIO&gt; dir
+ Volume in drive C is REGRET
+ Directory of C:\PORTFOLIO
+</pre>
+    <div class="dir" id="dir"></div>
+    <pre class="dimtx">
+        6 File(s)  1,999,999 bytes free</pre>
+  </section>
+
+  <!-- LAB -->
+  <section class="sec box" id="sec-lab">
+    <h2><span data-i18n>■ 실험실 · LAB.EXE</span></h2>
+    <div class="row2">
+      <div id="skills" class="bar"></div>
+      <pre>      ______________
+     / ============ \
+    | | BSOD 4EVER | |
+    | |  &gt;run joy_ | |
+    | |____________| |
+     \______________/
+      \\############\\
+       \\############\\
+        \      ____    \
+         \____/ .. \____\</pre>
+    </div>
+  </section>
+
+  <!-- CONTACT -->
+  <section class="sec box" id="sec-contact">
+    <h2><span data-i18n>■ 연락 · CONTACT.BAT</span></h2>
+    <p data-i18n>버그 리포트, 협업 제안, 혹은 그냥 파란 안부 인사도 좋습니다.</p>
+    <br>
+    <pre>  ┌──[ MESSAGE.EXE ]─────────────────┐
+  │  TO      : hyunaeee@gmail.com    │
+  │  SUBJECT : RE: blue greetings    │
+  └──────────────────────────────────┘</pre>
+    <br>
+    <button class="nv" id="sendBtn" data-i18n>[ 보내기 ]</button>
+    <button class="nv" id="cancelBtn" data-i18n>[ 취소 ]</button>
+  </section>
+
+  <footer>
+    <pre>0000:0000  42 4C 55 45 53 43 52 45  45 4E 2E 53 59 53 20 4F  BLUESCREEN.SYS O
+0000:0010  4B 20 28 63 29 20 32 30  32 36 20 68 79 75 6E 61  K (c) 2026 hyuna</pre>
+    <p>© 2026 hyunaeee · MIT License · <span data-i18n>이 파란색은 의도된 것입니다</span></p>
+  </footer>
+</div>
+
+<!-- 다이얼로그 -->
+<div class="dlg" id="dlg">
+  <pre id="dlgTx"></pre>
+  <div class="bts"><button id="dlgOk">[ OK ]</button></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+"use strict";
+
+var EN=new URLSearchParams(location.search).get('lang')==='en';
+
+/* ── 부팅 타자기 ── */
+var BOOT_KO=[
+'문제가 감지되어 사용자를 보호하기 위해 이 홈페이지가 표시되었습니다.',
+'',
+'원인: DESIGN_OVERFLOW — 디자이너가 파란색을 과다 복용했습니다.',
+'',
+'수집 중: 취향  ▓▓▓▓▓▓▓▓▓▓▓▓ 100%',
+'',
+'이것이 처음 보는 화면이라면, 축하합니다. 원래 다들 여기서 시작합니다.',
+'기술 지원 문의: hyunaeee@gmail.com  ·  STOP CODE: 0x2026BLUE'];
+var BOOT_EN=[
+'A problem has been detected and this homepage has been launched to protect you.',
+'',
+'Cause: DESIGN_OVERFLOW — the designer overdosed on blue.',
+'',
+'Collecting taste  ▓▓▓▓▓▓▓▓▓▓▓▓ 100%',
+'',
+'If this is the first time you have seen this screen: congratulations, everyone starts here.',
+'Tech support: hyunaeee@gmail.com  ·  STOP CODE: 0x2026BLUE'];
+var bootEl=document.getElementById('bootTx');
+var bootTimer=null;
+function runBoot(){
+  var lines=EN?BOOT_EN:BOOT_KO;
+  var full=lines.join('\n'), i=0;
+  clearInterval(bootTimer); bootEl.textContent='';
+  bootTimer=setInterval(function(){
+    if(window.__paused) return;
+    i=Math.min(full.length, i+3);
+    bootEl.textContent=full.slice(0,i);
+    if(i>=full.length) clearInterval(bootTimer);
+  },16);
+}
+function dismissBoot(){ document.body.classList.add('booted'); }
+document.getElementById('boot').addEventListener('click', dismissBoot);
+addEventListener('keydown', function(e){
+  if(!document.body.classList.contains('booted')){ dismissBoot(); return; }
+  if(e.key>='1' && e.key<='4'){
+    var map={1:'about',2:'work',3:'lab',4:'contact'};
+    showSec(map[e.key]);
+  } else if(e.key==='5'){ crash(); }
+});
+
+/* ── 섹션 ── */
+function showSec(id){
+  document.querySelectorAll('.sec').forEach(function(s){ s.classList.toggle('on', s.id==='sec-'+id); });
+  document.querySelectorAll('.nv[data-s]').forEach(function(b){ b.classList.toggle('on', b.dataset.s===id); });
+}
+document.getElementById('nav').addEventListener('click', function(e){
+  var b=e.target.closest('.nv[data-s]'); if(b) showSec(b.dataset.s);
+});
+function crash(){ document.body.classList.remove('booted'); runBoot(); }
+document.getElementById('crashBtn').addEventListener('click', crash);
+
+/* ── WORK 목록 ── */
+var WORKS=[
+  { d:'2026-03-14', n:'NEBULA-OS  ', s:'812K', ko:'가짜 운영체제. 진짜보다 예쁨',            en:'A fake OS, prettier than real ones' },
+  { d:'2026-01-02', n:'CRT-LOVE   ', s:' 44K', ko:'스캔라인 연서. 브라운관에게 바침',        en:'A love letter to cathode-ray tubes' },
+  { d:'2025-11-30', n:'ERR-GALLERY', s:'128K', ko:'404 페이지만 모은 전시회',               en:'An exhibition of nothing but 404 pages' },
+  { d:'2025-08-17', n:'ANSI-BLOOM ', s:' 96K', ko:'문자로만 피는 꽃밭 스크린세이버',        en:'A flower field screensaver, characters only' },
+  { d:'2025-05-01', n:'BEEP-RADIO ', s:' 12K', ko:'비프음 3화음 인터넷 라디오',             en:'Internet radio in 3-voice beeps' },
+  { d:'2025-02-09', n:'DIALUP-CAFE', s:'  9K', ko:'접속음이 BGM인 카페 홈페이지',           en:'A café homepage where dial-up is the BGM' }
+];
+function renderDir(){
+  document.getElementById('dir').innerHTML=WORKS.map(function(w,i){
+    return '<div data-i="'+i+'">'+w.d+'  &lt;EXE&gt;  '+w.n+' '+w.s+'  · '+(EN?w.en:w.ko)+'</div>';
+  }).join('');
+}
+document.getElementById('dir').addEventListener('click', function(e){
+  var r=e.target.closest('[data-i]'); if(!r) return;
+  var w=WORKS[+r.dataset.i];
+  openDlg(' '+w.n.trim()+'.EXE\n ────────────────────────────\n '+(EN?w.en:w.ko)+'\n\n '+(EN?'Status: shipped, still blue.':'상태: 출시됨. 여전히 파랗습니다.'));
+});
+
+/* ── LAB 스킬바 ── */
+var SKILLS=[['ASCII ART',96],['CSS ABUSE',91],['JS',84],['REGRET',77],['MODESTY',12]];
+document.getElementById('skills').innerHTML=SKILLS.map(function(s){
+  var n=Math.round(s[1]/10);
+  return '<div>'+(s[0]+'          ').slice(0,10)+' <b>'+'▓'.repeat(n)+'</b>'+'░'.repeat(10-n)+' '+s[1]+'%</div>';
+}).join('');
+
+/* ── 다이얼로그/토스트 ── */
+var dlg=document.getElementById('dlg');
+function openDlg(t){ document.getElementById('dlgTx').textContent=t; dlg.classList.add('on'); }
+document.getElementById('dlgOk').addEventListener('click', function(){ dlg.classList.remove('on'); });
+var tT=null;
+function toast(m){ var t=document.getElementById('toast'); t.textContent=m; t.classList.add('on');
+  clearTimeout(tT); tT=setTimeout(function(){ t.classList.remove('on'); },2200); }
+document.getElementById('sendBtn').addEventListener('click', function(){
+  try{ navigator.clipboard.writeText('hyunaeee@gmail.com'); }catch(e){}
+  toast(EN?'Address copied: hyunaeee@gmail.com':'주소를 복사했어요: hyunaeee@gmail.com');
+});
+document.getElementById('cancelBtn').addEventListener('click', function(){
+  toast(EN?'Wise choice.':'현명한 선택입니다.');
+});
+
+/* ── 언어 ── */
+var STR={
+'▶ 아무 키나 누르거나 화면을 클릭하세요 ▮':'▶ Press any key or click the screen ▮',
+'고장난 척하는 디자인 스튜디오 · SINCE 0x07EA · 텍스트 100% / 이미지 0%':'A design studio that pretends to be broken · SINCE 0x07EA · 100% text / 0% images',
+'소개':'ABOUT','작업물':'WORK','실험실':'LAB','연락':'CONTACT','다시 고장내기':'CRASH AGAIN',
+'■ 소개 · ABOUT.TXT':'■ ABOUT.TXT',
+'BLUESCREEN.SYS 는 오류 화면을 사랑하는 1인 스튜디오입니다. 픽셀도, 사진도, 그라디언트도 없습니다 — 여기 있는 모든 것은 글자입니다.':
+ 'BLUESCREEN.SYS is a one-person studio in love with error screens. No pixels, no photos, no gradients — everything here is a character.',
+'우리는 믿습니다: 잘 만든 실패 화면은 성공 화면보다 오래 기억된다고. 그래서 홈페이지를 통째로 블루스크린 위에 지었습니다.':
+ 'We believe a well-crafted failure screen is remembered longer than any success screen. So we built the whole homepage on top of one.',
+'■ 작업물 · DIR /W':'■ WORK · DIR /W',
+'■ 실험실 · LAB.EXE':'■ LAB.EXE',
+'■ 연락 · CONTACT.BAT':'■ CONTACT.BAT',
+'버그 리포트, 협업 제안, 혹은 그냥 파란 안부 인사도 좋습니다.':'Bug reports, collaboration offers, or just a blue hello — all welcome.',
+'[ 보내기 ]':'[ SEND ]','[ 취소 ]':'[ CANCEL ]',
+'이 파란색은 의도된 것입니다':'this blue is intentional'
+};
+var orig=new WeakMap();
+function applyLang(){
+  document.querySelectorAll('[data-i18n]').forEach(function(el){
+    if(!orig.has(el)) orig.set(el, el.innerHTML);
+    var ko=orig.get(el).trim();
+    el.innerHTML = EN ? (STR[ko]!==undefined?STR[ko]:orig.get(el)) : orig.get(el);
+  });
+  document.getElementById('lang').textContent=EN?'KO':'EN';
+  document.documentElement.lang=EN?'en':'ko';
+  document.title=EN?'BLUESCREEN.SYS — an all-ASCII blue screen homepage':'BLUESCREEN.SYS — ASCII 블루스크린 홈페이지';
+  document.getElementById('tick').textContent=EN
+    ?'*** STOP: 0x00000WOW (DESIGN_OVERFLOW) *** this site is blue on purpose *** characters instead of pixels *** EVERYTHING IS TEXT *** press 1-5 to navigate ***'
+    :'*** STOP: 0x00000WOW (DESIGN_OVERFLOW) *** 이 사이트는 일부러 파랗습니다 *** 픽셀 대신 글자만 씁니다 *** EVERYTHING IS TEXT *** 1-5 키로 이동하세요 ***';
+  renderDir(); runBoot();
+}
+document.getElementById('lang').addEventListener('click', function(e){
+  e.stopPropagation(); EN=!EN; applyLang();
+});
+
+setInterval(function(){ var p=!!window.__paused;
+  if(p!==document.body.classList.contains('anim-paused')) document.body.classList.toggle('anim-paused',p);
+},450);
+
+applyLang();
+})();
+</script>
+</body>
+</html>
