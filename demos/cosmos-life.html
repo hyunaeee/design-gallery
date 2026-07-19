@@ -240,6 +240,22 @@ function fitClip(){
   }
   waveAmp=r.height*0.05;             /* 물결 진폭 */
   fitDone=true;
+  /* rAF는 숨김 탭에서 얼어붙으므로 타이머로 예약 */
+  setTimeout(centerWord, 0);
+}
+/* 원근 회전이 오른쪽을 압축해 단어가 왼쪽으로 쏠린다 →
+   투영된 잉크의 실제 좌우 범위를 재서 화면 가운데로 평행이동 */
+var wordShift=0;
+function centerWord(){
+  if(!fitDone) return;
+  var l=1e9, r=-1e9;
+  document.querySelectorAll('#rim text').forEach(function(t){
+    var b=t.getBoundingClientRect(); if(!b.width) return;
+    l=Math.min(l,b.left); r=Math.max(r,b.right);
+  });
+  if(r<=l) return;
+  wordShift += innerWidth/2 - (l+r)/2;
+  maskedEl.style.transform='translateX('+Math.round(wordShift)+'px) perspective(1300px) rotateY(18deg)';
 }
 fitClip();
 addEventListener('resize', fitClip);
