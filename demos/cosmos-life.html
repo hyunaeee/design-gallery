@@ -10,6 +10,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <title>COSMOS — a lifeform of light</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@300;400;500;600&family=Instrument+Serif:ital@0;1&display=swap');
@@ -42,9 +44,12 @@ body{ font-family:'Inter',sans-serif; background:#04040c; color:#fff;
 .l3d{ position:absolute; inset:0; width:100%; height:100%; overflow:visible; pointer-events:none; }
 #ext{ z-index:0; filter:drop-shadow(0 22px 30px rgba(0,0,0,.55)); }
 #rim{ z-index:2; }
-/* 글자 모양으로 잘리는 래퍼 */
+/* 글자 모양으로 잘리는 래퍼 — 영상이 오기 전엔 성운 그라디언트가 글자를 채운다 */
 .vclip{ position:absolute; inset:0; z-index:1; clip-path:url(#txtClip); -webkit-clip-path:url(#txtClip);
+  background:radial-gradient(64% 92% at 30% 38%, #56419b 0%, #2c2160 46%, #0c0922 100%);
   filter:drop-shadow(0 0 18px rgba(127,233,255,.5)) drop-shadow(0 0 54px rgba(169,140,255,.34)); }
+.vclip video{ opacity:0; transition:opacity .9s ease; }
+.vclip video.on{ opacity:1; }
 /* 영상은 래퍼보다 34% 크게 — 프레임 경계가 글자 안으로 못 들어온다 */
 .vclip video{ position:absolute; left:-17%; top:-120%; width:134%; height:340%;
   object-fit:cover; }
@@ -149,7 +154,6 @@ body.lightmode .lang{ background:rgba(255,255,255,.7); color:#0d0d12; border-col
 
 <button class="lang" id="lang">KO</button>
 
-<script src="https://unpkg.com/three@0.128.0/build/three.min.js"></script>
 <script>
 (function(){
 "use strict";
@@ -163,6 +167,7 @@ function slowPlay(){
 }
 bgv.addEventListener('loadedmetadata', slowPlay);
 bgv.addEventListener('canplay', slowPlay);
+bgv.addEventListener('playing', function(){ bgv.classList.add('on'); });
 slowPlay();
 addEventListener('pointerdown', slowPlay, {once:true});
 addEventListener('scroll', slowPlay, {once:true, passive:true});
@@ -277,13 +282,15 @@ function waveLetters(t){
   }
 }
 
-/* ── three.js 별빛 파티클 (?nogl 시 생략 — 미리보기 캡처용) ── */
+/* ── three.js 별빛 파티클 (?nogl 시 생략 — 미리보기 캡처용) ──
+   three.js는 비동기로 내려받고, 도착하면 initGL이 붙는다.
+   글자·영상은 라이브러리를 기다리지 않고 즉시 뜬다. */
 var renderer=null, scene, camera, pts, geo, mat, MAX=14000, basePos, rnd, twk;
-if(!NOGL && typeof THREE!=='undefined' && window.WebGLRenderingContext){
+function initGL(){
+  if(renderer || NOGL || typeof THREE==='undefined' || !window.WebGLRenderingContext) return;
   try{ renderer=new THREE.WebGLRenderer({canvas:document.getElementById('gl'), alpha:true, antialias:true}); }
   catch(e){ renderer=null; }
-}
-if(renderer){
+  if(!renderer) return;
   renderer.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
   renderer.setSize(innerWidth, innerHeight);
   scene=new THREE.Scene();
@@ -330,6 +337,12 @@ if(renderer){
     camera.aspect=innerWidth/innerHeight; camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
   });
+}
+if(!NOGL){
+  var ts=document.createElement('script');
+  ts.src='https://unpkg.com/three@0.128.0/build/three.min.js';
+  ts.async=true; ts.onload=initGL;
+  document.head.appendChild(ts);
 }
 
 /* ── 스크롤 진행도 ── */
